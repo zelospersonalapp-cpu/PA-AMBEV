@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Settings,
   Building,
@@ -10,22 +11,29 @@ import {
   CheckCircle,
   X,
   Search,
+  User,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
 import type { AreaEmpresa, Local, Colaborador, AreaTipo, ColaboradorPapel } from '../types';
 
-type Tab = 'areas' | 'locais' | 'colaboradores';
+type Tab = 'areas' | 'locais' | 'colaboradores' | 'solicitantes';
 
 export const Cadastros: React.FC = () => {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<Tab>('areas');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const aba = searchParams.get('aba');
+    if (aba === 'solicitantes') return 'solicitantes';
+    return 'areas';
+  });
   const [loading, setLoading] = useState(true);
 
   // Data lists
   const [areas, setAreas] = useState<AreaEmpresa[]>([]);
   const [locais, setLocais] = useState<Local[]>([]);
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  const [solicitantes, setSolicitantes] = useState<Colaborador[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Modals state
@@ -56,6 +64,13 @@ export const Cadastros: React.FC = () => {
   const [colabContato, setColabContato] = useState('');
   const [colabAtivo, setColabAtivo] = useState(true);
 
+  // Solicitante Form (mesmo modelo de colaborador, papel fixo = solicitante)
+  const [editingSolicitante, setEditingSolicitante] = useState<Colaborador | null>(null);
+  const [solNome, setSolNome] = useState('');
+  const [solMatricula, setSolMatricula] = useState('');
+  const [solAreaId, setSolAreaId] = useState('');
+  const [solContato, setSolContato] = useState('');
+
   useEffect(() => {
     loadAll();
   }, []);
@@ -63,15 +78,17 @@ export const Cadastros: React.FC = () => {
   async function loadAll() {
     setLoading(true);
     try {
-      const [areasRes, locaisRes, colabsRes] = await Promise.all([
+      const [areasRes, locaisRes, colabsRes, solicitantesRes] = await Promise.all([
         supabase.from('areas_empresas').select('*').order('nome', { ascending: true }),
         supabase.from('locais').select('*').order('ug', { ascending: true }),
         supabase.from('colaboradores').select('*').order('nome', { ascending: true }),
+        supabase.from('colaboradores').select('*').eq('papel', 'solicitante').order('nome', { ascending: true }),
       ]);
 
       if (areasRes.data) setAreas(areasRes.data);
       if (locaisRes.data) setLocais(locaisRes.data);
       if (colabsRes.data) setColaboradores(colabsRes.data);
+      if (solicitantesRes.data) setSolicitantes(solicitantesRes.data);
     } catch (err: any) {
       console.error('Erro ao carregar cadastros auxiliares:', err);
       toast.error('Erro ao carregar dados', err.message);
@@ -95,6 +112,12 @@ export const Cadastros: React.FC = () => {
       setLocalPontoRef('');
       setLocalDescricao('');
       setLocalAtivo(true);
+    } else if (activeTab === 'solicitantes') {
+      setEditingSolicitante(null);
+      setSolNome('');
+      setSolMatricula('');
+      setSolAreaId('');
+      setSolContato('');
     } else {
       setEditingColab(null);
       setColabNome('');
@@ -549,6 +572,85 @@ export const Cadastros: React.FC = () => {
         </div>
       )}
 
+
+      {/* Content for TAB 4: SOLICITANTES */}
+      {activeTab === 'solicitantes' && (
+        <div className="space-y-4">
+          {solicitantes.length === 0 && !loading ? (
+            <div className="text-center py-10 text-gray-500 text-sm">
+              Nenhum solicitante cadastrado. Clique em &quot;+ Novo Solicitante&quot; para começar.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
+                  <tr>
+                    <th className="py-3 px-4">Nome</th>
+                    <th className="py-3 px-4">Matrícula</th>
+                    <th className="py-3 px-4">Área / Empresa</th>
+                    <th className="py-3 px-4">Contato</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {solicitantes.map((sol) => {
+                    const area = areas.find((a) => a.id === sol.area_empresa_id);
+                    return (
+                      <tr key={sol.id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 font-semibold text-gray-900">{sol.nome}</td>
+                        <td className="py-3 px-4 text-gray-600 font-mono">{sol.matricula || '-'}</td>
+                        <td className="py-3 px-4 text-gray-600">{area ? area.nome : '-'}</td>
+                        <td className="py-3 px-4 text-gray-600">{sol.contato || '-'}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${sol.ativo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                            {sol.ativo ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingSolicitante(sol);
+                                setSolNome(sol.nome);
+                                setSolMatricula(sol.matricula || '');
+                                setSolAreaId(sol.area_empresa_id || '');
+                                setSolContato(sol.contato || '');
+                                setModalOpen(true);
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-[#1B2A4A] rounded"
+                              title="Editar"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm('Excluir este solicitante?')) return;
+                                const { error } = await supabase.from('colaboradores').delete().eq('id', sol.id);
+                                if (error) {
+                                  toast.error('Erro ao excluir', 'Este solicitante pode estar vinculado a agendamentos.');
+                                } else {
+                                  toast.success('Excluído', 'Solicitante removido.');
+                                  loadAll();
+                                }
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-600 rounded"
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Modal for Area / Local / Colab */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -706,6 +808,100 @@ export const Cadastros: React.FC = () => {
                   </button>
                 </div>
               </form>
+            )}
+
+
+            {/* FORM SOLICITANTE */}
+            {activeTab === 'solicitantes' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Nome *</label>
+                  <input
+                    type="text"
+                    value={solNome}
+                    onChange={(e) => setSolNome(e.target.value)}
+                    required
+                    placeholder="Nome completo do solicitante"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Matrícula</label>
+                    <input
+                      type="text"
+                      value={solMatricula}
+                      onChange={(e) => setSolMatricula(e.target.value)}
+                      placeholder="Ex: 12345"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Contato</label>
+                    <input
+                      type="text"
+                      value={solContato}
+                      onChange={(e) => setSolContato(e.target.value)}
+                      placeholder="Telefone ou e-mail"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Área / Empresa</label>
+                  <select
+                    value={solAreaId}
+                    onChange={(e) => setSolAreaId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+                  >
+                    <option value="">Sem vínculo específico</option>
+                    {areas.map((a) => (
+                      <option key={a.id} value={a.id}>{a.nome}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
+                  <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saving || !solNome}
+                    onClick={async () => {
+                      setSaving(true);
+                      try {
+                        const payload = {
+                          nome: solNome,
+                          matricula: solMatricula || null,
+                          area_empresa_id: solAreaId || null,
+                          contato: solContato || null,
+                          papel: 'solicitante' as ColaboradorPapel,
+                          ativo: true,
+                        };
+                        if (editingSolicitante) {
+                          const { error } = await supabase.from('colaboradores').update(payload).eq('id', editingSolicitante.id);
+                          if (error) throw error;
+                          toast.success('Atualizado', 'Solicitante atualizado com sucesso.');
+                        } else {
+                          const { error } = await supabase.from('colaboradores').insert([payload]);
+                          if (error) throw error;
+                          toast.success('Cadastrado', 'Solicitante cadastrado com sucesso.');
+                        }
+                        setModalOpen(false);
+                        loadAll();
+                      } catch (err: any) {
+                        toast.error('Erro', err.message);
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    className="px-5 py-2 text-sm font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <CheckCircle className="w-4 h-4 text-[#F5D800]" />}
+                    {editingSolicitante ? 'Salvar Alterações' : 'Cadastrar Solicitante'}
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* FORM COLABORADOR */}
