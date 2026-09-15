@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Calendar,
@@ -14,14 +14,18 @@ import {
   Building2,
   CheckCircle2,
 } from 'lucide-react';
+import { AgendamentoModal } from './AgendamentoModal';
 
 interface LayoutProps {
+  children?: React.ReactNode;
   onOpenNovoAgendamento?: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [novoModalOpen, setNovoModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -69,13 +73,20 @@ export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
 
             {/* Header Right Action */}
             <div className="flex items-center gap-3">
-              <NavLink
-                to="/agenda?novo=true"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm shadow-xs transition-colors"
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenNovoAgendamento) {
+                    onOpenNovoAgendamento();
+                  } else {
+                    setNovoModalOpen(true);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4 text-white" />
                 <span>Novo Agendamento</span>
-              </NavLink>
+              </button>
             </div>
           </div>
         </div>
@@ -195,9 +206,24 @@ export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
 
         {/* Main Content Area */}
         <main className="flex-1 min-w-0">
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
+
+      {/* Modal de Novo Agendamento disparado pelo Header */}
+      {novoModalOpen && (
+        <AgendamentoModal
+          isOpen={novoModalOpen}
+          onClose={() => setNovoModalOpen(false)}
+          onSuccess={() => {
+            setNovoModalOpen(false);
+            window.dispatchEvent(new CustomEvent('agendamento-updated'));
+            if (location.pathname !== '/agenda') {
+              navigate('/agenda');
+            }
+          }}
+        />
+      )}
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-4 mt-auto">

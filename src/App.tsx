@@ -14,8 +14,8 @@ export default function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
-        <Layout>
-          <Routes>
+        <Routes>
+          <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/ptas" element={<Ptas />} />
@@ -24,8 +24,8 @@ export default function App() {
             <Route path="/confiabilidade" element={<Confiabilidade />} />
             <Route path="/cadastros" element={<Cadastros />} />
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Layout>
+          </Route>
+        </Routes>
       </BrowserRouter>
     </ToastProvider>
   );

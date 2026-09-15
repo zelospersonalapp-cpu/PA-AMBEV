@@ -42,6 +42,12 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
+
+    const handleUpdate = () => {
+      loadDashboardData();
+    };
+    window.addEventListener('agendamento-updated', handleUpdate);
+    return () => window.removeEventListener('agendamento-updated', handleUpdate);
   }, []);
 
   async function loadDashboardData() {

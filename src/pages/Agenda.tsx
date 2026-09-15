@@ -63,6 +63,12 @@ export const Agenda: React.FC = () => {
   useEffect(() => {
     loadAuxData();
     loadAgenda();
+
+    const handleUpdate = () => {
+      loadAgenda();
+    };
+    window.addEventListener('agendamento-updated', handleUpdate);
+    return () => window.removeEventListener('agendamento-updated', handleUpdate);
   }, []);
 
   async function loadAuxData() {
