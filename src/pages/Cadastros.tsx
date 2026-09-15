@@ -920,17 +920,6 @@ export const Cadastros: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-gray-700 mb-1">Matrícula AmBev *</label>
-                    <input
-                      type="text"
-                      required
-                      value={colabMatricula}
-                      onChange={(e) => setColabMatricula(e.target.value)}
-                      placeholder="Ex: 998877"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-mono"
-                    />
-                  </div>
-                  <div>
                     <label className="block font-semibold text-gray-700 mb-1">Papel / Função *</label>
                     <select
                       value={colabPapel}
@@ -945,7 +934,7 @@ export const Cadastros: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Área / Empresa</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Empresa</label>
                   <select
                     value={colabAreaId}
                     onChange={(e) => setColabAreaId(e.target.value)}
