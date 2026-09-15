@@ -10,7 +10,9 @@ import {
   MapPin,
   CheckCircle,
   FileText,
+  PlusCircle,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase, checkPtaConflict, formatSupabaseError } from '../lib/supabase';
 import { useToast } from './Toast';
 import type { PTA, AreaEmpresa, Colaborador, Local, Agendamento } from '../types';
@@ -34,6 +36,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   initialPtaId,
 }) => {
   const toast = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [checkingConflict, setCheckingConflict] = useState(false);
   const [conflictWarning, setConflictWarning] = useState<string | null>(null);
@@ -69,7 +72,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         const [ptasRes, areasRes, colabsRes, locaisRes] = await Promise.all([
           supabase.from('ptas').select('*').order('patrimonio', { ascending: true }),
           supabase.from('areas_empresas').select('*').eq('ativo', true).order('nome', { ascending: true }),
-          supabase.from('colaboradores').select('*').eq('ativo', true).order('nome', { ascending: true }),
+          supabase.from('colaboradores').select('*').eq('ativo', true).eq('papel', 'solicitante').order('nome', { ascending: true }),
           supabase.from('locais').select('*').eq('ativo', true).order('ug', { ascending: true }),
         ]);
 
@@ -341,7 +344,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Área / Empresa Solicitante *
+                Liberador *
               </label>
               <select
                 value={areaEmpresaId}
@@ -360,7 +363,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Colaborador Solicitante *
+                Solicitante *
               </label>
               <select
                 value={solicitanteId}
@@ -378,63 +381,30 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             </div>
           </div>
 
-          {/* Cascading Local (1. Unidade / UG -> 2. UG) */}
-          <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200 space-y-3">
+          {/* Local - UG única */}
+          <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200 space-y-2">
             <div className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-amber-500" />
-              Localização de Uso na Fábrica (UG) *
+              UG / Localização na Fábrica *
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] text-gray-600 mb-0.5">1. Unidade / UG</label>
-                <select
-                  value={selectedUG}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setSelectedUG(val);
-                    if (val) {
-                      const match = locais.find((l) => l.ug === val);
-                      setLocalId(match ? match.id : '');
-                    } else {
-                      setLocalId('');
-                    }
-                  }}
-                  className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs bg-white"
-                >
-                  <option value="">Todas as UGs</option>
-                  {uniqueUGs.map((ug) => (
-                    <option key={ug} value={ug}>
-                      {ug}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] text-gray-600 mb-0.5">2. UG *</label>
-                <select
-                  value={localId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setLocalId(id);
-                    const match = locais.find((l) => l.id === id);
-                    if (match) {
-                      setSelectedUG(match.ug);
-                    }
-                  }}
-                  required
-                  className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs bg-white font-medium text-gray-900"
-                >
-                  <option value="">Selecione a UG...</option>
-                  {filteredLocais.map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.ug}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            <select
+              value={localId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setLocalId(id);
+                const match = locais.find((l) => l.id === id);
+                if (match) setSelectedUG(match.ug);
+              }}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
+            >
+              <option value="">Selecione a UG...</option>
+              {locais.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.ug}{loc.descricao && loc.descricao !== loc.ug ? ` — ${loc.descricao}` : ""}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Dates & Period */}
