@@ -137,6 +137,48 @@ export const Cadastros: React.FC = () => {
     setModalOpen(true);
   };
 
+  const handleDelete = async (tabela: 'areas_empresas' | 'locais' | 'colaboradores', id: string) => {
+    const confirmed = window.confirm(
+      'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'
+    );
+    if (!confirmed) return;
+
+    try {
+      const { error } = await supabase.from(tabela).delete().eq('id', id);
+
+      if (error) {
+        if (
+          error.code === '23503' ||
+          error.message?.includes('foreign key constraint') ||
+          error.message?.includes('violates foreign key') ||
+          error.details?.includes('foreign key') ||
+          error.message?.toLowerCase().includes('violates')
+        ) {
+          toast.error('Não é possível excluir: este registro está vinculado a outros dados do sistema.');
+          return;
+        }
+        throw error;
+      }
+
+      toast.success('Registro excluído com sucesso');
+      await loadAll();
+    } catch (err: any) {
+      console.error('Erro ao excluir registro:', err);
+      if (
+        err.code === '23503' ||
+        err.message?.includes('foreign key constraint') ||
+        err.message?.includes('violates foreign key') ||
+        err.message?.toLowerCase().includes('foreign key') ||
+        err.details?.includes('foreign key') ||
+        err.message?.toLowerCase().includes('violates')
+      ) {
+        toast.error('Não é possível excluir: este registro está vinculado a outros dados do sistema.');
+      } else {
+        toast.error('Erro ao excluir', err.message || 'Ocorreu um erro ao excluir o registro.');
+      }
+    }
+  };
+
   // Submit handlers
   const handleSaveArea = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -356,13 +398,22 @@ export const Cadastros: React.FC = () => {
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => handleEditArea(area)}
-                        className="p-1 text-gray-500 hover:text-black hover:bg-gray-100 rounded"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleEditArea(area)}
+                          className="p-1 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete('areas_empresas', area.id)}
+                          className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -406,13 +457,22 @@ export const Cadastros: React.FC = () => {
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => handleEditLocal(loc)}
-                        className="p-1 text-gray-500 hover:text-black hover:bg-gray-100 rounded"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleEditLocal(loc)}
+                          className="p-1 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete('locais', loc.id)}
+                          className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -464,13 +524,22 @@ export const Cadastros: React.FC = () => {
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() => handleEditColab(colab)}
-                          className="p-1 text-gray-500 hover:text-black hover:bg-gray-100 rounded"
-                          title="Editar"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => handleEditColab(colab)}
+                            className="p-1 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition-colors"
+                            title="Editar"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete('colaboradores', colab.id)}
+                            className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                            title="Excluir"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
