@@ -223,10 +223,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
     try {
       // Calculate duration in days
-      const d1 = new Date(dataInicio).getTime();
-      const d2 = new Date(dataFim).getTime();
-      const duracaoDias = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1);
-
       const payload = {
         pta_id: ptaId,
         area_empresa_id: areaEmpresaId || null,
@@ -235,7 +231,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         local_id: localId,
         data_inicio: dataInicio,
         data_fim: dataFim,
-        duracao_dias: duracaoDias,
         tipo_atividade: tipoAtividade,
         descricao: descricao || null,
         prioridade,
@@ -430,7 +425,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Data Início *
+                Data da Retirada *
               </label>
               <div className="relative">
                 <input
@@ -445,7 +440,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Data Término *
+                Data da Entrega *
               </label>
               <div className="relative">
                 <input
