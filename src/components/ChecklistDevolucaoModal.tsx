@@ -228,19 +228,19 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="relative bg-white rounded-xl shadow-2xl max-w-xl w-full border border-gray-200 overflow-hidden my-6">
         {/* Header */}
-        <div className="bg-[#1A1A1A] text-white px-6 py-4 flex items-center justify-between border-b border-gray-800">
-          <div className="flex items-center gap-2">
+        <div className="bg-[#1B2A4A] text-white px-6 py-4 flex items-center justify-between border-b border-[#152238]">
+          <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 rounded-full bg-[#F5D800]" />
             <div>
               <h2 className="text-base font-bold text-white">Checklist de Devolução & SLA Facilities</h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-300">
                 Auditoria de entrega e conformidade de devolução da PTA
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white p-1 rounded transition-colors"
+            className="text-gray-300 hover:text-white p-1 rounded transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -256,7 +256,7 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
               value={devolvidoPor}
               onChange={(e) => setDevolvidoPor(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1B2A4A]"
             >
               <option value="">Selecione o responsável pela devolução...</option>
               {colaboradores.map((c) => (
@@ -487,8 +487,8 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
                 <Camera className="w-4 h-4 text-gray-600" />
                 Fotos da Devolução
               </label>
-              <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] rounded shadow-xs inline-flex items-center gap-1">
-                <Upload className="w-3 h-3" />
+              <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded shadow-xs inline-flex items-center gap-1 transition-colors">
+                <Upload className="w-3 h-3 text-[#F5D800]" />
                 <span>Adicionar Foto</span>
                 <input
                   type="file"
@@ -549,16 +549,16 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] border border-amber-400 rounded-lg shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs disabled:opacity-50 flex items-center gap-1.5 transition-colors"
             >
               {loading || uploadingPhotos ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Finalizando...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-4 h-4 text-[#F5D800]" />
                   <span>Concluir e Liberar PTA</span>
                 </>
               )}

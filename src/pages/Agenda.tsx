@@ -227,9 +227,9 @@ export const Agenda: React.FC = () => {
               setSelectedDateForNew(undefined);
               setNovoModalOpen(true);
             }}
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-xs sm:text-sm rounded-lg shadow-xs border border-amber-400 transition-colors"
+            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
           >
-            <PlusCircle className="w-4 h-4" />
+            <PlusCircle className="w-4 h-4 text-white" />
             <span>+ Novo Agendamento</span>
           </button>
           <button
@@ -369,9 +369,9 @@ export const Agenda: React.FC = () => {
           <button
             type="button"
             onClick={() => setViewMode('semana')}
-            className={`px-3 py-1 rounded font-semibold transition-all ${
+            className={`px-3 py-1 rounded-md font-semibold transition-all ${
               viewMode === 'semana'
-                ? 'bg-[#F5D800] text-black shadow-xs'
+                ? 'bg-[#1B2A4A] text-white shadow-xs'
                 : 'text-gray-600 hover:text-black'
             }`}
           >
@@ -380,9 +380,9 @@ export const Agenda: React.FC = () => {
           <button
             type="button"
             onClick={() => setViewMode('mes')}
-            className={`px-3 py-1 rounded font-semibold transition-all ${
+            className={`px-3 py-1 rounded-md font-semibold transition-all ${
               viewMode === 'mes'
-                ? 'bg-[#F5D800] text-black shadow-xs'
+                ? 'bg-[#1B2A4A] text-white shadow-xs'
                 : 'text-gray-600 hover:text-black'
             }`}
           >
@@ -391,9 +391,9 @@ export const Agenda: React.FC = () => {
           <button
             type="button"
             onClick={() => setViewMode('lista')}
-            className={`px-3 py-1 rounded font-semibold transition-all ${
+            className={`px-3 py-1 rounded-md font-semibold transition-all ${
               viewMode === 'lista'
-                ? 'bg-[#F5D800] text-black shadow-xs'
+                ? 'bg-[#1B2A4A] text-white shadow-xs'
                 : 'text-gray-600 hover:text-black'
             }`}
           >
@@ -618,7 +618,7 @@ export const Agenda: React.FC = () => {
                         <td className="py-3 px-4 font-bold text-gray-900">
                           {item.pta_patrimonio || item.patrimonio || 'PTA'}
                           {isPrioritario && (
-                            <span className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#F5D800] text-black">
+                            <span className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#F5D800] text-[#1B2A4A] border border-amber-300">
                               ★ Prioritário
                             </span>
                           )}
@@ -638,7 +638,7 @@ export const Agenda: React.FC = () => {
                         <td className="py-3 px-4 text-gray-600">
                           {item.solicitante_nome || item.nome_solicitante || '-'}
                         </td>
-                        <td className="py-3 px-4 text-right font-bold text-amber-700 hover:underline">
+                        <td className="py-3 px-4 text-right font-bold text-[#1B2A4A] hover:underline">
                           Ver Fluxo →
                         </td>
                       </tr>

@@ -187,7 +187,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                   Agendamento #{agendamento?.id.substring(0, 8)}
                 </span>
                 {agendamento?.prioridade === 'prioritario' && (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#F5D800] text-black border border-amber-300">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#F5D800] text-[#1B2A4A] border border-amber-300">
                     ★ PRIORITÁRIO
                   </span>
                 )}
@@ -313,9 +313,9 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                       <button
                         type="button"
                         onClick={() => setLiberarDialogOpen(true)}
-                        className="w-full py-2.5 px-4 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-sm rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2 border border-amber-400"
+                        className="w-full py-2.5 px-4 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-sm rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2"
                       >
-                        <ShieldCheck className="w-4 h-4" />
+                        <ShieldCheck className="w-4 h-4 text-[#F5D800]" />
                         <span>Liberar PTA para Retirada</span>
                       </button>
                     </div>
@@ -329,9 +329,9 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                       <button
                         type="button"
                         onClick={() => setRetiradaModalOpen(true)}
-                        className="w-full py-2.5 px-4 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-sm rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2 border border-amber-400"
+                        className="w-full py-2.5 px-4 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-sm rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2"
                       >
-                        <CheckSquare className="w-4 h-4" />
+                        <CheckSquare className="w-4 h-4 text-[#F5D800]" />
                         <span>Abrir Checklist de Retirada</span>
                       </button>
                     </div>
@@ -345,7 +345,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                       <button
                         type="button"
                         onClick={() => setDevolucaoModalOpen(true)}
-                        className="w-full py-2.5 px-4 bg-[#1A1A1A] hover:bg-black text-white font-bold text-sm rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-2.5 px-4 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-sm rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2"
                       >
                         <FileCheck className="w-4 h-4 text-[#F5D800]" />
                         <span>Devolver / Concluir (Checklist + SLA)</span>
@@ -648,7 +648,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                   value={liberadoPor}
                   onChange={(e) => setLiberadoPor(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1B2A4A]"
                 >
                   <option value="">Selecione o liberador...</option>
                   {colaboradores.map((c) => (
@@ -669,7 +669,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] rounded-lg shadow-xs"
+                  className="px-4 py-1.5 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs transition-colors"
                 >
                   Confirmar Liberação
                 </button>

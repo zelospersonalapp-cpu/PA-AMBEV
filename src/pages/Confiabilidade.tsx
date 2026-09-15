@@ -89,8 +89,8 @@ export const Confiabilidade: React.FC = () => {
           </p>
         </div>
 
-        <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-xs font-semibold text-amber-900">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+        <div className="px-3 py-1.5 bg-[#152238] border border-[#F5D800]/30 rounded-lg flex items-center gap-2 text-xs font-semibold text-white">
+          <Sparkles className="w-4 h-4 text-[#F5D800]" />
           <span>Meta Facilities: Score &gt; 90%</span>
         </div>
       </div>
@@ -176,7 +176,7 @@ export const Confiabilidade: React.FC = () => {
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
                           index === 0
-                            ? 'bg-[#F5D800] text-black font-extrabold shadow-2xs'
+                            ? 'bg-[#F5D800] text-[#1B2A4A] font-extrabold shadow-2xs'
                             : index === 1
                             ? 'bg-gray-200 text-gray-800'
                             : index === 2

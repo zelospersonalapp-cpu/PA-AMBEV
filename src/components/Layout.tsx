@@ -34,19 +34,16 @@ export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F7F7F8] text-[#1A1A1A] flex flex-col font-sans antialiased">
-      {/* Top AmBev Yellow Bar Accent */}
-      <div className="h-1.5 bg-[#F5D800] w-full" />
-
-      {/* Main Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-xs">
+    <div className="min-h-screen bg-[#F0F2F5] text-[#1A1A1A] flex flex-col font-sans antialiased">
+      {/* Main Header / Top Bar: fundo #1B2A4A, texto branco */}
+      <header className="bg-[#1B2A4A] border-b border-[#152238] sticky top-0 z-30 shadow-sm text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo and App Title */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                className="lg:hidden p-2 rounded-md text-[#CBD5E1] hover:text-white hover:bg-[#1E3461]"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Abrir menu"
               >
@@ -54,33 +51,29 @@ export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
               </button>
 
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-md bg-[#F5D800] flex items-center justify-center font-bold text-black text-sm tracking-tight shadow-xs border border-amber-300">
+                {/* Logo com fundo #243656 */}
+                <div className="w-9 h-9 rounded-md bg-[#243656] flex items-center justify-center font-extrabold text-white text-sm tracking-tight shadow-xs border border-white/10">
                   PTA
                 </div>
                 <div>
-                  <h1 className="text-base sm:text-lg font-bold text-[#1A1A1A] leading-tight flex items-center gap-2">
+                  <h1 className="text-base sm:text-lg font-bold text-white leading-tight flex items-center gap-2">
                     AmBev — Gestão de PTAs
-                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-900 border border-amber-200">
+                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#243656] text-[#93C5FD]">
                       PPM Facilities
                     </span>
                   </h1>
-                  <p className="text-xs text-gray-500 font-medium">Centro de Inteligência Facilities</p>
+                  <p className="text-xs text-[#CBD5E1] font-medium">Centro de Inteligência Facilities</p>
                 </div>
               </div>
             </div>
 
-            {/* Header Right Action & Status */}
+            {/* Header Right Action */}
             <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Supabase Conectado</span>
-              </div>
-
               <NavLink
                 to="/agenda?novo=true"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#F5D800] hover:bg-[#e4c900] text-black font-semibold text-xs sm:text-sm shadow-xs transition-colors border border-amber-400"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm shadow-xs transition-colors"
               >
-                <PlusCircle className="w-4 h-4" />
+                <PlusCircle className="w-4 h-4 text-white" />
                 <span>Novo Agendamento</span>
               </NavLink>
             </div>
@@ -90,13 +83,15 @@ export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
 
       {/* Main Layout Container */}
       <div className="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6">
-        {/* Desktop Sidebar */}
+        {/* Desktop Sidebar: fundo #1B2A4A */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-3 sticky top-24">
-            <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              Navegação do Sistema
+          <div className="bg-[#1B2A4A] rounded-xl border border-[#152238] shadow-md p-3 sticky top-24 text-white">
+            {/* Cabeçalho do sidebar: #152238 */}
+            <div className="bg-[#152238] px-3.5 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider text-[#93C5FD] flex items-center justify-between">
+              <span>Navegação do Sistema</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#60A5FA]" />
             </div>
-            <nav className="space-y-1 mt-1">
+            <nav className="space-y-1.5 mt-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive =
@@ -108,44 +103,56 @@ export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
                   <NavLink
                     key={item.name}
                     to={item.href}
-                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    className={`group flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors border-l-[3px] ${
                       isActive
-                        ? 'bg-[#F5D800] text-black font-semibold shadow-xs'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                        ? 'bg-[#243656] text-white font-bold border-l-[#60A5FA] shadow-xs'
+                        : 'border-l-transparent text-[#CBD5E1] hover:bg-[#1E3461] hover:text-[#E2E8F0]'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-gray-500'}`} />
+                    <Icon
+                      className={`w-4 h-4 transition-colors ${
+                        isActive
+                          ? 'text-white'
+                          : 'text-[#94A3B8] group-hover:text-[#E2E8F0]'
+                      }`}
+                    />
                     <span>{item.name}</span>
                   </NavLink>
                 );
               })}
             </nav>
 
-            <div className="mt-6 pt-4 border-t border-gray-100 px-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-800">
-                <Building2 className="w-4 h-4 text-[#e4c900]" />
+            <div className="mt-6 pt-4 border-t border-[#152238] px-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-white">
+                <Building2 className="w-4 h-4 text-[#94A3B8]" />
                 <span>Cervejaria AmBev</span>
               </div>
-              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                Controle de Plataformas Elevatórias (Articuladas e Tesourinhas) sem conflitos.
+              <p className="text-[11px] text-[#94A3B8] mt-1 leading-relaxed">
+                PPM Facilities • Controle Inteligente de Plataformas Elevatórias.
               </p>
             </div>
           </div>
         </aside>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Navigation Drawer: fundo #1B2A4A */}
         {mobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 flex">
             <div
-              className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl">
-              <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-                <div className="font-bold text-sm text-[#1A1A1A]">Menu Principal</div>
+            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#1B2A4A] shadow-xl text-white border-r border-[#152238]">
+              {/* Cabeçalho do sidebar mobile: #152238 */}
+              <div className="p-4 border-b border-[#152238] flex items-center justify-between bg-[#152238]">
+                <div className="font-bold text-sm text-white flex items-center gap-2">
+                  <div className="w-6 h-6 rounded bg-[#243656] flex items-center justify-center font-bold text-white text-xs border border-white/10">
+                    PTA
+                  </div>
+                  <span>Menu Principal</span>
+                </div>
                 <button
                   type="button"
-                  className="p-1 rounded-md text-gray-500 hover:text-gray-900"
+                  className="p-1 rounded-md text-[#94A3B8] hover:text-white"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <X className="w-5 h-5" />
@@ -164,13 +171,19 @@ export const Layout: React.FC<LayoutProps> = ({ onOpenNovoAgendamento }) => {
                       key={item.name}
                       to={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
+                      className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border-l-[3px] ${
                         isActive
-                          ? 'bg-[#F5D800] text-black font-semibold'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? 'bg-[#243656] text-white font-bold border-l-[#60A5FA]'
+                          : 'border-l-transparent text-[#CBD5E1] hover:bg-[#1E3461] hover:text-[#E2E8F0]'
                       }`}
                     >
-                      <Icon className="w-4 h-4" />
+                      <Icon
+                        className={`w-4 h-4 transition-colors ${
+                          isActive
+                            ? 'text-white'
+                            : 'text-[#94A3B8] group-hover:text-[#E2E8F0]'
+                        }`}
+                      />
                       <span>{item.name}</span>
                     </NavLink>
                   );

@@ -281,17 +281,17 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full border border-gray-200 overflow-hidden my-8">
-        {/* Header with AmBev yellow accent */}
-        <div className="border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#F5D800] border border-amber-400" />
-            <h2 className="text-lg font-bold text-[#1A1A1A]">
+        {/* Header with AmBev dark navy */}
+        <div className="border-b border-[#152238] bg-[#1B2A4A] px-6 py-4 flex items-center justify-between text-white">
+          <div className="flex items-center gap-2.5">
+            <div className="w-3 h-3 rounded-full bg-[#F5D800]" />
+            <h2 className="text-base sm:text-lg font-bold text-white">
               {editingAgendamento ? 'Editar Agendamento de PTA' : 'Novo Agendamento de PTA'}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1 rounded-md transition-colors"
+            className="text-gray-300 hover:text-white p-1 rounded-md transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -523,7 +523,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                   onClick={() => setPrioridade('prioritario')}
                   className={`flex-1 py-1 text-xs font-bold rounded transition-all ${
                     prioridade === 'prioritario'
-                      ? 'bg-[#F5D800] text-black shadow-xs'
+                      ? 'bg-[#F5D800] text-[#1B2A4A] shadow-xs'
                       : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
@@ -543,7 +543,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               onChange={(e) => setDescricao(e.target.value)}
               rows={2}
               placeholder="Detalhes operacionais sobre o trabalho a ser executado na PTA..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1B2A4A] bg-white"
             />
           </div>
 
@@ -556,7 +556,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
               placeholder="Avisos para liberação, operadores autorizados, etc."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1B2A4A] bg-white"
             />
           </div>
 
@@ -572,16 +572,16 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             <button
               type="submit"
               disabled={loading || Boolean(conflictWarning && conflictWarning.includes('A data de início'))}
-              className="px-5 py-2 text-sm font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] border border-amber-400 rounded-lg shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-5 py-2 text-sm font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Salvando...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-4 h-4" />
+                  <CheckCircle className="w-4 h-4 text-[#F5D800]" />
                   <span>{editingAgendamento ? 'Salvar Alterações' : 'Confirmar Agendamento'}</span>
                 </>
               )}

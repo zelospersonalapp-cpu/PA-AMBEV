@@ -199,9 +199,9 @@ export const Ptas: React.FC = () => {
 
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-xs sm:text-sm rounded-lg shadow-xs border border-amber-400 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
         >
-          <PlusCircle className="w-4 h-4" />
+          <PlusCircle className="w-4 h-4 text-[#F5D800]" />
           <span>Cadastrar Nova PTA</span>
         </button>
       </div>
@@ -215,7 +215,7 @@ export const Ptas: React.FC = () => {
             placeholder="Buscar por patrimônio, modelo, fabricante ou nº de série..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F5D800] bg-white"
+            className="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1B2A4A] bg-white"
           />
         </div>
 
@@ -248,12 +248,12 @@ export const Ptas: React.FC = () => {
       {/* PTAs Grid / Cards */}
       {loading ? (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500 text-sm flex flex-col items-center gap-2">
-          <div className="w-6 h-6 border-2 border-[#F5D800] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#1B2A4A] border-t-transparent rounded-full animate-spin" />
           <span>Carregando inventário de PTAs...</span>
         </div>
       ) : filteredPtas.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 text-[#1B2A4A] flex items-center justify-center mx-auto mb-3">
             <Truck className="w-6 h-6" />
           </div>
           <h3 className="text-base font-bold text-gray-900">
@@ -267,7 +267,7 @@ export const Ptas: React.FC = () => {
           {ptas.length === 0 && (
             <button
               onClick={openCreateModal}
-              className="mt-4 px-4 py-2 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-xs rounded-lg shadow-xs border border-amber-400"
+              className="mt-4 px-4 py-2 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-xs rounded-lg shadow-xs transition-colors"
             >
               + Cadastrar Primeira PTA
             </button>
@@ -393,16 +393,16 @@ export const Ptas: React.FC = () => {
       {modalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full border border-gray-200 overflow-hidden my-6">
-            <div className="bg-[#F5D800] px-6 py-4 flex items-center justify-between border-b border-amber-300">
+            <div className="bg-[#1B2A4A] text-white px-6 py-4 flex items-center justify-between border-b border-[#152238]">
               <div className="flex items-center gap-2">
-                <Truck className="w-5 h-5 text-black font-bold" />
-                <h2 className="text-base font-bold text-black">
+                <Truck className="w-5 h-5 text-[#F5D800]" />
+                <h2 className="text-base font-bold text-white">
                   {editingPta ? `Editar PTA (${editingPta.patrimonio})` : 'Cadastrar Nova PTA'}
                 </h2>
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-black/70 hover:text-black p-1"
+                className="text-gray-300 hover:text-white p-1"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -572,7 +572,7 @@ export const Ptas: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] border border-amber-400 rounded-lg shadow-xs disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs disabled:opacity-50 transition-colors"
                 >
                   {saving ? 'Salvando...' : 'Salvar PTA'}
                 </button>
@@ -586,18 +586,18 @@ export const Ptas: React.FC = () => {
       {historyPta && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full border border-gray-200 overflow-hidden my-6">
-            <div className="bg-gray-900 text-white px-6 py-4 flex items-center justify-between border-b border-gray-800">
+            <div className="bg-[#1B2A4A] text-white px-6 py-4 flex items-center justify-between border-b border-[#152238]">
               <div>
-                <h3 className="text-base font-bold">
+                <h3 className="text-base font-bold text-white">
                   Histórico de Ocorrências: {historyPta.patrimonio}
                 </h3>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-300">
                   {historyPta.fabricante} {historyPta.modelo} ({historyPta.tipo})
                 </p>
               </div>
               <button
                 onClick={() => setHistoryPta(null)}
-                className="text-gray-400 hover:text-white p-1"
+                className="text-gray-300 hover:text-white p-1"
               >
                 <X className="w-5 h-5" />
               </button>

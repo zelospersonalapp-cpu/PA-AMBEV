@@ -272,9 +272,9 @@ export const Avarias: React.FC = () => {
 
         <button
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-xs sm:text-sm rounded-lg shadow-xs border border-amber-400 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
         >
-          <PlusCircle className="w-4 h-4" />
+          <PlusCircle className="w-4 h-4 text-[#F5D800]" />
           <span>Registrar Nova Avaria</span>
         </button>
       </div>
@@ -508,9 +508,9 @@ export const Avarias: React.FC = () => {
                         setResolvidoPor('');
                         setResolveDialogOpen(true);
                       }}
-                      className="px-3.5 py-1.5 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] border border-amber-400 rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
+                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
                     >
-                      <CheckCircle className="w-3.5 h-3.5" />
+                      <CheckCircle className="w-3.5 h-3.5 text-[#F5D800]" />
                       <span>Concluir Reparo e Liberar PTA</span>
                     </button>
                   </div>
@@ -525,14 +525,14 @@ export const Avarias: React.FC = () => {
       {modalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full border border-gray-200 overflow-hidden my-6">
-            <div className="bg-[#1A1A1A] text-white px-6 py-4 flex items-center justify-between border-b border-gray-800">
+            <div className="bg-[#1B2A4A] text-white px-6 py-4 flex items-center justify-between border-b border-[#152238]">
               <div className="flex items-center gap-2">
-                <AlertOctagon className="w-5 h-5 text-rose-500" />
+                <AlertOctagon className="w-5 h-5 text-[#F5D800]" />
                 <h2 className="text-base font-bold">Registrar Ocorrência / Avaria</h2>
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-gray-400 hover:text-white p-1"
+                className="text-gray-300 hover:text-white p-1"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -669,8 +669,8 @@ export const Avarias: React.FC = () => {
                     <Camera className="w-4 h-4 text-gray-600" />
                     Fotos da Avaria (Bucket 'ptas')
                   </label>
-                  <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] rounded shadow-xs inline-flex items-center gap-1">
-                    <Upload className="w-3 h-3" />
+                  <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded shadow-xs inline-flex items-center gap-1 transition-colors">
+                    <Upload className="w-3 h-3 text-[#F5D800]" />
                     <span>Adicionar</span>
                     <input
                       type="file"
@@ -716,7 +716,7 @@ export const Avarias: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving || uploading}
-                  className="px-4 py-1.5 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] border border-amber-400 rounded-lg shadow-xs disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs disabled:opacity-50 transition-colors"
                 >
                   {saving || uploading ? 'Registrando...' : 'Salvar Avaria'}
                 </button>
@@ -731,7 +731,7 @@ export const Avarias: React.FC = () => {
         <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 border border-gray-200">
             <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-1">
-              <CheckCircle className="w-5 h-5 text-emerald-600" />
+              <CheckCircle className="w-5 h-5 text-[#1B2A4A]" />
               Finalizar Reparo e Liberar PTA
             </h3>
             <p className="text-xs text-gray-500 mb-4">
@@ -768,7 +768,7 @@ export const Avarias: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] rounded-lg shadow-xs"
+                  className="px-4 py-1.5 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs transition-colors"
                 >
                   Confirmar e Liberar PTA
                 </button>

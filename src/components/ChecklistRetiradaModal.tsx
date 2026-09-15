@@ -169,19 +169,19 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="relative bg-white rounded-xl shadow-2xl max-w-xl w-full border border-gray-200 overflow-hidden my-6">
-        <div className="bg-[#F5D800] px-6 py-4 flex items-center justify-between border-b border-amber-300">
-          <div className="flex items-center gap-2 text-black">
-            <CheckSquare className="w-5 h-5 font-bold" />
+        <div className="bg-[#1B2A4A] px-6 py-4 flex items-center justify-between border-b border-[#152238] text-white">
+          <div className="flex items-center gap-2.5">
+            <CheckSquare className="w-5 h-5 text-[#F5D800]" />
             <div>
-              <h2 className="text-base font-bold leading-tight">Checklist de Retirada de PTA</h2>
-              <p className="text-xs text-black/80 font-medium">
+              <h2 className="text-base font-bold leading-tight text-white">Checklist de Retirada de PTA</h2>
+              <p className="text-xs text-gray-300 font-medium">
                 Vistoria obrigatória antes de liberar o equipamento na fábrica
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-black/70 hover:text-black p-1 rounded transition-colors"
+            className="text-gray-300 hover:text-white p-1 rounded transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -197,7 +197,7 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
               value={retiradoPor}
               onChange={(e) => setRetiradoPor(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1B2A4A]"
             >
               <option value="">Selecione o operador...</option>
               {colaboradores.map((c) => (
@@ -282,8 +282,8 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
                 <Camera className="w-4 h-4 text-gray-600" />
                 Fotos da Vistoria (Bucket Supabase 'ptas')
               </label>
-              <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] rounded shadow-xs inline-flex items-center gap-1">
-                <Upload className="w-3 h-3" />
+              <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded shadow-xs inline-flex items-center gap-1 transition-colors">
+                <Upload className="w-3 h-3 text-[#F5D800]" />
                 <span>Adicionar Foto</span>
                 <input
                   type="file"
@@ -351,16 +351,16 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
             <button
               type="submit"
               disabled={loading || !assinaturaOk}
-              className="px-4 py-2 text-xs font-bold text-black bg-[#F5D800] hover:bg-[#e4c900] border border-amber-400 rounded-lg shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg shadow-xs disabled:opacity-50 flex items-center gap-1.5 transition-colors"
             >
               {loading || uploadingPhotos ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>{uploadingPhotos ? 'Enviando fotos...' : 'Registrando...'}</span>
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-4 h-4" />
+                  <UserCheck className="w-4 h-4 text-[#F5D800]" />
                   <span>Confirmar Retirada e Liberar Uso</span>
                 </>
               )}

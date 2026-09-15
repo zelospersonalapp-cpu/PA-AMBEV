@@ -244,9 +244,9 @@ export const Cadastros: React.FC = () => {
 
         <button
           onClick={handleOpenCreate}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-xs sm:text-sm rounded-lg shadow-xs border border-amber-400 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
         >
-          <PlusCircle className="w-4 h-4" />
+          <PlusCircle className="w-4 h-4 text-[#F5D800]" />
           <span>
             {activeTab === 'areas'
               ? 'Nova Área / Empresa'
@@ -266,8 +266,8 @@ export const Cadastros: React.FC = () => {
           }}
           className={`py-3 px-4 font-bold text-xs flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'areas'
-              ? 'border-amber-500 text-black'
-              : 'border-transparent text-gray-500 hover:text-black'
+              ? 'border-[#F5D800] text-[#1B2A4A]'
+              : 'border-transparent text-gray-500 hover:text-[#1B2A4A]'
           }`}
         >
           <Building className="w-4 h-4" />
@@ -281,8 +281,8 @@ export const Cadastros: React.FC = () => {
           }}
           className={`py-3 px-4 font-bold text-xs flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'locais'
-              ? 'border-amber-500 text-black'
-              : 'border-transparent text-gray-500 hover:text-black'
+              ? 'border-[#F5D800] text-[#1B2A4A]'
+              : 'border-transparent text-gray-500 hover:text-[#1B2A4A]'
           }`}
         >
           <MapPin className="w-4 h-4" />
@@ -296,8 +296,8 @@ export const Cadastros: React.FC = () => {
           }}
           className={`py-3 px-4 font-bold text-xs flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'colaboradores'
-              ? 'border-amber-500 text-black'
-              : 'border-transparent text-gray-500 hover:text-black'
+              ? 'border-[#F5D800] text-[#1B2A4A]'
+              : 'border-transparent text-gray-500 hover:text-[#1B2A4A]'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -483,9 +483,9 @@ export const Cadastros: React.FC = () => {
       {/* Modal for Area / Local / Colab */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border border-gray-200 overflow-hidden">
-            <div className="bg-[#F5D800] px-6 py-4 flex items-center justify-between border-b border-amber-300">
-              <h3 className="text-base font-bold text-black">
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full border border-gray-200 overflow-hidden">
+            <div className="bg-[#1B2A4A] text-white px-6 py-4 flex items-center justify-between border-b border-[#152238]">
+              <h3 className="text-base font-bold text-white">
                 {activeTab === 'areas'
                   ? editingArea
                     ? 'Editar Área'
@@ -498,7 +498,7 @@ export const Cadastros: React.FC = () => {
                   ? 'Editar Colaborador'
                   : 'Novo Colaborador'}
               </h3>
-              <button onClick={() => setModalOpen(false)} className="text-black/70 hover:text-black p-1">
+              <button onClick={() => setModalOpen(false)} className="text-gray-300 hover:text-white p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -558,7 +558,7 @@ export const Cadastros: React.FC = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-1.5 bg-[#F5D800] font-bold text-black rounded-lg shadow-xs"
+                    className="px-4 py-1.5 bg-[#1B2A4A] hover:bg-[#152238] font-bold text-white rounded-lg shadow-xs transition-colors"
                   >
                     {saving ? 'Salvando...' : 'Salvar'}
                   </button>
@@ -631,7 +631,7 @@ export const Cadastros: React.FC = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-1.5 bg-[#F5D800] font-bold text-black rounded-lg shadow-xs"
+                    className="px-4 py-1.5 bg-[#1B2A4A] hover:bg-[#152238] font-bold text-white rounded-lg shadow-xs transition-colors"
                   >
                     {saving ? 'Salvando...' : 'Salvar'}
                   </button>
@@ -724,7 +724,7 @@ export const Cadastros: React.FC = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-1.5 bg-[#F5D800] font-bold text-black rounded-lg shadow-xs"
+                    className="px-4 py-1.5 bg-[#1B2A4A] hover:bg-[#152238] font-bold text-white rounded-lg shadow-xs transition-colors"
                   >
                     {saving ? 'Salvando...' : 'Salvar'}
                   </button>

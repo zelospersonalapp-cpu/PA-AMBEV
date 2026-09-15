@@ -146,9 +146,9 @@ export const Dashboard: React.FC = () => {
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
             onClick={() => setNovoModalOpen(true)}
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#F5D800] hover:bg-[#e4c900] text-black font-bold text-xs sm:text-sm rounded-lg shadow-xs border border-amber-400 transition-colors"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
           >
-            <PlusCircle className="w-4 h-4" />
+            <PlusCircle className="w-4 h-4 text-white" />
             <span>Novo Agendamento</span>
           </button>
           <NavLink
@@ -161,17 +161,16 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Cards Grid (AmBev yellow accents & clean white cards) */}
+      {/* KPI Cards Grid (Fundo branco #FFFFFF, borda esquerda 4px solid #F5D800) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: PTAs por Status */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5D800]" />
+        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
                 Parque de PTAs ({ptas.length})
               </span>
-              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
                 <Truck className="w-4 h-4" />
               </div>
             </div>
@@ -196,14 +195,13 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Card 2: Agendamentos Hoje / Semana */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5D800]" />
+        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
                 Reservas em Operação
               </span>
-              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
                 <Clock className="w-4 h-4" />
               </div>
             </div>
@@ -221,14 +219,13 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Card 3: Avarias Abertas */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5D800]" />
+        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
                 Manutenção & Avarias
               </span>
-              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
                 <AlertOctagon className="w-4 h-4" />
               </div>
             </div>
@@ -246,7 +243,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
-            <NavLink to="/avarias" className="text-amber-700 hover:underline font-semibold flex items-center gap-1">
+            <NavLink to="/avarias" className="text-amber-800 hover:underline font-semibold flex items-center gap-1">
               <span>Gerenciar ocorrências</span>
               <ArrowRight className="w-3 h-3" />
             </NavLink>
@@ -254,14 +251,13 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Card 4: Taxa de Confiabilidade / SLA */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-[#F5D800]" />
+        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
                 Pontualidade SLA
               </span>
-              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
                 <Award className="w-4 h-4" />
               </div>
             </div>
@@ -314,7 +310,7 @@ export const Dashboard: React.FC = () => {
               </p>
               <button
                 onClick={() => setNovoModalOpen(true)}
-                className="mt-3 px-3 py-1.5 bg-[#F5D800] hover:bg-[#e4c900] text-black text-xs font-bold rounded shadow-xs"
+                className="mt-3 px-3.5 py-1.5 bg-[#1B2A4A] hover:bg-[#152238] text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
               >
                 Criar primeiro agendamento
               </button>
@@ -350,7 +346,7 @@ export const Dashboard: React.FC = () => {
                             {item.pta_patrimonio || item.patrimonio || 'PTA'} — {item.tipo_atividade}
                           </span>
                           {isPrioritario && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#F5D800] text-black border border-amber-300">
+                            <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#F5D800] text-[#1B2A4A] border border-amber-300">
                               ★ PRIORITÁRIO
                             </span>
                           )}
