@@ -313,7 +313,7 @@ export const Cadastros: React.FC = () => {
           <PlusCircle className="w-4 h-4 text-[#F5D800]" />
           <span>
             {activeTab === 'areas'
-              ? 'Nova Área / Empresa'
+              ? 'Nova Empresa'
               : activeTab === 'locais'
               ? 'Novo Local (UG)'
               : 'Novo Colaborador'}
@@ -335,7 +335,7 @@ export const Cadastros: React.FC = () => {
           }`}
         >
           <Building className="w-4 h-4" />
-          <span>Áreas & Empresas ({areas.length})</span>
+          <span>Empresas ({areas.length})</span>
         </button>
 
         <button
@@ -654,8 +654,8 @@ export const Cadastros: React.FC = () => {
               <h3 className="text-base font-bold text-white">
                 {activeTab === 'areas'
                   ? editingArea
-                    ? 'Editar Área'
-                    : 'Nova Área / Empresa'
+                    ? 'Editar Empresa'
+                    : 'Nova Empresa'
                   : activeTab === 'locais'
                   ? editingLocal
                     ? 'Editar Local'
@@ -673,13 +673,13 @@ export const Cadastros: React.FC = () => {
             {activeTab === 'areas' && (
               <form onSubmit={handleSaveArea} className="p-6 space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Nome da Área *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Empresa *</label>
                   <input
                     type="text"
                     required
                     value={areaNome}
                     onChange={(e) => setAreaNome(e.target.value)}
-                    placeholder="Ex: Fabricação / Manutenção / Empresa Parceira"
+                    placeholder="Ex: Vision Refrigeração / Elétrica / Civil"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium"
                   />
                 </div>
