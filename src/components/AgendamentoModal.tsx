@@ -51,7 +51,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
   // Cascading Local fields
   const [selectedUG, setSelectedUG] = useState('');
-  const [selectedSetor, setSelectedSetor] = useState('');
   const [localId, setLocalId] = useState('');
 
   const [dataInicio, setDataInicio] = useState('');
@@ -108,7 +107,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setAreaEmpresaId('');
       setSolicitanteId('');
       setSelectedUG('');
-      setSelectedSetor('');
       setLocalId('');
       setDataInicio(today);
       setDataFim(today);
@@ -120,29 +118,22 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
     }
   }, [isOpen, editingAgendamento, initialDate, initialPtaId]);
 
-  // When localId changes or editingAgendamento is loaded, sync UG/Setor selectors
+  // When localId changes or editingAgendamento is loaded, sync UG selector
   useEffect(() => {
     if (localId && locais.length > 0) {
       const loc = locais.find((l) => l.id === localId);
       if (loc) {
         setSelectedUG(loc.ug);
-        setSelectedSetor(loc.setor_linha);
       }
     }
   }, [localId, locais]);
 
-  // Available UGs
+  // Available UGs from locais
   const uniqueUGs = Array.from(new Set(locais.map((l) => l.ug))).filter(Boolean);
-  // Available Setores for chosen UG
-  const availableSetores = Array.from(
-    new Set(locais.filter((l) => !selectedUG || l.ug === selectedUG).map((l) => l.setor_linha))
-  ).filter(Boolean);
-  // Available Pontos for chosen UG & Setor
-  const filteredLocais = locais.filter((l) => {
-    if (selectedUG && l.ug !== selectedUG) return false;
-    if (selectedSetor && l.setor_linha !== selectedSetor) return false;
-    return true;
-  });
+  // Available Locais filtered by chosen UG
+  const filteredLocais = selectedUG
+    ? locais.filter((l) => l.ug === selectedUG)
+    : locais;
 
   // Filter solicitantes by chosen Area if area has employees
   const filteredColaboradores = areaEmpresaId
@@ -207,7 +198,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       return;
     }
     if (!localId) {
-      toast.warning('Selecione o Local', 'Selecione a UG, Setor e Ponto de referência.');
+      toast.warning('Selecione o Local', 'Selecione a UG de uso.');
       return;
     }
     if (!dataInicio || !dataFim) {
@@ -387,22 +378,27 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             </div>
           </div>
 
-          {/* Cascading Local (UG -> Setor/Linha -> Ponto) */}
+          {/* Cascading Local (1. Unidade / UG -> 2. UG) */}
           <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200 space-y-3">
             <div className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-amber-500" />
-              Localização de Uso na Fábrica (UG / Setor / Ponto) *
+              Localização de Uso na Fábrica (UG) *
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] text-gray-600 mb-0.5">1. Unidade / UG</label>
                 <select
                   value={selectedUG}
                   onChange={(e) => {
-                    setSelectedUG(e.target.value);
-                    setSelectedSetor('');
-                    setLocalId('');
+                    const val = e.target.value;
+                    setSelectedUG(val);
+                    if (val) {
+                      const match = locais.find((l) => l.ug === val);
+                      setLocalId(match ? match.id : '');
+                    } else {
+                      setLocalId('');
+                    }
                   }}
                   className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs bg-white"
                 >
@@ -416,36 +412,24 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] text-gray-600 mb-0.5">2. Setor / Linha</label>
-                <select
-                  value={selectedSetor}
-                  onChange={(e) => {
-                    setSelectedSetor(e.target.value);
-                    setLocalId('');
-                  }}
-                  className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs bg-white"
-                >
-                  <option value="">Todos os setores</option>
-                  {availableSetores.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] text-gray-600 mb-0.5">3. Ponto Ref. / Local Exato *</label>
+                <label className="block text-[11px] text-gray-600 mb-0.5">2. UG *</label>
                 <select
                   value={localId}
-                  onChange={(e) => setLocalId(e.target.value)}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setLocalId(id);
+                    const match = locais.find((l) => l.id === id);
+                    if (match) {
+                      setSelectedUG(match.ug);
+                    }
+                  }}
                   required
                   className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs bg-white font-medium text-gray-900"
                 >
-                  <option value="">Selecione o local final...</option>
+                  <option value="">Selecione a UG...</option>
                   {filteredLocais.map((loc) => (
                     <option key={loc.id} value={loc.id}>
-                      {loc.ug} — {loc.setor_linha} {loc.ponto_ref ? `(${loc.ponto_ref})` : ''}
+                      {loc.ug}
                     </option>
                   ))}
                 </select>
