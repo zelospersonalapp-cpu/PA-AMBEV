@@ -101,7 +101,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
     if (editingAgendamento) {
       setPtaId(editingAgendamento.pta_id);
-      setAreaEmpresaId(editingAgendamento.area_empresa_id);
       setLiberadorId(editingAgendamento.liberado_por || '');
       setSolicitanteId(editingAgendamento.solicitante_id);
       setLocalId(editingAgendamento.local_id);
@@ -115,7 +114,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       // Defaults for new
       const today = initialDate || new Date().toISOString().substring(0, 10);
       setPtaId(initialPtaId || '');
-      setAreaEmpresaId('');
       setLiberadorId('');
       setSolicitanteId('');
       setSelectedUG('');
@@ -147,10 +145,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
     ? locais.filter((l) => l.ug === selectedUG)
     : locais;
 
-  // Filter solicitantes by chosen Area if area has employees
-  const filteredColaboradores = areaEmpresaId
-    ? colaboradores.filter((c) => !c.area_empresa_id || c.area_empresa_id === areaEmpresaId)
-    : colaboradores;
+  const filteredColaboradores = colaboradores;
 
   // Real-time conflict preview check
   useEffect(() => {
@@ -225,7 +220,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       // Calculate duration in days
       const payload = {
         pta_id: ptaId,
-        area_empresa_id: areaEmpresaId || null,
         solicitante_id: solicitanteId,
         liberado_por: liberadorId || null,
         local_id: localId,
