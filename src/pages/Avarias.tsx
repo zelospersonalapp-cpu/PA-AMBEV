@@ -28,6 +28,7 @@ export const Avarias: React.FC = () => {
 
   // Auxiliary
   const [ptas, setPtas] = useState<PTA[]>([]);
+  const [areasEmpresas, setAreasEmpresas] = useState<{ id: string; nome: string }[]>([]);
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
 
@@ -49,7 +50,6 @@ export const Avarias: React.FC = () => {
   const [descricao, setDescricao] = useState('');
   const [severidade, setSeveridade] = useState<SeveridadeAvaria>('media');
   const [tipoAnomalia, setTipoAnomalia] = useState('');
-  const [custoEstimado, setCustoEstimado] = useState<string>('');
   const [observacoes, setObservacoes] = useState('');
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
@@ -66,10 +66,11 @@ export const Avarias: React.FC = () => {
   async function loadData() {
     setLoading(true);
     try {
-      const [avariasRes, resumoRes, ptasRes, colabsRes, agRes] = await Promise.all([
+      const [avariasRes, resumoRes, ptasRes, areasRes, colabsRes, agRes] = await Promise.all([
         supabase.from('avarias').select('*').order('data_avaria', { ascending: false }),
         supabase.from('v_avarias_pta').select('*'),
         supabase.from('ptas').select('*').order('patrimonio', { ascending: true }),
+        supabase.from('areas_empresas').select('id, nome').eq('ativo', true).order('nome'),
         supabase.from('colaboradores').select('*').eq('ativo', true).order('nome', { ascending: true }),
         supabase.from('agendamentos').select('*').order('created_at', { ascending: false }).limit(50),
       ]);
@@ -77,6 +78,7 @@ export const Avarias: React.FC = () => {
       if (avariasRes.data) setAvarias(avariasRes.data);
       if (resumoRes.data) setResumoPtas(resumoRes.data);
       if (ptasRes.data) setPtas(ptasRes.data);
+      if (areasRes.data) setAreasEmpresas(areasRes.data);
       if (colabsRes.data) setColaboradores(colabsRes.data);
       if (agRes.data) setAgendamentos(agRes.data);
     } catch (err: any) {
@@ -114,7 +116,7 @@ export const Avarias: React.FC = () => {
       return;
     }
     if (!reportadoPor) {
-      toast.warning('Identifique o Relator', 'Selecione o colaborador que comunicou a avaria.');
+      toast.warning('Identifique o Relator', 'Selecione a área / empresa que comunicou a avaria.');
       return;
     }
     if (!tipoAnomalia) {
@@ -153,7 +155,6 @@ export const Avarias: React.FC = () => {
         severidade,
         tipo_anomalia: tipoAnomalia,
         status: 'aberta',
-        custo_estimado: custoEstimado ? Number(custoEstimado) : null,
         fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
         observacoes: observacoes.trim() || null,
       };
@@ -194,7 +195,6 @@ export const Avarias: React.FC = () => {
       setAgendamentoId('');
       setDescricao('');
       setTipoAnomalia('');
-      setCustoEstimado('');
       setObservacoes('');
       setPhotoFiles([]);
       setPhotoPreviews([]);
@@ -417,7 +417,7 @@ export const Avarias: React.FC = () => {
         <div className="space-y-3">
           {filteredAvarias.map((avaria) => {
             const ptaObj = ptas.find((p) => p.id === avaria.pta_id);
-            const reporter = colaboradores.find((c) => c.id === avaria.reportado_por);
+            const reporter = areasEmpresas.find((a) => a.id === avaria.reportado_por) || colaboradores.find((c) => c.id === avaria.reportado_por);
             const resolver = colaboradores.find((c) => c.id === avaria.resolvido_por);
             const severidadeConf = getSeveridadeAvariaConfig(avaria.severidade);
             const statusConf = getStatusAvariaConfig(avaria.status);
@@ -601,10 +601,10 @@ export const Avarias: React.FC = () => {
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
                   >
-                    <option value="">Selecione o colaborador...</option>
-                    {colaboradores.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nome} ({c.matricula})
+                    <option value="">Selecione a área / empresa...</option>
+                    {areasEmpresas.map((area) => (
+                      <option key={area.id} value={area.id}>
+                        {area.nome}
                       </option>
                     ))}
                   </select>
@@ -635,8 +635,8 @@ export const Avarias: React.FC = () => {
                 >
                   <option value="baixa">Baixa (estético, não afeta operação)</option>
                   <option value="media">Média (desgaste moderado)</option>
-                  <option value="alta">Alta (Bloqueia a PTA no banco)</option>
-                  <option value="critica">Crítica (Risco grave de acidente — bloqueio imediato)</option>
+                  <option value="alta">Alta (Bloquear a PTA)</option>
+                  <option value="critica">Crítica (Risco grave de acidente)</option>
                 </select>
                 {(severidade === 'alta' || severidade === 'critica') && (
                   <p className="text-[11px] text-rose-600 mt-1 font-semibold flex items-center gap-1">
@@ -683,38 +683,22 @@ export const Avarias: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                    Custo Estimado (R$)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0,00"
-                    value={custoEstimado}
-                    onChange={(e) => setCustoEstimado(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                    Agendamento Vinculado
-                  </label>
-                  <select
-                    value={agendamentoId}
-                    onChange={(e) => setAgendamentoId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                  >
-                    <option value="">Nenhum / Não vinculado</option>
-                    {agendamentos.map((ag) => (
-                      <option key={ag.id} value={ag.id}>
-                        {ag.tipo_atividade} ({formatDateBR(ag.data_inicio)})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                  Agendamento Vinculado
+                </label>
+                <select
+                  value={agendamentoId}
+                  onChange={(e) => setAgendamentoId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                >
+                  <option value="">Nenhum / Não vinculado</option>
+                  {agendamentos.map((ag) => (
+                    <option key={ag.id} value={ag.id}>
+                      {ag.tipo_atividade} ({formatDateBR(ag.data_inicio)})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Photos upload for avaria */}
