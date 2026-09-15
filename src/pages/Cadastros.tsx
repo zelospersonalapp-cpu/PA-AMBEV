@@ -822,46 +822,66 @@ export const Cadastros: React.FC = () => {
 
             {/* FORM SOLICITANTE */}
             {activeTab === 'solicitantes' && (
-              <div className="space-y-4">
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!solNome.trim()) return;
+                  setSaving(true);
+                  try {
+                    const payload = {
+                      nome: solNome.trim(),
+                      matricula: solMatricula || null,
+                      area_empresa_id: solAreaId || null,
+                      contato: solContato || null,
+                      papel: 'solicitante' as ColaboradorPapel,
+                      ativo: true,
+                    };
+                    if (editingSolicitante) {
+                      const { error } = await supabase.from('colaboradores').update(payload).eq('id', editingSolicitante.id);
+                      if (error) throw error;
+                      toast.success('Atualizado', 'Solicitante atualizado.');
+                    } else {
+                      const { error } = await supabase.from('colaboradores').insert([payload]);
+                      if (error) throw error;
+                      toast.success('Cadastrado', 'Solicitante cadastrado com sucesso.');
+                    }
+                    setModalOpen(false);
+                    loadAll();
+                  } catch (err: any) {
+                    toast.error('Erro', err.message);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="p-6 space-y-4 text-xs"
+              >
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Nome *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Nome Completo *</label>
                   <input
                     type="text"
+                    required
                     value={solNome}
                     onChange={(e) => setSolNome(e.target.value)}
-                    required
-                    placeholder="Nome completo do solicitante"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+                    placeholder="Ex: João Silva"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-[#F5D800]"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Matrícula</label>
-                    <input
-                      type="text"
-                      value={solMatricula}
-                      onChange={(e) => setSolMatricula(e.target.value)}
-                      placeholder="Ex: 12345"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Contato</label>
-                    <input
-                      type="text"
-                      value={solContato}
-                      onChange={(e) => setSolContato(e.target.value)}
-                      placeholder="Telefone ou e-mail"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Contato (Telefone / E-mail)</label>
+                  <input
+                    type="text"
+                    value={solContato}
+                    onChange={(e) => setSolContato(e.target.value)}
+                    placeholder="Ex: (21) 99999-0000 / joao@ambev.com"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Área / Empresa</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Empresa</label>
                   <select
                     value={solAreaId}
                     onChange={(e) => setSolAreaId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
                   >
                     <option value="">Sem vínculo específico</option>
                     {areas.map((a) => (
@@ -869,48 +889,26 @@ export const Cadastros: React.FC = () => {
                     ))}
                   </select>
                 </div>
-                <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
-                  <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
                     Cancelar
                   </button>
                   <button
-                    type="button"
-                    disabled={saving || !solNome}
-                    onClick={async () => {
-                      setSaving(true);
-                      try {
-                        const payload = {
-                          nome: solNome,
-                          matricula: solMatricula || null,
-                          area_empresa_id: solAreaId || null,
-                          contato: solContato || null,
-                          papel: 'solicitante' as ColaboradorPapel,
-                          ativo: true,
-                        };
-                        if (editingSolicitante) {
-                          const { error } = await supabase.from('colaboradores').update(payload).eq('id', editingSolicitante.id);
-                          if (error) throw error;
-                          toast.success('Atualizado', 'Solicitante atualizado com sucesso.');
-                        } else {
-                          const { error } = await supabase.from('colaboradores').insert([payload]);
-                          if (error) throw error;
-                          toast.success('Cadastrado', 'Solicitante cadastrado com sucesso.');
-                        }
-                        setModalOpen(false);
-                        loadAll();
-                      } catch (err: any) {
-                        toast.error('Erro', err.message);
-                      } finally {
-                        setSaving(false);
-                      }
-                    }}
+                    type="submit"
+                    disabled={saving || !solNome.trim()}
                     className="px-5 py-2 text-sm font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg disabled:opacity-50 flex items-center gap-2"
                   >
-                    {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <CheckCircle className="w-4 h-4 text-[#F5D800]" />}
+                    {saving
+                      ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      : <CheckCircle className="w-4 h-4 text-[#F5D800]" />}
                     {editingSolicitante ? 'Salvar Alterações' : 'Cadastrar Solicitante'}
                   </button>
                 </div>
-              </div>
+              </form>
             )}
 
             {/* FORM COLABORADOR */}
