@@ -264,12 +264,11 @@ export const Cadastros: React.FC = () => {
 
   const handleSaveColab = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!colabNome.trim() || !colabMatricula.trim()) return;
+    if (!colabNome.trim()) return;
     setSaving(true);
     try {
       const payload = {
         nome: colabNome.trim(),
-        matricula: colabMatricula.trim(),
         area_empresa_id: colabAreaId || null,
         papel: colabPapel,
         contato: colabContato.trim() || null,
@@ -388,7 +387,7 @@ export const Cadastros: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
               <tr>
-                <th className="py-3 px-4">Nome da Área / Empresa</th>
+                <th className="py-3 px-4">Empresa</th>
                 <th className="py-3 px-4">Tipo</th>
                 <th className="py-3 px-4">Contato / Informações</th>
                 <th className="py-3 px-4">Status</th>
@@ -511,8 +510,7 @@ export const Cadastros: React.FC = () => {
             <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
               <tr>
                 <th className="py-3 px-4">Nome</th>
-                <th className="py-3 px-4">Matrícula</th>
-                <th className="py-3 px-4">Área / Empresa</th>
+                <th className="py-3 px-4">Empresa</th>
                 <th className="py-3 px-4">Papel / Função</th>
                 <th className="py-3 px-4">Contato</th>
                 <th className="py-3 px-4">Status</th>
@@ -531,7 +529,6 @@ export const Cadastros: React.FC = () => {
                   return (
                     <tr key={colab.id} className="hover:bg-gray-50">
                       <td className="py-3 px-4 font-bold text-gray-900">{colab.nome}</td>
-                      <td className="py-3 px-4 font-mono text-gray-700 font-bold">{colab.matricula}</td>
                       <td className="py-3 px-4 text-gray-800">{areaObj?.nome || '-'}</td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-800">
@@ -586,8 +583,7 @@ export const Cadastros: React.FC = () => {
                 <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
                   <tr>
                     <th className="py-3 px-4">Nome</th>
-                    <th className="py-3 px-4">Matrícula</th>
-                    <th className="py-3 px-4">Área / Empresa</th>
+                    <th className="py-3 px-4">Empresa</th>
                     <th className="py-3 px-4">Contato</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 text-right">Ações</th>
@@ -599,7 +595,6 @@ export const Cadastros: React.FC = () => {
                     return (
                       <tr key={sol.id} className="hover:bg-gray-50">
                         <td className="py-3 px-4 font-semibold text-gray-900">{sol.nome}</td>
-                        <td className="py-3 px-4 text-gray-600 font-mono">{sol.matricula || '-'}</td>
                         <td className="py-3 px-4 text-gray-600">{area ? area.nome : '-'}</td>
                         <td className="py-3 px-4 text-gray-600">{sol.contato || '-'}</td>
                         <td className="py-3 px-4">
