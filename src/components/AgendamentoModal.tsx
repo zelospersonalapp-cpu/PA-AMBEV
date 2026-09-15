@@ -358,7 +358,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 <option value="">Selecione o liberador...</option>
                 {liberadores.map((l) => (
                   <option key={l.id} value={l.id}>
-                    {l.nome}{l.matricula ? ` (${l.matricula})` : ''}
+                    {l.nome}
                   </option>
                 ))}
               </select>
@@ -377,7 +377,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 <option value="">Selecione o solicitante...</option>
                 {filteredColaboradores.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.nome} (Matrícula: {c.matricula})
+                    {c.nome}
                   </option>
                 ))}
               </select>
