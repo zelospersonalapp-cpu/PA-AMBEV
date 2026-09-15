@@ -12,7 +12,6 @@ import {
   FileText,
   PlusCircle,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { supabase, checkPtaConflict, formatSupabaseError } from '../lib/supabase';
 import { useToast } from './Toast';
 import type { PTA, AreaEmpresa, Colaborador, Local, Agendamento } from '../types';
@@ -36,8 +35,12 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   initialPtaId,
 }) => {
   const toast = useToast();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [novoSolicitanteOpen, setNovoSolicitanteOpen] = useState(false);
+  const [novoSolNome, setNovoSolNome] = useState('');
+  const [novoSolContato, setNovoSolContato] = useState('');
+  const [novoSolAreaId, setNovoSolAreaId] = useState('');
+  const [savingSol, setSavingSol] = useState(false);
   const [checkingConflict, setCheckingConflict] = useState(false);
   const [conflictWarning, setConflictWarning] = useState<string | null>(null);
 
@@ -385,7 +388,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 <button
                   type="button"
                   title="Cadastrar novo solicitante"
-                  onClick={() => { onClose(); navigate('/cadastros?aba=solicitantes'); }}
+                  onClick={() => { setNovoSolNome(''); setNovoSolContato(''); setNovoSolAreaId(''); setNovoSolicitanteOpen(true); }}
                   className="px-2.5 py-2 bg-[#1B2A4A] hover:bg-[#243656] text-white rounded-lg flex items-center justify-center shrink-0"
                 >
                   <PlusCircle className="w-4 h-4" />
@@ -529,6 +532,101 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1B2A4A] bg-white"
             />
           </div>
+
+          {/* Mini-modal: Cadastrar Novo Solicitante */}
+          {novoSolicitanteOpen && (
+            <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
+                <div className="bg-[#1B2A4A] px-5 py-4 flex items-center justify-between text-white">
+                  <h3 className="font-bold text-sm">Novo Solicitante</h3>
+                  <button onClick={() => setNovoSolicitanteOpen(false)} className="text-gray-300 hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="p-5 space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Nome Completo *</label>
+                    <input
+                      type="text"
+                      value={novoSolNome}
+                      onChange={(e) => setNovoSolNome(e.target.value)}
+                      placeholder="Ex: João Silva"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Contato</label>
+                    <input
+                      type="text"
+                      value={novoSolContato}
+                      onChange={(e) => setNovoSolContato(e.target.value)}
+                      placeholder="Telefone ou e-mail"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Empresa</label>
+                    <select
+                      value={novoSolAreaId}
+                      onChange={(e) => setNovoSolAreaId(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+                    >
+                      <option value="">Sem vínculo específico</option>
+                      {areas.map((a) => (
+                        <option key={a.id} value={a.id}>{a.nome}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="pt-3 border-t border-gray-200 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNovoSolicitanteOpen(false)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      disabled={savingSol || !novoSolNome.trim()}
+                      onClick={async () => {
+                        if (!novoSolNome.trim()) return;
+                        setSavingSol(true);
+                        try {
+                          const { data, error } = await supabase
+                            .from('colaboradores')
+                            .insert([{
+                              nome: novoSolNome.trim(),
+                              contato: novoSolContato || null,
+                              area_empresa_id: novoSolAreaId || null,
+                              papel: 'solicitante',
+                              ativo: true,
+                            }])
+                            .select()
+                            .single();
+                          if (error) throw error;
+                          // Atualizar lista e selecionar o novo solicitante
+                          setColaboradores((prev) => [...prev, data]);
+                          setSolicitanteId(data.id);
+                          setNovoSolicitanteOpen(false);
+                        } catch (err: any) {
+                          console.error(err);
+                        } finally {
+                          setSavingSol(false);
+                        }
+                      }}
+                      className="px-5 py-2 text-sm font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {savingSol
+                        ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        : <CheckCircle className="w-4 h-4 text-[#F5D800]" />}
+                      Cadastrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
