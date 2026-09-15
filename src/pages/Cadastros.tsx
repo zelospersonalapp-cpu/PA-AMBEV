@@ -367,6 +367,20 @@ export const Cadastros: React.FC = () => {
           <Users className="w-4 h-4" />
           <span>Colaboradores & Operadores ({colaboradores.length})</span>
         </button>
+        <button
+          onClick={() => {
+            setActiveTab('solicitantes');
+            setSearchTerm('');
+          }}
+          className={`py-3 px-4 font-bold text-xs flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'solicitantes'
+              ? 'border-[#F5D800] text-[#1B2A4A]'
+              : 'border-transparent text-gray-500 hover:text-[#1B2A4A]'
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span>Solicitantes ({solicitantes.length})</span>
+        </button>
       </div>
 
       {/* Search Input */}
