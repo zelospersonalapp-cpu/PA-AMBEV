@@ -161,6 +161,7 @@ export interface Avaria {
   data_avaria: string;
   descricao: string;
   severidade: SeveridadeAvaria;
+  tipo_anomalia?: string | null;
   status: StatusAvaria;
   custo_estimado?: number | null;
   fotos?: string[] | null;

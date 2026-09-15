@@ -18,6 +18,7 @@ import { supabase, uploadPtaPhoto } from '../lib/supabase';
 import { useToast } from '../components/Toast';
 import type { Avaria, PTA, Colaborador, Agendamento, VAvariasPTA, SeveridadeAvaria, StatusAvaria } from '../types';
 import { formatDateBR, formatDateTimeBR, getSeveridadeAvariaConfig, getStatusAvariaConfig } from '../lib/formatters';
+import { GRUPOS_ANOMALIA } from '../data/anomalias';
 
 export const Avarias: React.FC = () => {
   const toast = useToast();
@@ -47,6 +48,7 @@ export const Avarias: React.FC = () => {
   const [dataAvaria, setDataAvaria] = useState(new Date().toISOString().substring(0, 10));
   const [descricao, setDescricao] = useState('');
   const [severidade, setSeveridade] = useState<SeveridadeAvaria>('media');
+  const [tipoAnomalia, setTipoAnomalia] = useState('');
   const [custoEstimado, setCustoEstimado] = useState<string>('');
   const [observacoes, setObservacoes] = useState('');
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
@@ -115,6 +117,10 @@ export const Avarias: React.FC = () => {
       toast.warning('Identifique o Relator', 'Selecione o colaborador que comunicou a avaria.');
       return;
     }
+    if (!tipoAnomalia) {
+      toast.warning('Tipo de Anomalia Obrigatório', 'Selecione o tipo de anomalia pré-definido.');
+      return;
+    }
     if (!descricao.trim()) {
       toast.warning('Descrição Obrigatória', 'Explique o dano ou falha ocorrida.');
       return;
@@ -138,22 +144,39 @@ export const Avarias: React.FC = () => {
       }
 
       // 2. Insert avaria
-      const { error } = await supabase.from('avarias').insert([
-        {
-          pta_id: ptaId,
-          agendamento_id: agendamentoId || null,
-          reportado_por: reportadoPor,
-          data_avaria: dataAvaria,
-          descricao: descricao.trim(),
-          severidade,
-          status: 'aberta',
-          custo_estimado: custoEstimado ? Number(custoEstimado) : null,
-          fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
-          observacoes: observacoes.trim() || null,
-        },
-      ]);
+      const payload: any = {
+        pta_id: ptaId,
+        agendamento_id: agendamentoId || null,
+        reportado_por: reportadoPor,
+        data_avaria: dataAvaria,
+        descricao: descricao.trim(),
+        severidade,
+        tipo_anomalia: tipoAnomalia,
+        status: 'aberta',
+        custo_estimado: custoEstimado ? Number(custoEstimado) : null,
+        fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
+        observacoes: observacoes.trim() || null,
+      };
 
-      if (error) throw error;
+      let { error } = await supabase.from('avarias').insert([payload]);
+
+      // If column does not exist yet (error 42703), save without it and notify
+      if (error && (error.code === '42703' || error.message?.includes('tipo_anomalia'))) {
+        console.warn('Coluna tipo_anomalia ainda não criada no Supabase. Salvando com fallback...');
+        const fallbackPayload = { ...payload };
+        delete fallbackPayload.tipo_anomalia;
+        const fallbackRes = await supabase.from('avarias').insert([fallbackPayload]);
+        if (fallbackRes.error) {
+          throw fallbackRes.error;
+        }
+        toast.warning(
+          'Avaria Salva (Coluna no Supabase pendente)',
+          'Para persistir o Tipo de Anomalia, execute no SQL Editor do Supabase: ALTER TABLE avarias ADD COLUMN IF NOT EXISTS tipo_anomalia text;'
+        );
+        error = null;
+      } else if (error) {
+        throw error;
+      }
 
       // Notice about automatic block for severe
       if (severidade === 'alta' || severidade === 'critica') {
@@ -170,6 +193,9 @@ export const Avarias: React.FC = () => {
       setPtaId('');
       setAgendamentoId('');
       setDescricao('');
+      setTipoAnomalia('');
+      setCustoEstimado('');
+      setObservacoes('');
       setPhotoFiles([]);
       setPhotoPreviews([]);
       loadData();
@@ -419,6 +445,12 @@ export const Avarias: React.FC = () => {
                     >
                       {statusConf.label}
                     </span>
+
+                    {avaria.tipo_anomalia && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#1B2A4A] text-[#93C5FD] border border-[#243656]">
+                        {avaria.tipo_anomalia}
+                      </span>
+                    )}
                   </div>
 
                   <span className="text-xs text-gray-400 font-medium">
@@ -612,6 +644,29 @@ export const Avarias: React.FC = () => {
                     Regra do sistema: Severidades Alta e Crítica desabilitam novas reservas desta PTA.
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                  Tipo de Anomalia *
+                </label>
+                <select
+                  value={tipoAnomalia}
+                  onChange={(e) => setTipoAnomalia(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium text-gray-900"
+                >
+                  <option value="">Selecione o tipo de anomalia...</option>
+                  {GRUPOS_ANOMALIA.map((grupo) => (
+                    <optgroup key={grupo.categoria} label={grupo.categoria}>
+                      {grupo.opcoes.map((opcao) => (
+                        <option key={opcao} value={opcao}>
+                          {opcao}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
               </div>
 
               <div>
