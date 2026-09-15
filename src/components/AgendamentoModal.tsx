@@ -116,6 +116,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setPtaId(initialPtaId || '');
       setLiberadorId('');
       setSolicitanteId('');
+      setAreaEmpresaId('');
       setSelectedUG('');
       setLocalId('');
       setDataInicio(today);
@@ -221,6 +222,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       const payload = {
         pta_id: ptaId,
         solicitante_id: solicitanteId,
+        area_empresa_id: areaEmpresaId || null,
         liberado_por: liberadorId || null,
         local_id: localId,
         data_inicio: dataInicio,
@@ -336,7 +338,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             )}
           </div>
 
-          {/* Area and Solicitante */}
+          {/* Liberador + Solicitante + Empresa */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
@@ -387,6 +389,25 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 <p className="text-[11px] text-amber-700 mt-1">Nenhum solicitante cadastrado. Clique em + para cadastrar.</p>
               )}
             </div>
+          </div>
+
+          {/* Empresa do Solicitante */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              Empresa do Solicitante
+            </label>
+            <select
+              value={areaEmpresaId}
+              onChange={(e) => setAreaEmpresaId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
+            >
+              <option value="">Selecione a empresa...</option>
+              {areas.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.nome}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Local - UG única */}
