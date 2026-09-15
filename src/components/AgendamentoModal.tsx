@@ -44,12 +44,14 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   // Aux data
   const [ptas, setPtas] = useState<PTA[]>([]);
   const [areas, setAreas] = useState<AreaEmpresa[]>([]);
+  const [liberadores, setLiberadores] = useState<Colaborador[]>([]);
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [locais, setLocais] = useState<Local[]>([]);
 
   // Form fields
   const [ptaId, setPtaId] = useState('');
   const [areaEmpresaId, setAreaEmpresaId] = useState('');
+  const [liberadorId, setLiberadorId] = useState('');
   const [solicitanteId, setSolicitanteId] = useState('');
 
   // Cascading Local fields
@@ -69,15 +71,17 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
     async function loadFormData() {
       try {
-        const [ptasRes, areasRes, colabsRes, locaisRes] = await Promise.all([
+        const [ptasRes, areasRes, liberadoresRes, colabsRes, locaisRes] = await Promise.all([
           supabase.from('ptas').select('*').order('patrimonio', { ascending: true }),
           supabase.from('areas_empresas').select('*').eq('ativo', true).order('nome', { ascending: true }),
+          supabase.from('colaboradores').select('*').eq('ativo', true).eq('papel', 'liberador').order('nome', { ascending: true }),
           supabase.from('colaboradores').select('*').eq('ativo', true).eq('papel', 'solicitante').order('nome', { ascending: true }),
           supabase.from('locais').select('*').eq('ativo', true).order('ug', { ascending: true }),
         ]);
 
         if (ptasRes.data) setPtas(ptasRes.data);
         if (areasRes.data) setAreas(areasRes.data);
+        if (liberadoresRes.data) setLiberadores(liberadoresRes.data);
         if (colabsRes.data) setColaboradores(colabsRes.data);
         if (locaisRes.data) setLocais(locaisRes.data);
       } catch (err) {
@@ -95,6 +99,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
     if (editingAgendamento) {
       setPtaId(editingAgendamento.pta_id);
       setAreaEmpresaId(editingAgendamento.area_empresa_id);
+      setLiberadorId(editingAgendamento.liberado_por || '');
       setSolicitanteId(editingAgendamento.solicitante_id);
       setLocalId(editingAgendamento.local_id);
       setDataInicio(editingAgendamento.data_inicio ? editingAgendamento.data_inicio.substring(0, 10) : '');
@@ -108,6 +113,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       const today = initialDate || new Date().toISOString().substring(0, 10);
       setPtaId(initialPtaId || '');
       setAreaEmpresaId('');
+      setLiberadorId('');
       setSolicitanteId('');
       setSelectedUG('');
       setLocalId('');
@@ -192,10 +198,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       toast.warning('Selecione uma PTA', 'A escolha da plataforma é obrigatória.');
       return;
     }
-    if (!areaEmpresaId) {
-      toast.warning('Selecione a Área/Empresa', 'Informe a área solicitante.');
-      return;
-    }
+
     if (!solicitanteId) {
       toast.warning('Selecione o Solicitante', 'Informe o colaborador responsável.');
       return;
@@ -223,8 +226,9 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
       const payload = {
         pta_id: ptaId,
-        area_empresa_id: areaEmpresaId,
+        area_empresa_id: areaEmpresaId || null,
         solicitante_id: solicitanteId,
+        liberado_por: liberadorId || null,
         local_id: localId,
         data_inicio: dataInicio,
         data_fim: dataFim,
@@ -347,15 +351,14 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 Liberador *
               </label>
               <select
-                value={areaEmpresaId}
-                onChange={(e) => setAreaEmpresaId(e.target.value)}
-                required
+                value={liberadorId}
+                onChange={(e) => setLiberadorId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
               >
-                <option value="">Selecione a Área ou Terceira...</option>
-                {areas.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.nome} ({a.tipo === 'area_interna' ? 'Interna' : 'Terceira'})
+                <option value="">Selecione o liberador...</option>
+                {liberadores.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.nome}{l.matricula ? ` (${l.matricula})` : ''}
                   </option>
                 ))}
               </select>
