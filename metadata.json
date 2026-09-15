@@ -1,0 +1,6 @@
+{
+  "name": "Gestão de PTAs — AmBev Facilities",
+  "description": "Sistema interno para agendar e controlar o uso de plataformas elevatórias (PTAs) no Centro de Inteligência Facilities da AmBev.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
