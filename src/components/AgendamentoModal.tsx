@@ -368,19 +368,32 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
                 Solicitante *
               </label>
-              <select
-                value={solicitanteId}
-                onChange={(e) => setSolicitanteId(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
-              >
-                <option value="">Selecione o solicitante...</option>
-                {filteredColaboradores.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nome}
-                  </option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  value={solicitanteId}
+                  onChange={(e) => setSolicitanteId(e.target.value)}
+                  required
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
+                >
+                  <option value="">Selecione o solicitante...</option>
+                  {filteredColaboradores.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  title="Cadastrar novo solicitante"
+                  onClick={() => { onClose(); navigate('/cadastros?aba=solicitantes'); }}
+                  className="px-2.5 py-2 bg-[#1B2A4A] hover:bg-[#243656] text-white rounded-lg flex items-center justify-center shrink-0"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                </button>
+              </div>
+              {filteredColaboradores.length === 0 && (
+                <p className="text-[11px] text-amber-700 mt-1">Nenhum solicitante cadastrado. Clique em + para cadastrar.</p>
+              )}
             </div>
           </div>
 
