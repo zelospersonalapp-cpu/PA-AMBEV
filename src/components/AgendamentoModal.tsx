@@ -43,7 +43,7 @@ const ConflitoBusca: React.FC<{
         .from('v_agenda')
         .select('*')
         .eq('pta_id', ptaId)
-        .neq('status', 'cancelado')
+        .not('status', 'in', '("cancelado","concluido")')
         .lte('data_inicio', dataFim)
         .gte('data_fim', dataInicio)
         .limit(1)
