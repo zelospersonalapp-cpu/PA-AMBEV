@@ -541,10 +541,10 @@ export const Agenda: React.FC = () => {
                             setDrawerOpen(true);
                           }}
                           className={`px-1.5 py-0.5 rounded text-[10px] truncate cursor-pointer font-medium border flex items-center justify-between gap-1 ${statusConfig.bg}`}
-                          title={`${item.pta_patrimonio} - ${item.tipo_atividade} (${item.area_nome})`}
+                          title={`${item.solicitante_nome || item.solicitante || 'Solicitante'} — ${item.ug || ''} — ${item.tipo_atividade}`}
                         >
                           <span className="truncate">
-                            {item.pta_patrimonio || 'PTA'}: {item.tipo_atividade}
+                            {item.solicitante_nome || item.solicitante || 'Solicitante'} · {item.ug || item.tipo_atividade}
                           </span>
                           {isPrioritario && <span className="text-[#927300] font-bold">★</span>}
                         </div>
