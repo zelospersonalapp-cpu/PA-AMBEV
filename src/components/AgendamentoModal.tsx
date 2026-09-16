@@ -739,27 +739,28 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           {notifPopupOpen && notifData && (() => {
             const dtRet = new Date(notifData.dataRetirada + 'T00:00:00').toLocaleDateString('pt-BR');
             const dtEnt = new Date(notifData.dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR');
-            const msgTexto = `Olá ${notifData.solicitanteNome}! Seu agendamento da PTA ${notifData.ptaPatrimonio} (${notifData.ptaTipo}) foi confirmado.
+            const msgTexto = `Olá, ${notifData.solicitanteNome}! Seu agendamento da PTA ${notifData.ptaPatrimonio} (${notifData.ptaTipo}) foi confirmado pelo Facilities. ✅
 
-📅 RETIRADA: ${dtRet} | DEVOLUÇÃO: ${dtEnt}
+📅 Retirada: ${dtRet}
+📅 Devolução: ${dtEnt}
 
-✅ INSTRUÇÕES OBRIGATÓRIAS:
+Para que tudo corra bem, siga as instruções abaixo:
 
-1. ANTES DE RETIRAR — Realize o CHECK DE EXTRATO da PTA (verificar nível de bateria, avarias visíveis e funcionamento dos controles).
+1️⃣ ANTES DE RETIRAR: faça o Check de Extrato da PTA — confira nível de bateria, avarias visíveis e o funcionamento dos controles.
 
-2. RETIRADA — Retire a PTA do carregador com cuidado. Transporte somente pelo corredor autorizado e com o equipamento desligado.
+2️⃣ RETIRADA: desconecte do carregador com cuidado e transporte a plataforma somente pelo corredor autorizado, com o equipamento desligado.
 
-3. USO — Utilize apenas no local combinado. Em caso de avaria ou problema técnico, comunique IMEDIATAMENTE ao Facilities pelo ramal/WhatsApp.
+3️⃣ DURANTE O USO: utilize apenas no local combinado. Qualquer avaria ou problema técnico, avise o Facilities IMEDIATAMENTE.
 
-4. DEVOLUÇÃO — Realize novo CHECK DE EXTRATO. Devolva a PTA limpa e sem danos ao local de origem.
+4️⃣ NA DEVOLUÇÃO: faça um novo Check de Extrato e entregue a PTA limpa e sem danos no local de origem.
 
-5. CARREGAMENTO — Ligue a PTA no carregador imediatamente após a devolução. Use SEMPRE o mesmo carregador que estava conectado.
+5️⃣ CARREGAMENTO: logo após devolver, conecte a PTA no MESMO carregador que estava sendo usado.
 
-6. USO NO DIA SEGUINTE — Se a PTA permanecer na área para uso no dia seguinte, posicione-a próxima a uma tomada/carregador disponível antes de encerrar o turno.
+6️⃣ SE FICAR PARA O DIA SEGUINTE: deixe a plataforma carregando no local onde ela ficará, antes de encerrar o turno.
 
-⚠️ Não deixe a PTA descarregada ou sem supervisão fora da área designada.
+⚠️ Nunca deixe a PTA descarregada ou sem supervisão fora da área designada.
 
-Qualquer dúvida, acione o Facilities.`;
+Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
 
             const msgWpp = encodeURIComponent(msgTexto);
             const telContato = notifData.solicitanteContato.replace(/\D/g, '');
