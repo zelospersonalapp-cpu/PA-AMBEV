@@ -260,7 +260,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       console.error('Erro ao salvar agendamento:', err);
       // Explicit UX requirement: handle exclusion_violation 23P01
       const friendlyMessage = formatSupabaseError(err);
-      setConflictWarning(friendlyMessage);
+      toast.error('Conflito ou Erro no Agendamento', friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -446,7 +446,13 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 <input
                   type="date"
                   value={dataInicio}
-                  onChange={(e) => setDataInicio(e.target.value)}
+                  onChange={(e) => {
+                    const novaInicio = e.target.value;
+                    setDataInicio(novaInicio);
+                    if (dataFim && novaInicio > dataFim) {
+                      setDataFim(novaInicio);
+                    }
+                  }}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] bg-white"
                 />
