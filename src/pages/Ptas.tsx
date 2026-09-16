@@ -382,6 +382,15 @@ export const Ptas: React.FC = () => {
                     <Edit2 className="w-3 h-3" />
                     <span>Editar</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExcluirPta(item)}
+                    className="px-3 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>Excluir</span>
+                  </button>
                 </div>
               </div>
             );
