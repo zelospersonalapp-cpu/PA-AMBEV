@@ -71,7 +71,7 @@ export const Avarias: React.FC = () => {
         supabase.from('v_avarias_pta').select('*'),
         supabase.from('ptas').select('*').order('patrimonio', { ascending: true }),
         supabase.from('areas_empresas').select('id, nome').eq('ativo', true).order('nome'),
-        supabase.from('colaboradores').select('*').eq('ativo', true).order('nome', { ascending: true }),
+        supabase.from('colaboradores').select('*').eq('ativo', true).eq('papel', 'liberador').order('nome', { ascending: true }),
         supabase.from('agendamentos').select('*').order('created_at', { ascending: false }).limit(50),
       ]);
 
@@ -601,10 +601,10 @@ export const Avarias: React.FC = () => {
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
                   >
-                    <option value="">Selecione a área / empresa...</option>
-                    {areasEmpresas.map((area) => (
-                      <option key={area.id} value={area.id}>
-                        {area.nome}
+                    <option value="">Selecione o responsável...</option>
+                    {colaboradores.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nome}
                       </option>
                     ))}
                   </select>
@@ -706,7 +706,7 @@ export const Avarias: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
                     <Camera className="w-4 h-4 text-gray-600" />
-                    Fotos da Avaria (Bucket 'ptas')
+                    Fotos da Avaria
                   </label>
                   <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded shadow-xs inline-flex items-center gap-1 transition-colors">
                     <Upload className="w-3 h-3 text-[#F5D800]" />
