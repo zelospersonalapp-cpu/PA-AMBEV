@@ -54,7 +54,7 @@ export async function checkPtaConflict(
 ): Promise<{ hasConflict: boolean; conflictingAgendamentos: Agendamento[] }> {
   try {
     let query = supabase
-      .from('agendamentos')
+      .from('v_agenda')
       .select('*')
       .eq('pta_id', ptaId)
       .neq('status', 'cancelado')
