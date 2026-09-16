@@ -282,6 +282,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
     }
 
     setLoading(true);
+    let abriuPopup = false;
 
     try {
       // Calculate duration in days
