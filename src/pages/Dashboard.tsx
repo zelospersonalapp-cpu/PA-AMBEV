@@ -119,13 +119,13 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner / Welcome */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 animate-card-in">
         <div>
-          <h2 className="text-xl font-bold text-[#1A1A1A] flex items-center gap-2">
-            Painel Geral de Plataformas Elevatórias (PTAs)
+          <h2 className="text-lg sm:text-xl font-bold text-[#1A1A1A] flex items-center gap-2 leading-tight">
+            Painel Geral de PTAs
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-            Monitoramento em tempo real do parque de plataformas, vistorias operacionais e pontualidade Facilities.
+            Monitoramento em tempo real do parque de plataformas e pontualidade Facilities.
           </p>
         </div>
 
@@ -147,10 +147,10 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Cards Grid (Fundo branco #FFFFFF, borda esquerda 4px solid #F5D800) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 stagger">
         {/* Card 1: PTAs por Status */}
-        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
+        <NavLink to="/ptas" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
@@ -160,7 +160,7 @@ export const Dashboard: React.FC = () => {
                 <Truck className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2 text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
+            <div className="mt-2 text-xl sm:text-3xl font-bold text-[#1A1A1A]">
               {ptaDisponiveis}{' '}
               <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                 Disponíveis
@@ -175,13 +175,13 @@ export const Dashboard: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-amber-500" /> {ptaManutencao} manut.
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-rose-500" /> {ptaAvariadas} avariadas
+              <span className="w-2 h-2 rounded-full bg-rose-500" /> {ptaAvariadas} avar.
             </span>
           </div>
-        </div>
+        </NavLink>
 
         {/* Card 2: Agendamentos Hoje / Semana */}
-        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
+        <NavLink to="/agenda" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
@@ -191,21 +191,21 @@ export const Dashboard: React.FC = () => {
                 <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2 text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
+            <div className="mt-2 text-xl sm:text-3xl font-bold text-[#1A1A1A]">
               {agendamentosHoje}{' '}
               <span className="text-xs font-medium text-gray-500">hoje na fábrica</span>
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
-            <span>Esta semana:</span>
+            <span>Semana:</span>
             <span className="font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
-              {agendamentosSemana} agendamento(s)
+              {agendamentosSemana}
             </span>
           </div>
-        </div>
+        </NavLink>
 
         {/* Card 3: Avarias Abertas */}
-        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
+        <NavLink to="/avarias" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
@@ -215,7 +215,7 @@ export const Dashboard: React.FC = () => {
                 <AlertOctagon className="w-4 h-4" />
               </div>
             </div>
-            <div className="mt-2 text-2xl sm:text-3xl font-bold text-[#1A1A1A] flex items-center gap-2">
+            <div className="mt-2 text-xl sm:text-3xl font-bold text-[#1A1A1A] flex items-center gap-2">
               {avariasAbertas}
               {avariasAbertas > 0 ? (
                 <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
@@ -229,12 +229,12 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
-            <NavLink to="/avarias" className="text-amber-800 hover:underline font-semibold flex items-center gap-1">
-              <span>Gerenciar ocorrências</span>
+            <span className="text-amber-800 font-semibold flex items-center gap-1">
+              <span>Gerenciar</span>
               <ArrowRight className="w-3 h-3" />
-            </NavLink>
+            </span>
           </div>
-        </div>
+        </NavLink>
 
       </div>
 
@@ -293,7 +293,7 @@ export const Dashboard: React.FC = () => {
                       setSelectedAgendamentoId(item.id);
                       setDrawerOpen(true);
                     }}
-                    className="py-3.5 px-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer flex items-center justify-between gap-4"
+                    className="tap-card py-3 px-2.5 rounded-lg hover:bg-gray-50 flex items-center justify-between gap-3 sm:gap-4"
                   >
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex flex-col items-center justify-center shrink-0">
