@@ -337,9 +337,9 @@ export const Avarias: React.FC = () => {
 
       {/* Overview Cards by PTA (v_avarias_pta) */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
-        <div className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center justify-between">
-          <span>Histórico Consolidado por Plataforma (v_avarias_pta)</span>
-          <span className="text-gray-400 font-normal">Monitoramento Preventivo</span>
+        <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center justify-between">
+          <span>Histórico por Plataforma</span>
+          <span className="text-gray-300 font-medium normal-case">Monitoramento preventivo</span>
         </div>
 
         {resumoPtas.length === 0 ? (
@@ -350,22 +350,21 @@ export const Avarias: React.FC = () => {
               <div
                 key={r.pta_id}
                 onClick={() => setFilterPta(filterPta === r.pta_id ? '' : r.pta_id)}
-                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                className={`p-3 rounded-lg border cursor-pointer transition-colors flex items-center justify-between gap-2 ${
                   filterPta === r.pta_id
-                    ? 'border-[#F5D800] bg-amber-50 ring-1 ring-[#F5D800]'
-                    : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                    ? 'border-[#F5D800] bg-amber-50'
+                    : 'border-gray-100 bg-gray-50/60 hover:bg-gray-100'
                 }`}
               >
-                <div className="font-bold text-xs text-gray-900 truncate">{r.patrimonio}</div>
-                <div className="text-[10px] text-gray-500 capitalize mb-2">{r.tipo}</div>
-                <div className="flex items-center justify-between pt-2 border-t border-gray-200/70 text-[11px]">
-                  <span className="text-gray-500">Total: <strong className="text-gray-900">{r.total_avarias}</strong></span>
-                  {r.avarias_abertas > 0 ? (
-                    <span className="text-rose-600 font-bold">{r.avarias_abertas} abertas</span>
-                  ) : (
-                    <span className="text-emerald-600 font-bold">OK</span>
-                  )}
+                <div className="min-w-0">
+                  <div className="font-bold text-xs text-gray-900 truncate">{r.patrimonio}</div>
+                  <div className="text-[10px] text-gray-400 capitalize">{r.tipo}</div>
                 </div>
+                {r.avarias_abertas > 0 ? (
+                  <span className="shrink-0 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded-full">{r.avarias_abertas}</span>
+                ) : (
+                  <span className="shrink-0 w-2 h-2 rounded-full bg-emerald-400" title="Sem avarias abertas" />
+                )}
               </div>
             ))}
           </div>
@@ -373,7 +372,7 @@ export const Avarias: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex flex-wrap items-center gap-3">
+      <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-xs flex flex-wrap items-center gap-2.5">
         <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 uppercase tracking-wider">
           <Filter className="w-3.5 h-3.5 text-amber-500" />
           <span>Filtros</span>
@@ -444,7 +443,7 @@ export const Avarias: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
           {filteredAvarias.map((avaria) => {
             const ptaObj = ptas.find((p) => p.id === avaria.pta_id);
             const reporter = areasEmpresas.find((a) => a.id === avaria.reportado_por) || colaboradores.find((c) => c.id === avaria.reportado_por);
@@ -455,7 +454,7 @@ export const Avarias: React.FC = () => {
             return (
               <div
                 key={avaria.id}
-                className="bg-white rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition-colors shadow-xs"
+                className="p-4 hover:bg-gray-50/60 transition-colors"
               >
                 {/* Cabeçalho: PTA + badges à esquerda, relator/data à direita */}
                 <div className="flex items-start justify-between gap-3">
@@ -477,7 +476,7 @@ export const Avarias: React.FC = () => {
                 </div>
 
                 {/* Rodapé: ações alinhadas */}
-                <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-gray-100/80">
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
