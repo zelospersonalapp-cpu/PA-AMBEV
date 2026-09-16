@@ -624,6 +624,21 @@ export const Ptas: React.FC = () => {
         </div>
       )}
 
+      {/* Modal de Agendamento a partir da PTA */}
+      {agendarModalOpen && ptaParaAgendar && (
+        <AgendamentoModal
+          isOpen={agendarModalOpen}
+          initialPtaId={ptaParaAgendar.id}
+          onClose={() => { setAgendarModalOpen(false); setPtaParaAgendar(null); }}
+          onSuccess={() => {
+            setAgendarModalOpen(false);
+            setPtaParaAgendar(null);
+            window.dispatchEvent(new CustomEvent('agendamento-updated'));
+            loadData();
+          }}
+        />
+      )}
+
       {/* History Modal for PTA */}
       {historyPta && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
