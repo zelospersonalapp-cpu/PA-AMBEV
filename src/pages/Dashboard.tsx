@@ -15,7 +15,7 @@ import {
   BatteryCharging,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import type { PTA, VAgenda } from '../types';
+import type { PTA, VAgenda, Agendamento } from '../types';
 import { formatDateBR, getAgendamentoStatusConfig, getPtaStatusConfig } from '../lib/formatters';
 import { DetalhesAgendamentoDrawer } from '../components/DetalhesAgendamentoDrawer';
 import { AgendamentoModal } from '../components/AgendamentoModal';
@@ -36,6 +36,7 @@ export const Dashboard: React.FC = () => {
   const [selectedAgendamentoId, setSelectedAgendamentoId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [novoModalOpen, setNovoModalOpen] = useState(false);
+  const [editingAgendamento, setEditingAgendamento] = useState<Agendamento | null>(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -354,12 +355,17 @@ export const Dashboard: React.FC = () => {
         }}
         agendamentoId={selectedAgendamentoId}
         onUpdated={loadDashboardData}
+        onOpenEdit={(agendamento) => {
+          setEditingAgendamento(agendamento);
+          setNovoModalOpen(true);
+        }}
       />
 
       <AgendamentoModal
         isOpen={novoModalOpen}
-        onClose={() => setNovoModalOpen(false)}
+        onClose={() => { setNovoModalOpen(false); setEditingAgendamento(null); }}
         onSuccess={loadDashboardData}
+        editingAgendamento={editingAgendamento}
       />
     </div>
   );
