@@ -470,7 +470,7 @@ export const Agenda: React.FC = () => {
                         >
                           <div className="flex items-center justify-between gap-1 mb-0.5">
                             <span className="font-bold text-gray-900 truncate">
-                              {item.pta_patrimonio || item.patrimonio || 'PTA'}
+                              {item.solicitante_nome || item.nome_solicitante || 'Solicitante'}
                             </span>
                             {isPrioritario && (
                               <span className="px-1 py-0.2 rounded text-[9px] font-extrabold bg-[#F5D800] text-black border border-amber-400">
@@ -482,10 +482,7 @@ export const Agenda: React.FC = () => {
                             {item.tipo_atividade}
                           </div>
                           <div className="text-[10px] text-gray-500 truncate mt-0.5">
-                            {item.area_nome || item.nome_area || 'Área'}
-                          </div>
-                          <div className="text-[10px] text-gray-500 truncate">
-                            UG: {item.ug || 'Principal'}
+                            {item.ug || 'UG não informada'}
                           </div>
                         </div>
                       );
