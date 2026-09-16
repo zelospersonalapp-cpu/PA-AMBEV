@@ -68,7 +68,7 @@ export const Avarias: React.FC = () => {
   async function loadData() {
     setLoading(true);
     try {
-      const [avariasRes, resumoRes, ptasRes, areasRes, colabsRes, solRes, agRes] = await Promise.all([
+      const [avariasRes, resumoRes, ptasRes, areasRes, colabsRes, agRes, solRes] = await Promise.all([
         supabase.from('avarias').select('*').order('data_avaria', { ascending: false }),
         supabase.from('v_avarias_pta').select('*'),
         supabase.from('ptas').select('*').order('patrimonio', { ascending: true }),
@@ -159,7 +159,7 @@ export const Avarias: React.FC = () => {
         severidade,
         tipo_anomalia: tipoAnomalia,
         status: 'aberta',
-        fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
+        fotos: uploadedUrls.length > 0 ? uploadedUrls : [],
         observacoes: observacoes.trim() || null,
       };
 
