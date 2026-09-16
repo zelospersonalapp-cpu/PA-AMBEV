@@ -69,6 +69,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const [descricao, setDescricao] = useState('');
   const [prioridade, setPrioridade] = useState<'normal' | 'prioritario'>('normal');
   const [observacoes, setObservacoes] = useState('');
+  const [repeticao, setRepeticao] = useState<'nenhuma' | 'diaria' | 'semanal' | 'quinzenal' | 'mensal'>('nenhuma');
 
   // Load auxiliary records on mount or modal open
   useEffect(() => {
@@ -127,6 +128,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setDescricao('');
       setPrioridade('normal');
       setObservacoes('');
+    setRepeticao('nenhuma');
       setConflictWarning(null);
     }
   }, [isOpen, editingAgendamento, initialDate, initialPtaId]);
@@ -256,6 +258,30 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
         if (error) throw error;
         toast.success('Agendamento Criado', 'Plataforma reservada com sucesso.');
+
+        // Gerar repetições se selecionado
+        if (repeticao !== 'nenhuma') {
+          const intervaloDias = repeticao === 'diaria' ? 1 : repeticao === 'semanal' ? 7 : repeticao === 'quinzenal' ? 14 : 30;
+          const maxRep = repeticao === 'diaria' ? 30 : repeticao === 'mensal' ? 12 : 26;
+          const duracaoDias = Math.max(1, Math.round((new Date(dataFim).getTime() - new Date(dataInicio).getTime()) / 86400000));
+          const extras: any[] = [];
+          for (let i = 1; i <= maxRep; i++) {
+            const ini = new Date(dataInicio);
+            ini.setDate(ini.getDate() + intervaloDias * i);
+            const fim = new Date(ini);
+            fim.setDate(fim.getDate() + duracaoDias);
+            extras.push({
+              ...payload,
+              status: 'agendado',
+              origem: 'recorrente',
+              data_inicio: ini.toISOString().substring(0, 10),
+              data_fim: fim.toISOString().substring(0, 10),
+            });
+          }
+          if (extras.length > 0) {
+            await supabase.from('agendamentos').insert(extras);
+          }
+        }
       }
 
       onSuccess();
@@ -702,6 +728,43 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* Repetição */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3.5">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+              🔁 Repetir Agendamento
+            </label>
+            <div className="grid grid-cols-5 gap-1.5">
+              {([
+                { val: 'nenhuma', label: 'Não repetir' },
+                { val: 'diaria', label: 'Diário' },
+                { val: 'semanal', label: 'Semanal' },
+                { val: 'quinzenal', label: 'Quinzenal' },
+                { val: 'mensal', label: 'Mensal' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.val}
+                  type="button"
+                  onClick={() => setRepeticao(opt.val)}
+                  className={`py-1.5 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all ${
+                    repeticao === opt.val
+                      ? 'bg-[#1B2A4A] text-white border-[#1B2A4A]'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-[#1B2A4A]'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {repeticao !== 'nenhuma' && (
+              <p className="text-[11px] text-blue-700 mt-2">
+                {repeticao === 'diaria' && '⚠️ Serão criados 30 agendamentos diários a partir desta data.'}
+                {repeticao === 'semanal' && '⚠️ Serão criados 26 agendamentos semanais (≈ 6 meses).'}
+                {repeticao === 'quinzenal' && '⚠️ Serão criados 26 agendamentos quinzenais (≈ 1 ano).'}
+                {repeticao === 'mensal' && '⚠️ Serão criados 12 agendamentos mensais (1 ano).'}
+              </p>
+            )}
+          </div>
 
           {/* Actions */}
           <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
