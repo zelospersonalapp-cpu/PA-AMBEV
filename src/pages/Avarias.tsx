@@ -46,6 +46,8 @@ export const Avarias: React.FC = () => {
   const [ptaId, setPtaId] = useState('');
   const [agendamentoId, setAgendamentoId] = useState('');
   const [reportadoPor, setReportadoPor] = useState('');
+  const [operadorId, setOperadorId] = useState('');
+  const [solicitantes, setSolicitantes] = useState<Colaborador[]>([]);
   const [dataAvaria, setDataAvaria] = useState(new Date().toISOString().substring(0, 10));
   const [descricao, setDescricao] = useState('');
   const [severidade, setSeveridade] = useState<SeveridadeAvaria>('media');
@@ -66,12 +68,13 @@ export const Avarias: React.FC = () => {
   async function loadData() {
     setLoading(true);
     try {
-      const [avariasRes, resumoRes, ptasRes, areasRes, colabsRes, agRes] = await Promise.all([
+      const [avariasRes, resumoRes, ptasRes, areasRes, colabsRes, agRes, solRes] = await Promise.all([
         supabase.from('avarias').select('*').order('data_avaria', { ascending: false }),
         supabase.from('v_avarias_pta').select('*'),
         supabase.from('ptas').select('*').order('patrimonio', { ascending: true }),
         supabase.from('areas_empresas').select('id, nome').eq('ativo', true).order('nome'),
         supabase.from('colaboradores').select('*').eq('ativo', true).eq('papel', 'liberador').order('nome', { ascending: true }),
+        supabase.from('colaboradores').select('*').eq('ativo', true).eq('papel', 'solicitante').order('nome', { ascending: true }),
         supabase.from('agendamentos').select('*').order('created_at', { ascending: false }).limit(50),
       ]);
 
@@ -80,6 +83,7 @@ export const Avarias: React.FC = () => {
       if (ptasRes.data) setPtas(ptasRes.data);
       if (areasRes.data) setAreasEmpresas(areasRes.data);
       if (colabsRes.data) setColaboradores(colabsRes.data);
+      if (solRes?.data) setSolicitantes(solRes.data);
       if (agRes.data) setAgendamentos(agRes.data);
     } catch (err: any) {
       console.error('Erro ao carregar avarias:', err);
@@ -148,14 +152,14 @@ export const Avarias: React.FC = () => {
       // 2. Insert avaria
       const payload: any = {
         pta_id: ptaId,
-        agendamento_id: agendamentoId || null,
+        operador_id: operadorId || null,
         reportado_por: reportadoPor,
         data_avaria: dataAvaria,
         descricao: descricao.trim(),
         severidade,
         tipo_anomalia: tipoAnomalia,
         status: 'aberta',
-        fotos: uploadedUrls.length > 0 ? uploadedUrls : [],
+        fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
         observacoes: observacoes.trim() || null,
       };
 
@@ -605,6 +609,24 @@ export const Avarias: React.FC = () => {
                     {colaboradores.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                    Operador que estava usando *
+                  </label>
+                  <select
+                    value={operadorId}
+                    onChange={(e) => setOperadorId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                  >
+                    <option value="">Selecione o operador...</option>
+                    {solicitantes.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nome}
                       </option>
                     ))}
                   </select>
