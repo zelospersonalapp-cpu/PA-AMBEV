@@ -70,10 +70,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const [prioridade, setPrioridade] = useState<'normal' | 'prioritario'>('normal');
   const [observacoes, setObservacoes] = useState('');
   const [repeticao, setRepeticao] = useState<'nenhuma' | 'diaria' | 'semanal' | 'quinzenal' | 'mensal'>('nenhuma');
-  const [repeticaoPopupOpen, setRepeticaoPopupOpen] = useState(false);
-  const [repeticaoPendente, setRepeticaoPendente] = useState<'diaria' | 'semanal' | 'quinzenal' | 'mensal' | null>(null);
-  const [repeticaoFim, setRepeticaoFim] = useState('');
-  const [repeticaoIndefinida, setRepeticaoIndefinida] = useState(false);
 
   // Load auxiliary records on mount or modal open
   useEffect(() => {
@@ -133,10 +129,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setPrioridade('normal');
       setObservacoes('');
     setRepeticao('nenhuma');
-    setRepeticaoPopupOpen(false);
-    setRepeticaoPendente(null);
-    setRepeticaoFim('');
-    setRepeticaoIndefinida(false);
       setConflictWarning(null);
     }
   }, [isOpen, editingAgendamento, initialDate, initialPtaId]);
@@ -270,14 +262,12 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         // Gerar repetições se selecionado
         if (repeticao !== 'nenhuma') {
           const intervaloDias = repeticao === 'diaria' ? 1 : repeticao === 'semanal' ? 7 : repeticao === 'quinzenal' ? 14 : 30;
-          const maxRep = repeticaoIndefinida ? 104 : repeticao === 'diaria' ? 365 : repeticao === 'mensal' ? 24 : 52;
-          const limiteData = !repeticaoIndefinida && repeticaoFim ? new Date(repeticaoFim + 'T23:59:59') : null;
+          const maxRep = repeticao === 'diaria' ? 30 : repeticao === 'mensal' ? 12 : 26;
           const duracaoDias = Math.max(1, Math.round((new Date(dataFim).getTime() - new Date(dataInicio).getTime()) / 86400000));
           const extras: any[] = [];
           for (let i = 1; i <= maxRep; i++) {
             const ini = new Date(dataInicio);
             ini.setDate(ini.getDate() + intervaloDias * i);
-            if (limiteData && ini > limiteData) break;
             const fim = new Date(ini);
             fim.setDate(fim.getDate() + duracaoDias);
             extras.push({
@@ -376,7 +366,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 border-t border-gray-100 pt-3">
-                  Deseja cancelar este agendamento para usar a PTA nas suas datas? O agendamento acima será marcado como cancelado.
+                  Apenas este agendamento específico será cancelado. Os demais agendamentos recorrentes da mesma série continuam ativos.
                 </p>
                 <div className="flex gap-2.5">
                   <button
@@ -778,16 +768,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 <button
                   key={opt.val}
                   type="button"
-                  onClick={() => {
-                    if (opt.val === 'nenhuma') {
-                      setRepeticao('nenhuma');
-                      setRepeticaoFim('');
-                      setRepeticaoIndefinida(false);
-                    } else {
-                      setRepeticaoPendente(opt.val);
-                      setRepeticaoPopupOpen(true);
-                    }
-                  }}
+                  onClick={() => setRepeticao(opt.val)}
                   className={`py-1.5 px-1 text-[11px] font-semibold rounded-lg border text-center transition-all ${
                     repeticao === opt.val
                       ? 'bg-[#1B2A4A] text-white border-[#1B2A4A]'
@@ -800,8 +781,10 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             </div>
             {repeticao !== 'nenhuma' && (
               <p className="text-[11px] text-blue-700 mt-2">
-                ✅ Repetição <strong>{repeticao}</strong> configurada
-                {repeticaoIndefinida ? ' — sem data de término (indefinida)' : repeticaoFim ? ` — até ${new Date(repeticaoFim + 'T12:00:00').toLocaleDateString('pt-BR')}` : ''}.
+                {repeticao === 'diaria' && '⚠️ Serão criados 30 agendamentos diários a partir desta data.'}
+                {repeticao === 'semanal' && '⚠️ Serão criados 26 agendamentos semanais (≈ 6 meses).'}
+                {repeticao === 'quinzenal' && '⚠️ Serão criados 26 agendamentos quinzenais (≈ 1 ano).'}
+                {repeticao === 'mensal' && '⚠️ Serão criados 12 agendamentos mensais (1 ano).'}
               </p>
             )}
           </div>
@@ -835,85 +818,6 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           </div>
         </form>
       </div>
-      {/* Popup de configuração de recorrência */}
-      {repeticaoPopupOpen && repeticaoPendente && (
-        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full border border-gray-200 overflow-hidden">
-            <div className="bg-[#1B2A4A] px-5 py-3.5 flex items-center gap-2">
-              <span className="text-lg">🔁</span>
-              <span className="text-sm font-bold text-white capitalize">Repetição {repeticaoPendente}</span>
-            </div>
-            <div className="p-5 space-y-4">
-              <p className="text-sm text-gray-600">
-                Deseja definir uma data de término para esta recorrência?
-              </p>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <input
-                    type="radio"
-                    name="repeticao_fim"
-                    checked={!repeticaoIndefinida}
-                    onChange={() => setRepeticaoIndefinida(false)}
-                    className="w-4 h-4 text-[#1B2A4A]"
-                  />
-                  <div>
-                    <div className="text-sm font-semibold text-gray-800">Com data de término</div>
-                    <div className="text-xs text-gray-500">Repetir até uma data específica</div>
-                  </div>
-                </label>
-
-                {!repeticaoIndefinida && (
-                  <input
-                    type="date"
-                    value={repeticaoFim}
-                    min={dataInicio}
-                    onChange={(e) => setRepeticaoFim(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white ml-6"
-                  />
-                )}
-
-                <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <input
-                    type="radio"
-                    name="repeticao_fim"
-                    checked={repeticaoIndefinida}
-                    onChange={() => { setRepeticaoIndefinida(true); setRepeticaoFim(''); }}
-                    className="w-4 h-4 text-[#1B2A4A]"
-                  />
-                  <div>
-                    <div className="text-sm font-semibold text-gray-800">Sem data de término</div>
-                    <div className="text-xs text-gray-500">Repetir indefinidamente (até 2 anos)</div>
-                  </div>
-                </label>
-              </div>
-
-              <div className="flex gap-2.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setRepeticaoPopupOpen(false); setRepeticaoPendente(null); }}
-                  className="flex-1 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  disabled={!repeticaoIndefinida && !repeticaoFim}
-                  onClick={() => {
-                    if (repeticaoPendente) setRepeticao(repeticaoPendente);
-                    setRepeticaoPopupOpen(false);
-                    setRepeticaoPendente(null);
-                  }}
-                  className="flex-1 py-2 text-sm font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] disabled:opacity-40 rounded-lg transition-colors"
-                >
-                  Confirmar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };
