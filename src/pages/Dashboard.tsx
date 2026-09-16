@@ -126,7 +126,7 @@ export const Dashboard: React.FC = () => {
             Painel Geral de PTAs
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-            Monitoramento em tempo real do parque de plataformas e pontualidade Facilities.
+            Visão geral do parque de plataformas e desempenho operacional.
           </p>
         </div>
 
