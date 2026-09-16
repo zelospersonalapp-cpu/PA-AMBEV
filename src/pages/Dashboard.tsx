@@ -256,6 +256,29 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Card 4: Taxa de Confiabilidade / SLA */}
+        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                Pontualidade SLA
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
+                <Award className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2 text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
+              {taxaPontualidade}%{' '}
+              <span className="text-xs font-semibold text-gray-500">score médio</span>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
+            <span>Meta Facilities:</span>
+            <span className="font-bold text-emerald-700">&gt; 90%</span>
+          </div>
+        </div>
+      </div>
+
       {/* Main Section: Próximas Atividades */}
       <div className="grid grid-cols-1 gap-6">
         {/* Left 2 Cols: Próximas Atividades (7 dias de v_agenda) */}
