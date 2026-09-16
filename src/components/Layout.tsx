@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -13,8 +13,11 @@ import {
   PlusCircle,
   Building2,
   CheckCircle2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { AgendamentoModal } from './AgendamentoModal';
+import { feedback, isSoundMuted, setSoundMuted } from '../lib/feedback';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -24,6 +27,27 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [novoModalOpen, setNovoModalOpen] = useState(false);
+  const [soundMuted, setSoundMutedState] = useState<boolean>(() => isSoundMuted());
+
+  // Som + vibração global ao tocar em qualquer elemento interativo
+  useEffect(() => {
+    const handler = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (target.closest('button, a, [role="button"], .tap-card')) {
+        feedback('tap');
+      }
+    };
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, []);
+
+  const toggleSound = () => {
+    const next = !soundMuted;
+    setSoundMuted(next);
+    setSoundMutedState(next);
+    if (!next) feedback('success');
+  };
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -71,7 +95,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
             </div>
 
             {/* Header Right Action */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={toggleSound}
+                aria-label={soundMuted ? 'Ativar sons' : 'Desativar sons'}
+                title={soundMuted ? 'Ativar sons' : 'Desativar sons'}
+                className="p-2 rounded-md text-[#CBD5E1] hover:text-white hover:bg-[#1E3461] transition-colors"
+              >
+                {soundMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -84,7 +117,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4 text-white" />
-                <span>Novo Agendamento</span>
+                <span className="hidden sm:inline">Novo Agendamento</span>
+                <span className="sm:hidden">Agendar</span>
               </button>
             </div>
           </div>
@@ -148,10 +182,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
         {mobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 flex">
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#1B2A4A] shadow-xl text-white border-r border-[#152238]">
+            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#1B2A4A] shadow-2xl text-white border-r border-[#152238] animate-drawer-in">
               {/* Cabeçalho do sidebar mobile: #152238 */}
               <div className="p-4 border-b border-[#152238] flex items-center justify-between bg-[#152238]">
                 <div className="font-bold text-sm text-white flex items-center gap-2">
