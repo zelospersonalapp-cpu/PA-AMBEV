@@ -17,6 +17,7 @@ import {
   Trash2,
   ArrowRight,
   Battery,
+  Share2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from './Toast';
@@ -53,6 +54,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
   const [liberadoPor, setLiberadoPor] = useState('');
   const [retiradaModalOpen, setRetiradaModalOpen] = useState(false);
   const [devolucaoModalOpen, setDevolucaoModalOpen] = useState(false);
+  const [sharePopupOpen, setSharePopupOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !agendamentoId) return;
@@ -215,6 +217,16 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                   <span className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
                   {statusConfig.label}
                 </span>
+              )}
+              {agendamento && (
+                <button
+                  onClick={() => setSharePopupOpen(true)}
+                  title="Compartilhar com solicitante"
+                  className="p-1.5 text-emerald-700 hover:text-white bg-emerald-50 hover:bg-emerald-600 rounded-md transition-colors flex items-center gap-1 px-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span className="text-xs font-semibold hidden sm:inline">Compartilhar</span>
+                </button>
               )}
               {onOpenEdit &&
                 agendamento &&
@@ -640,6 +652,62 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
           </div>
         </div>
       </div>
+
+      {/* Popup Compartilhar com Solicitante */}
+      {sharePopupOpen && agendamento && (() => {
+        const patr = vAgendaItem?.pta_patrimonio || vAgendaItem?.patrimonio || pta?.patrimonio || 'PTA';
+        const tipoPta = (pta?.tipo || vAgendaItem?.pta_tipo) === 'articulada' ? 'Articulada' : 'Tesourinha';
+        const solNome = vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || 'Solicitante';
+        const solObj = colaboradores.find((c) => c.id === agendamento.solicitante_id);
+        const solContato = solObj?.contato || '';
+        const dtRet = formatDateBR(agendamento.data_inicio);
+        const dtEnt = formatDateBR(agendamento.data_fim);
+        const msgTexto = `Olá, ${solNome}! Seu agendamento da PTA ${patr} (${tipoPta}) foi confirmado pelo Facilities. ✅\n\n📅 Retirada: ${dtRet}\n📅 Devolução: ${dtEnt}\n\nPara que tudo corra bem, siga as instruções abaixo:\n\n1️⃣ ANTES DE RETIRAR: faça o Check de Extrato da PTA — confira nível de bateria, avarias visíveis e o funcionamento dos controles.\n\n2️⃣ RETIRADA: desconecte do carregador com cuidado e transite somente por locais autorizados.\n\n3️⃣ DURANTE O USO: utilize apenas no local combinado. Qualquer avaria ou problema técnico, avise o Facilities IMEDIATAMENTE.\n\n4️⃣ NA DEVOLUÇÃO: faça um novo Check de Extrato e entregue a PTA limpa e sem danos no local de origem.\n\n5️⃣ CARREGAMENTO: logo após devolver, conecte a PTA no MESMO carregador que estava sendo usado.\n\n6️⃣ SE FICAR PARA O DIA SEGUINTE: deixe a plataforma carregando no local onde ela ficará, antes de encerrar o turno.\n\n🚫 IMPORTANTE: em hipótese alguma a PTA pode deixar de ser devolvida no mesmo dia, salvo quando previamente alinhado com o Facilities.\n\n⚠️ Nunca deixe a PTA descarregada ou sem supervisão fora da área designada.\n\nQualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
+        const msgWpp = encodeURIComponent(msgTexto);
+        const tel = solContato.replace(/\D/g, '');
+        const wppUrl = tel ? `https://wa.me/55${tel}?text=${msgWpp}` : `https://wa.me/?text=${msgWpp}`;
+        const mailUrl = `mailto:?subject=${encodeURIComponent(`Agendamento PTA ${patr} — Retirada em ${dtRet}`)}&body=${encodeURIComponent(msgTexto)}`;
+        return (
+          <div className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
+              <div className="bg-[#1B2A4A] px-5 py-4 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-white text-sm">Compartilhar Agendamento</h3>
+                  <p className="text-blue-200 text-[11px] mt-0.5">Para: {solNome}</p>
+                </div>
+                <button onClick={() => setSharePopupOpen(false)} className="text-gray-300 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+                  <p>Retirada: <strong>{dtRet}</strong> | Devolução: <strong>{dtEnt}</strong></p>
+                  <p className="mt-1">Envie as instruções de uso, carregamento e devolução para o solicitante.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <a href={wppUrl} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-bold text-sm rounded-lg transition-colors">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 2.112.549 4.094 1.508 5.814L0 24l6.336-1.482A11.945 11.945 0 0012 24c6.626 0 12-5.373 12-12S18.626 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.37l-.36-.214-3.724.977.994-3.63-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+                    WhatsApp
+                  </a>
+                  <a href={mailUrl}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-sm rounded-lg transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    E-mail
+                  </a>
+                </div>
+                {!solContato && (
+                  <p className="text-[11px] text-amber-600">O solicitante não tem contato cadastrado — o WhatsApp abrirá sem número, mas você pode escolher o contato manualmente.</p>
+                )}
+                <button onClick={() => setSharePopupOpen(false)}
+                  className="w-full py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Dialog to Liberar */}
       {liberarDialogOpen && (
