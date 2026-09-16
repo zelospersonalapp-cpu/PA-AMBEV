@@ -152,8 +152,8 @@ export const Dashboard: React.FC = () => {
         {/* Card 1: PTAs por Status */}
         <NavLink to="/ptas" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 leading-tight min-h-[2rem] flex items-center">
                 Parque de PTAs ({ptas.length})
               </span>
               <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
@@ -183,8 +183,8 @@ export const Dashboard: React.FC = () => {
         {/* Card 2: Agendamentos Hoje / Semana */}
         <NavLink to="/agenda" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 leading-tight min-h-[2rem] flex items-center">
                 Reservas em Operação
               </span>
               <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
@@ -207,8 +207,8 @@ export const Dashboard: React.FC = () => {
         {/* Card 3: Avarias Abertas */}
         <NavLink to="/avarias" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 leading-tight min-h-[2rem] flex items-center">
                 Manutenção & Avarias
               </span>
               <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
