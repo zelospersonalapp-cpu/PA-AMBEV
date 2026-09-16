@@ -748,7 +748,7 @@ Para que tudo corra bem, siga as instruções abaixo:
 
 1️⃣ ANTES DE RETIRAR: faça o Check de Extrato da PTA — confira nível de bateria, avarias visíveis e o funcionamento dos controles.
 
-2️⃣ RETIRADA: desconecte do carregador com cuidado e transporte a plataforma somente pelo corredor autorizado, com o equipamento desligado.
+2️⃣ RETIRADA: desconecte do carregador com cuidado e transite somente por locais autorizados.
 
 3️⃣ DURANTE O USO: utilize apenas no local combinado. Qualquer avaria ou problema técnico, avise o Facilities IMEDIATAMENTE.
 
@@ -795,7 +795,7 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                     <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 text-[11px] text-gray-700 space-y-1.5 max-h-48 overflow-y-auto leading-relaxed">
                       <p className="font-bold text-gray-900 text-xs">📨 Resumo da mensagem que será enviada:</p>
                       <p>1️⃣ <strong>Check de Extrato</strong> antes de retirar (bateria, avarias, controles)</p>
-                      <p>2️⃣ Desconectar do carregador com cuidado e transportar pelo corredor autorizado</p>
+                      <p>2️⃣ Desconectar do carregador com cuidado e transitar somente por locais autorizados</p>
                       <p>3️⃣ Usar somente no <strong>local combinado</strong></p>
                       <p>4️⃣ Avisar o Facilities <strong>imediatamente</strong> em caso de avaria ou problema técnico</p>
                       <p>5️⃣ Novo <strong>Check de Extrato</strong> na devolução</p>
