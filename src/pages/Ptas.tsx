@@ -4,6 +4,7 @@ import {
   PlusCircle,
   Edit2,
   Battery,
+  CalendarPlus,
   AlertTriangle,
   CheckCircle,
   X,
@@ -17,6 +18,7 @@ import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
 import type { PTA, PtaTipo, PtaStatus, VAvariasPTA } from '../types';
 import { getPtaStatusConfig } from '../lib/formatters';
+import { AgendamentoModal } from '../components/AgendamentoModal';
 
 export const Ptas: React.FC = () => {
   const toast = useToast();
@@ -45,6 +47,8 @@ export const Ptas: React.FC = () => {
   const [observacoes, setObservacoes] = useState('');
 
   // History modal for specific PTA
+  const [agendarModalOpen, setAgendarModalOpen] = useState(false);
+  const [ptaParaAgendar, setPtaParaAgendar] = useState<PTA | null>(null);
   const [historyPta, setHistoryPta] = useState<PTA | null>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -375,8 +379,25 @@ export const Ptas: React.FC = () => {
                   )}
                 </div>
 
+                {/* Botão Agendar esta PTA */}
+                {(item.status === 'avariada' || item.status === 'em_manutencao') ? (
+                  <div className="mt-4 w-full py-2 rounded-lg bg-gray-100 border border-gray-200 text-center text-xs font-semibold text-gray-400 flex items-center justify-center gap-1.5">
+                    <CalendarPlus className="w-4 h-4" />
+                    Indisponível para agendamento
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => { setPtaParaAgendar(item); setAgendarModalOpen(true); }}
+                    className="mt-4 w-full py-2.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-sm shadow-xs transition-colors flex items-center justify-center gap-2"
+                  >
+                    <CalendarPlus className="w-4 h-4" />
+                    Agendar esta PTA
+                  </button>
+                )}
+
                 {/* Card Actions */}
-                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => openHistory(item)}
