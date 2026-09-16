@@ -331,6 +331,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           solicitanteContato: solSel?.contato || '',
         });
         setNotifPopupOpen(true);
+        abriuPopup = true;
 
         // Gerar repetições se selecionado
         if (repeticao !== 'nenhuma') {
@@ -357,7 +358,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         }
       }
 
-      if (!notifPopupOpen) { onSuccess(); onClose(); }
+      if (!abriuPopup) { onSuccess(); onClose(); }
     } catch (err: any) {
       console.error('Erro ao salvar agendamento:', err);
       // Explicit UX requirement: handle exclusion_violation 23P01
