@@ -233,10 +233,10 @@ export const Agenda: React.FC = () => {
               setSelectedDateForNew(undefined);
               setNovoModalOpen(true);
             }}
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
+            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors whitespace-nowrap"
           >
-            <PlusCircle className="w-4 h-4 text-white" />
-            <span>+ Novo Agendamento</span>
+            <PlusCircle className="w-4 h-4 text-white shrink-0" />
+            <span>Novo Agendamento</span>
           </button>
           <button
             onClick={loadAgenda}
