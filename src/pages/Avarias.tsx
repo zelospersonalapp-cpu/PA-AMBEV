@@ -155,7 +155,7 @@ export const Avarias: React.FC = () => {
         severidade,
         tipo_anomalia: tipoAnomalia,
         status: 'aberta',
-        fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
+        fotos: uploadedUrls.length > 0 ? uploadedUrls : [],
         observacoes: observacoes.trim() || null,
       };
 
@@ -697,7 +697,6 @@ export const Avarias: React.FC = () => {
                     <input
                       type="file"
                       accept="image/*"
-                  capture="environment"
                       multiple
                       onChange={handlePhotoSelect}
                       className="hidden"
