@@ -216,6 +216,19 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                   {statusConfig.label}
                 </span>
               )}
+              {onOpenEdit &&
+                agendamento &&
+                agendamento.status !== 'concluido' &&
+                agendamento.status !== 'cancelado' && (
+                  <button
+                    onClick={() => { onOpenEdit(agendamento); onClose(); }}
+                    title="Editar agendamento"
+                    className="p-1.5 text-[#1B2A4A] hover:text-white bg-gray-100 hover:bg-[#1B2A4A] rounded-md transition-colors flex items-center gap-1 px-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    <span className="text-xs font-semibold hidden sm:inline">Editar</span>
+                  </button>
+                )}
               <button
                 onClick={onClose}
                 className="p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200"
@@ -617,7 +630,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                           className="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-1.5"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
-                          <span>Editar Dados</span>
+                          <span>Editar Agendamento</span>
                         </button>
                       )}
                   </div>
