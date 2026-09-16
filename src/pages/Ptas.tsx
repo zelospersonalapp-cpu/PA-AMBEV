@@ -148,6 +148,18 @@ export const Ptas: React.FC = () => {
     }
   };
 
+  const handleExcluirPta = async (pta: PTA) => {
+    if (!window.confirm(`Excluir PTA ${pta.patrimonio}? Esta ação não pode ser desfeita.`)) return;
+    try {
+      const { error } = await supabase.from('ptas').delete().eq('id', pta.id);
+      if (error) throw error;
+      toast.success('PTA Excluída', `PTA ${pta.patrimonio} removida com sucesso.`);
+      loadData();
+    } catch (err: any) {
+      toast.error('Erro ao excluir', err.message);
+    }
+  };
+
   const openHistory = async (pta: PTA) => {
     setHistoryPta(pta);
     setHistoryLoading(true);
