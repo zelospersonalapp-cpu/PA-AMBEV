@@ -429,95 +429,53 @@ export const Avarias: React.FC = () => {
             return (
               <div
                 key={avaria.id}
-                className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs space-y-3 hover:border-amber-400 transition-all"
+                className="bg-white rounded-lg border border-gray-200 px-4 py-3 shadow-xs hover:border-amber-300 transition-all"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-                      <Truck className="w-4 h-4 text-gray-500" />
-                      {ptaObj?.patrimonio || 'PTA'} ({ptaObj?.modelo || 'Plataforma'})
+                {/* Linha 1: PTA + badges + data */}
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-bold text-gray-900 flex items-center gap-1">
+                      <Truck className="w-3.5 h-3.5 text-gray-400" />
+                      {ptaObj?.patrimonio || 'PTA'}
                     </span>
-
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold border ${severidadeConf.badge}`}
-                    >
-                      Severidade: {severidadeConf.label}
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${severidadeConf.badge}`}>
+                      {severidadeConf.label}
                     </span>
-
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold border ${statusConf.badge}`}
-                    >
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${statusConf.badge}`}>
                       {statusConf.label}
                     </span>
-
                     {avaria.tipo_anomalia && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#1B2A4A] text-[#93C5FD] border border-[#243656]">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#1B2A4A] text-[#93C5FD] border border-[#243656]">
                         {avaria.tipo_anomalia}
                       </span>
                     )}
                   </div>
+                  <span className="text-[10px] text-gray-400">{formatDateBR(avaria.data_avaria)}</span>
+                </div>
 
-                  <span className="text-xs text-gray-400 font-medium">
-                    Reportado em: {formatDateBR(avaria.data_avaria)}
+                {/* Linha 2: Descrição + reportado por inline */}
+                <div className="flex items-start justify-between gap-4 text-xs mb-2">
+                  <p className="text-gray-700 leading-relaxed flex-1">{avaria.descricao}</p>
+                  <span className="text-gray-500 whitespace-nowrap">
+                    Por: <strong className="text-gray-800">{reporter?.nome || '—'}</strong>
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                  <div className="md:col-span-2 space-y-1">
-                    <div className="font-semibold text-gray-700">Descrição do Problema:</div>
-                    <p className="text-gray-900 bg-gray-50 p-2.5 rounded-lg border border-gray-200 leading-relaxed">
-                      {avaria.descricao}
-                    </p>
-
-                    {/* Photos list */}
-                    {avaria.fotos && avaria.fotos.length > 0 && (
-                      <div className="pt-2">
-                        <div className="text-[11px] font-semibold text-gray-500 mb-1">
-                          Fotos do Laudo Técnico:
-                        </div>
-                        <div className="flex gap-2">
-                          {avaria.fotos.map((url, i) => (
-                            <a
-                              key={i}
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="w-14 h-14 rounded border border-gray-300 overflow-hidden block hover:opacity-80 transition-opacity"
-                            >
-                              <img
-                                src={url}
-                                alt="Foto Avaria"
-                                className="w-full h-full object-cover"
-                                referrerPolicy="no-referrer"
-                              />
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                {/* Fotos em linha */}
+                {avaria.fotos && avaria.fotos.length > 0 && (
+                  <div className="flex gap-1.5 mb-2">
+                    {avaria.fotos.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noreferrer"
+                        className="w-10 h-10 rounded border border-gray-200 overflow-hidden block hover:opacity-80">
+                        <img src={url} alt="Foto" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      </a>
+                    ))}
                   </div>
+                )}
 
-                  <div className="space-y-2 bg-gray-50/60 p-3 rounded-lg border border-gray-200 text-xs">
-                    <div>
-                      <span className="text-gray-500 block">Reportado por:</span>
-                      <strong className="text-gray-900">{reporter?.nome || 'Operador/Técnico'}</strong>
-                    </div>
-
-                    {avaria.custo_estimado && (
-                      <div>
-                        <span className="text-gray-500 block">Custo Estimado de Reparo:</span>
-                        <strong className="text-emerald-700">
-                          R$ {Number(avaria.custo_estimado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </strong>
-                      </div>
-                    )}
-
-                    {avaria.status === 'resolvida' && (
-                      <div className="pt-2 border-t border-gray-200 text-emerald-800">
-                        <span className="block text-[11px]">Resolvido por: <strong>{resolver?.nome || 'Facilities'}</strong></span>
-                        <span className="text-[10px] text-gray-500">
-                          {formatDateTimeBR(avaria.resolvido_em)}
-                        </span>
+                {avaria.status === 'resolvida' && (
+                  <div className="text-[10px] text-emerald-700 mb-1">
+                    Resolvido por <strong>{resolver?.nome || 'Facilities'}</strong> · {formatDateTimeBR(avaria.resolvido_em)}
                       </div>
                     )}
                   </div>
