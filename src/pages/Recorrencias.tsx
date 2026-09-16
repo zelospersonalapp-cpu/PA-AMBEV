@@ -562,8 +562,10 @@ export const Recorrencias: React.FC = () => {
                     onChange={(e) => setFrequencia(e.target.value as any)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium"
                   >
+                    <option value="diaria">Diária</option>
                     <option value="semanal">Semanal</option>
                     <option value="quinzenal">Quinzenal</option>
+                    <option value="mensal">Mensal</option>
                   </select>
                 </div>
               </div>
