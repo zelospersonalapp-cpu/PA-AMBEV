@@ -44,6 +44,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const [checkingConflict, setCheckingConflict] = useState(false);
   const [conflictWarning, setConflictWarning] = useState<string | null>(null);
   const [conflictAgendamento, setConflictAgendamento] = useState<any | null>(null);
+  const [erroPopup, setErroPopup] = useState<string | null>(null);
   const [cancelingConflict, setCancelingConflict] = useState(false);
 
   // Aux data
@@ -129,6 +130,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setPrioridade('normal');
       setObservacoes('');
     setRepeticao('nenhuma');
+    setErroPopup(null);
       setConflictWarning(null);
     }
   }, [isOpen, editingAgendamento, initialDate, initialPtaId]);
@@ -290,7 +292,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       console.error('Erro ao salvar agendamento:', err);
       // Explicit UX requirement: handle exclusion_violation 23P01
       const friendlyMessage = formatSupabaseError(err);
-      toast.error('Conflito ou Erro no Agendamento', friendlyMessage);
+      setErroPopup(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -817,6 +819,28 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             </button>
           </div>
         </form>
+
+        {/* Popup de erro no agendamento */}
+        {erroPopup && (
+          <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full border border-rose-200 overflow-hidden">
+              <div className="bg-rose-600 px-5 py-3.5 flex items-center gap-2.5">
+                <span className="text-xl">⚠️</span>
+                <span className="text-sm font-bold text-white">Conflito no Agendamento</span>
+              </div>
+              <div className="p-5 space-y-4">
+                <p className="text-sm text-gray-700 leading-relaxed">{erroPopup}</p>
+                <button
+                  type="button"
+                  onClick={() => setErroPopup(null)}
+                  className="w-full py-2.5 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
