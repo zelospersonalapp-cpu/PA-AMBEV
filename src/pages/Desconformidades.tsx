@@ -145,7 +145,7 @@ export const Desconformidades: React.FC = () => {
       <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-xs">
         <h2 className="text-lg sm:text-xl font-bold text-[#1A1A1A] flex items-center gap-2">
           <TrendingDown className="w-5 h-5 text-rose-500" />
-          Análise de Desconformidades
+          Análise de Conduta
         </h2>
         <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
           Mapeamento de condutas fora do padrão: entregas fora do prazo, fora do local combinado e sem posicionar a PTA na carga.
@@ -323,3 +323,4 @@ export const Desconformidades: React.FC = () => {
     </div>
   );
 };
+
