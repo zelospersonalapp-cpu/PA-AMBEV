@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   AlertOctagon,
+  Trash2,
+  Edit2,
   PlusCircle,
   Wrench,
   CheckCircle,
@@ -46,6 +48,7 @@ export const Avarias: React.FC = () => {
   const [ptaId, setPtaId] = useState('');
   const [agendamentoId, setAgendamentoId] = useState('');
   const [reportadoPor, setReportadoPor] = useState('');
+  const [editingAvaria, setEditingAvaria] = useState<any | null>(null);
   const [operadorId, setOperadorId] = useState('');
   const [solicitantes, setSolicitantes] = useState<Colaborador[]>([]);
   const [dataAvaria, setDataAvaria] = useState(new Date().toISOString().substring(0, 10));
@@ -286,6 +289,29 @@ export const Avarias: React.FC = () => {
     return true;
   });
 
+  const handleExcluirAvaria = async (avaria: any) => {
+    if (!window.confirm('Excluir esta avaria? Esta ação não pode ser desfeita.')) return;
+    try {
+      const { error } = await supabase.from('avarias').delete().eq('id', avaria.id);
+      if (error) throw error;
+      toast.success('Avaria Excluída', 'Registro removido com sucesso.');
+      loadData();
+    } catch (err: any) {
+      toast.error('Erro ao excluir', err.message);
+    }
+  };
+
+  const handleEditarAvaria = (avaria: any) => {
+    setEditingAvaria(avaria);
+    setPtaId(avaria.pta_id || '');
+    setReportadoPor(avaria.reportado_por || '');
+    setDataAvaria(avaria.data_avaria || new Date().toISOString().substring(0, 10));
+    setSeveridade(avaria.severidade || 'media');
+    setTipoAnomalia(avaria.tipo_anomalia || '');
+    setDescricao(avaria.descricao || '');
+    setModalOpen(true);
+  };
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -444,28 +470,48 @@ export const Avarias: React.FC = () => {
                 </div>
 
                 {/* Botões compactos */}
-                {avaria.status !== 'resolvida' && (
-                  <div className="flex items-center justify-end gap-1.5 mt-2">
-                    {avaria.status === 'aberta' && (
-                      <button
-                        type="button"
-                        onClick={() => handleMarcarManutencao(avaria)}
-                        className="px-2.5 py-1 text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-md flex items-center gap-1 transition-colors"
-                      >
-                        <Wrench className="w-3 h-3" />
-                        Manutenção
-                      </button>
-                    )}
+                <div className="flex items-center justify-between gap-1.5 mt-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => { setSelectedAvariaForResolve(avaria); setResolvidoPor(''); setResolveDialogOpen(true); }}
-                      className="px-2.5 py-1 text-[11px] font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-md flex items-center gap-1 transition-colors"
+                      onClick={() => handleEditarAvaria(avaria)}
+                      className="px-2.5 py-1 text-[11px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md flex items-center gap-1 transition-colors"
                     >
-                      <CheckCircle className="w-3 h-3 text-[#F5D800]" />
-                      Concluir Reparo
+                      <Edit2 className="w-3 h-3" />
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExcluirAvaria(avaria)}
+                      className="px-2.5 py-1 text-[11px] font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-md flex items-center gap-1 transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Excluir
                     </button>
                   </div>
-                )}
+                  {avaria.status !== 'resolvida' && (
+                    <div className="flex items-center gap-1.5">
+                      {avaria.status === 'aberta' && (
+                        <button
+                          type="button"
+                          onClick={() => handleMarcarManutencao(avaria)}
+                          className="px-2.5 py-1 text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-md flex items-center gap-1 transition-colors"
+                        >
+                          <Wrench className="w-3 h-3" />
+                          Manutenção
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedAvariaForResolve(avaria); setResolvidoPor(''); setResolveDialogOpen(true); }}
+                        className="px-2.5 py-1 text-[11px] font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-md flex items-center gap-1 transition-colors"
+                      >
+                        <CheckCircle className="w-3 h-3 text-[#F5D800]" />
+                        Concluir Reparo
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {avaria.status === 'resolvida' && (
                   <div className="text-[10px] text-emerald-600 mt-1">
