@@ -653,7 +653,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                   <option value="">Selecione o liberador...</option>
                   {colaboradores.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.nome} ({c.matricula} — {c.papel})
+                      {c.nome}
                     </option>
                   ))}
                 </select>
