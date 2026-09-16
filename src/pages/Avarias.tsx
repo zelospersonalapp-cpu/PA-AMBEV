@@ -350,20 +350,20 @@ export const Avarias: React.FC = () => {
               <div
                 key={r.pta_id}
                 onClick={() => setFilterPta(filterPta === r.pta_id ? '' : r.pta_id)}
-                className={`p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
+                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                   filterPta === r.pta_id
-                    ? 'border-[#F5D800] bg-amber-50/50 ring-2 ring-[#F5D800]'
+                    ? 'border-[#F5D800] bg-amber-50 ring-1 ring-[#F5D800]'
                     : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
                 }`}
               >
-                <div className="font-bold text-gray-900 truncate">{r.patrimonio}</div>
-                <div className="text-[11px] text-gray-500 capitalize">{r.tipo}</div>
-                <div className="mt-1 flex items-center justify-between text-[11px]">
-                  <span>Total: <strong>{r.total_avarias}</strong></span>
+                <div className="font-bold text-xs text-gray-900 truncate">{r.patrimonio}</div>
+                <div className="text-[10px] text-gray-500 capitalize mb-2">{r.tipo}</div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200/70 text-[11px]">
+                  <span className="text-gray-500">Total: <strong className="text-gray-900">{r.total_avarias}</strong></span>
                   {r.avarias_abertas > 0 ? (
                     <span className="text-rose-600 font-bold">{r.avarias_abertas} abertas</span>
                   ) : (
-                    <span className="text-emerald-600 font-bold">0</span>
+                    <span className="text-emerald-600 font-bold">OK</span>
                   )}
                 </div>
               </div>
@@ -455,27 +455,34 @@ export const Avarias: React.FC = () => {
             return (
               <div
                 key={avaria.id}
-                className="bg-white rounded-lg border border-gray-200 px-3 py-2.5 hover:border-amber-300 transition-all"
+                className="bg-white rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition-colors shadow-xs"
               >
-                {/* Linha única: tudo em uma linha */}
-                <div className="flex items-center gap-2 flex-wrap text-xs">
-                  <span className="font-bold text-gray-900">{ptaObj?.patrimonio || 'PTA'}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${severidadeConf.badge}`}>{severidadeConf.label}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${statusConf.badge}`}>{statusConf.label}</span>
-                  {avaria.tipo_anomalia && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#1B2A4A] text-[#93C5FD] border border-[#243656]">{avaria.tipo_anomalia}</span>
-                  )}
-                  <span className="text-gray-500 truncate flex-1">{avaria.descricao}</span>
-                  <span className="text-gray-400 whitespace-nowrap">{reporter?.nome || '—'} · {formatDateBR(avaria.data_avaria)}</span>
+                {/* Cabeçalho: PTA + badges à esquerda, relator/data à direita */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-sm text-gray-900">{ptaObj?.patrimonio || 'PTA'}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${severidadeConf.badge}`}>{severidadeConf.label}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusConf.badge}`}>{statusConf.label}</span>
+                      {avaria.tipo_anomalia && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1B2A4A] text-[#93C5FD] border border-[#243656]">{avaria.tipo_anomalia}</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1.5 line-clamp-2">{avaria.descricao}</p>
+                  </div>
+                  <div className="text-right shrink-0 text-[11px] text-gray-400 leading-tight">
+                    <div className="font-semibold text-gray-500">{reporter?.nome || '—'}</div>
+                    <div>{formatDateBR(avaria.data_avaria)}</div>
+                  </div>
                 </div>
 
-                {/* Botões compactos */}
-                <div className="flex items-center justify-between gap-1.5 mt-2">
+                {/* Rodapé: ações alinhadas */}
+                <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-gray-100">
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => handleEditarAvaria(avaria)}
-                      className="px-2.5 py-1 text-[11px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md flex items-center gap-1 transition-colors"
+                      className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md flex items-center gap-1 transition-colors"
                     >
                       <Edit2 className="w-3 h-3" />
                       Editar
@@ -483,19 +490,19 @@ export const Avarias: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleExcluirAvaria(avaria)}
-                      className="px-2.5 py-1 text-[11px] font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-md flex items-center gap-1 transition-colors"
+                      className="px-2.5 py-1.5 text-[11px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md flex items-center gap-1 transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
                       Excluir
                     </button>
                   </div>
-                  {avaria.status !== 'resolvida' && (
+                  {avaria.status !== 'resolvida' ? (
                     <div className="flex items-center gap-1.5">
                       {avaria.status === 'aberta' && (
                         <button
                           type="button"
                           onClick={() => handleMarcarManutencao(avaria)}
-                          className="px-2.5 py-1 text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-md flex items-center gap-1 transition-colors"
+                          className="px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-md flex items-center gap-1 transition-colors"
                         >
                           <Wrench className="w-3 h-3" />
                           Manutenção
@@ -504,20 +511,18 @@ export const Avarias: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => { setSelectedAvariaForResolve(avaria); setResolvidoPor(''); setResolveDialogOpen(true); }}
-                        className="px-2.5 py-1 text-[11px] font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-md flex items-center gap-1 transition-colors"
+                        className="px-2.5 py-1.5 text-[11px] font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-md flex items-center gap-1 transition-colors"
                       >
                         <CheckCircle className="w-3 h-3 text-[#F5D800]" />
                         Concluir Reparo
                       </button>
                     </div>
+                  ) : (
+                    <span className="text-[11px] text-emerald-600 font-medium whitespace-nowrap">
+                      ✓ {resolver?.nome || 'Facilities'} · {formatDateBR(avaria.resolvido_em)}
+                    </span>
                   )}
                 </div>
-
-                {avaria.status === 'resolvida' && (
-                  <div className="text-[10px] text-emerald-600 mt-1">
-                    ✓ Resolvido por <strong>{resolver?.nome || 'Facilities'}</strong> · {formatDateTimeBR(avaria.resolvido_em)}
-                  </div>
-                )}
               </div>
             );
           })}
