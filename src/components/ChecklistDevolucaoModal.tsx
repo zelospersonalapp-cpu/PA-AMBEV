@@ -74,13 +74,13 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
     loadLiberadores();
 
     // Check if expected return date is passed
-    const now = new Date();
-    const dataFim = new Date(agendamento.data_fim);
-    // If today is past data_fim, default entregouNoPrazo to false
-    if (now.toISOString().substring(0, 10) > agendamento.data_fim.substring(0, 10)) {
-      setEntregouNoPrazo(false);
-    } else {
+    const hoje = new Date().toISOString().substring(0, 10);
+    const dataFimStr = agendamento.data_fim.substring(0, 10);
+    // Entregou no prazo se devolveu até o dia do data_fim (inclusive)
+    if (hoje <= dataFimStr) {
       setEntregouNoPrazo(true);
+    } else {
+      setEntregouNoPrazo(false);
     }
   }, [isOpen, agendamento]);
 
