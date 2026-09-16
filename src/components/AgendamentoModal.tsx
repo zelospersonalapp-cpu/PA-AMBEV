@@ -758,6 +758,8 @@ Para que tudo corra bem, siga as instruções abaixo:
 
 6️⃣ SE FICAR PARA O DIA SEGUINTE: deixe a plataforma carregando no local onde ela ficará, antes de encerrar o turno.
 
+🚫 IMPORTANTE: em hipótese alguma a PTA pode deixar de ser devolvida no mesmo dia, salvo quando previamente alinhado com o Facilities.
+
 ⚠️ Nunca deixe a PTA descarregada ou sem supervisão fora da área designada.
 
 Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
