@@ -107,6 +107,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
         .from('colaboradores')
         .select('*')
         .eq('ativo', true)
+        .eq('papel', 'liberador')
         .order('nome', { ascending: true });
       if (colabs) setColaboradores(colabs);
     } catch (err: any) {
