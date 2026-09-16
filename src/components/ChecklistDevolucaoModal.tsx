@@ -32,7 +32,7 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
 }) => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
-  const [solicitantes, setSolicitantes] = useState<Colaborador[]>([]);
+  const [liberadores, setLiberadores] = useState<Colaborador[]>([]);
 
   // Devolucao form
   const [devolvidoPor, setDevolvidoPor] = useState(
@@ -61,17 +61,17 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
   useEffect(() => {
     if (!isOpen) return;
 
-    async function loadSolicitantes() {
+    async function loadLiberadores() {
       const { data } = await supabase
         .from('colaboradores')
         .select('*')
         .eq('ativo', true)
-        .eq('papel', 'solicitante')
+        .eq('papel', 'liberador')
         .order('nome', { ascending: true });
-      if (data) setSolicitantes(data);
+      if (data) setLiberadores(data);
     }
 
-    loadSolicitantes();
+    loadLiberadores();
 
     // Check if expected return date is passed
     const now = new Date();
@@ -260,7 +260,7 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1B2A4A]"
             >
               <option value="">Selecione o responsável pela devolução...</option>
-              {solicitantes.map((c) => (
+              {liberadores.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.nome}
                 </option>
