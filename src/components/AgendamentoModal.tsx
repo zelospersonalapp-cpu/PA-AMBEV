@@ -801,6 +801,7 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                       <p>5️⃣ Novo <strong>Check de Extrato</strong> na devolução</p>
                       <p>6️⃣ Reconectar no <strong>mesmo carregador</strong> logo após devolver</p>
                       <p>7️⃣ Se pernoitar, deixar a PTA <strong>carregando</strong> no local onde ficará</p>
+                      <p>🚫 Em hipótese alguma deixar de devolver a PTA no <strong>mesmo dia</strong>, salvo alinhamento prévio com o Facilities</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
