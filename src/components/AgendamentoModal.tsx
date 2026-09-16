@@ -260,7 +260,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       console.error('Erro ao salvar agendamento:', err);
       // Explicit UX requirement: handle exclusion_violation 23P01
       const friendlyMessage = formatSupabaseError(err);
-      toast.error('Conflito ou Erro no Agendamento', friendlyMessage);
+      setConflictWarning(friendlyMessage);
     } finally {
       setLoading(false);
     }
