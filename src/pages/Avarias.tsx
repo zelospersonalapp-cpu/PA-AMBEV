@@ -683,23 +683,7 @@ export const Avarias: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                  Agendamento Vinculado
-                </label>
-                <select
-                  value={agendamentoId}
-                  onChange={(e) => setAgendamentoId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                >
-                  <option value="">Nenhum / Não vinculado</option>
-                  {agendamentos.map((ag) => (
-                    <option key={ag.id} value={ag.id}>
-                      {ag.tipo_atividade} ({formatDateBR(ag.data_inicio)})
-                    </option>
-                  ))}
-                </select>
-              </div>
+
 
               {/* Photos upload for avaria */}
               <div className="border border-dashed border-gray-300 rounded-lg p-3 bg-gray-50">
