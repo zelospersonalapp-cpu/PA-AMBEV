@@ -7,7 +7,6 @@ import { Agenda } from './pages/Agenda';
 import { Ptas } from './pages/Ptas';
 import { Avarias } from './pages/Avarias';
 import { Recorrencias } from './pages/Recorrencias';
-import { Confiabilidade } from './pages/Confiabilidade';
 import { Cadastros } from './pages/Cadastros';
 
 export default function App() {
@@ -21,7 +20,7 @@ export default function App() {
             <Route path="/ptas" element={<Ptas />} />
             <Route path="/avarias" element={<Avarias />} />
             <Route path="/recorrencias" element={<Recorrencias />} />
-            <Route path="/confiabilidade" element={<Confiabilidade />} />
+} />
             <Route path="/cadastros" element={<Cadastros />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
