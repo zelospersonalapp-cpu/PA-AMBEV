@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+/* Tudo digitado pelo usuário sai em maiúsculo */
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+textarea {
+  text-transform: uppercase;
+}
+
+input[type="text"]::placeholder,
+input[type="search"]::placeholder,
+textarea::placeholder {
+  text-transform: none;
+}
