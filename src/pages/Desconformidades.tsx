@@ -8,6 +8,7 @@ import {
   Building,
   Filter,
   TrendingDown,
+  Calendar,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -142,7 +143,7 @@ export const Desconformidades: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-xs">
+      <div className="bg-white rounded-xl border border-gray-200 p-3.5 sm:p-4 shadow-xs">
         <h2 className="text-lg sm:text-xl font-bold text-[#1A1A1A] flex items-center gap-2">
           <TrendingDown className="w-5 h-5 text-rose-500" />
           Análise de Conduta
@@ -157,14 +158,14 @@ export const Desconformidades: React.FC = () => {
         {kpis.map((k) => {
           const Icon = k.icon;
           return (
-            <div key={k.label} className={`bg-white rounded-xl border border-gray-200 border-l-4 ${k.ring} p-3.5 shadow-xs`}>
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 leading-tight min-h-[2rem] flex items-center">
+            <div key={k.label} className={`bg-white rounded-lg border border-gray-200 border-l-4 ${k.ring} p-2.5 shadow-xs`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 leading-tight">
                   {k.label}
                 </span>
-                <Icon className={`w-4 h-4 shrink-0 ${k.color}`} />
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${k.color}`} />
               </div>
-              <div className="text-2xl font-extrabold text-gray-900 mt-1">{k.value}</div>
+              <div className="text-xl font-extrabold text-gray-900 mt-0.5">{k.value}</div>
             </div>
           );
         })}
@@ -311,7 +312,8 @@ export const Desconformidades: React.FC = () => {
                       {r.tipo_atividade && (<><span className="text-gray-300">·</span><span>{r.tipo_atividade}</span></>)}
                     </div>
                   </div>
-                  <div className="text-right shrink-0 text-[11px] text-gray-400 whitespace-nowrap">
+                  <div className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-100 px-2 py-1 rounded-md whitespace-nowrap">
+                    <Calendar className="w-3 h-3" />
                     {formatDateBR(r.data_fim || r.data_inicio)}
                   </div>
                 </div>
