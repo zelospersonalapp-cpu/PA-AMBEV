@@ -455,7 +455,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                     <div>
                       <div className="text-xs text-gray-500">Local na Cervejaria</div>
                       <div className="font-semibold text-gray-900">
-                        UG: {vAgendaItem?.ug || 'Principal'} • Setor: {vAgendaItem?.setor_linha || '-'}
+                        UG: {vAgendaItem?.ug || 'Principal'}{vAgendaItem?.setor_linha ? ` • Setor: ${vAgendaItem.setor_linha}` : ''}
                       </div>
                       {vAgendaItem?.ponto_ref && (
                         <div className="text-xs text-gray-500">Ponto: {vAgendaItem.ponto_ref}</div>
