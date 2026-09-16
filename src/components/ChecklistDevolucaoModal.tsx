@@ -494,6 +494,7 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
                 <input
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   multiple
                   onChange={handlePhotoSelect}
                   className="hidden"
