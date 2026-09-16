@@ -51,7 +51,7 @@ export interface Colaborador {
   created_at?: string;
 }
 
-export type FrequenciaRecorrencia = 'semanal' | 'quinzenal';
+export type FrequenciaRecorrencia = 'diaria' | 'semanal' | 'quinzenal' | 'mensal';
 
 export interface Recorrencia {
   id: string;
