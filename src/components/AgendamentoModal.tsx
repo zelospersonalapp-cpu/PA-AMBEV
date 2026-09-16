@@ -26,6 +26,58 @@ interface AgendamentoModalProps {
   initialPtaId?: string;
 }
 
+
+// Componente auxiliar: busca e exibe o agendamento conflitante
+const ConflitoBusca: React.FC<{
+  ptaId: string;
+  dataInicio: string;
+  dataFim: string;
+  onCancelarConflito: (id: string) => void;
+}> = ({ ptaId, dataInicio, dataFim, onCancelarConflito }) => {
+  const [agendamento, setAgendamento] = React.useState<any | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('v_agenda')
+        .select('*')
+        .eq('pta_id', ptaId)
+        .neq('status', 'cancelado')
+        .lte('data_inicio', dataFim)
+        .gte('data_fim', dataInicio)
+        .limit(1)
+        .maybeSingle();
+      setAgendamento(data);
+      setLoading(false);
+    })();
+  }, [ptaId, dataInicio, dataFim]);
+
+  if (loading) return <p className="text-xs text-gray-400 animate-pulse">Buscando agendamento conflitante...</p>;
+  if (!agendamento) return null;
+
+  const dtIni = new Date(agendamento.data_inicio + 'T00:00:00').toLocaleDateString('pt-BR');
+  const dtFim = new Date(agendamento.data_fim + 'T00:00:00').toLocaleDateString('pt-BR');
+
+  return (
+    <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-xs space-y-2">
+      <p className="font-bold text-rose-800">📋 Agendamento em conflito:</p>
+      <p className="text-rose-700">
+        <strong>{agendamento.area_empresa || agendamento.solicitante || 'Área'}</strong>
+        {' — '}{dtIni}{dtIni !== dtFim ? ` até ${dtFim}` : ''}
+      </p>
+      <p className="text-rose-600">Status: <strong>{agendamento.status?.toUpperCase()}</strong></p>
+      <button
+        type="button"
+        onClick={() => onCancelarConflito(agendamento.id)}
+        className="w-full py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors"
+      >
+        ❌ Cancelar este agendamento e liberar a PTA
+      </button>
+    </div>
+  );
+};
+
 export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   isOpen,
   onClose,
@@ -47,6 +99,10 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const [conflictWarning, setConflictWarning] = useState<string | null>(null);
   const [conflictAgendamento, setConflictAgendamento] = useState<any | null>(null);
   const [erroPopup, setErroPopup] = useState<string | null>(null);
+  const [agendamentoConflitante, setAgendamentoConflitante] = useState<any | null>(null);
+  const [conflitoPtaId, setConflitoPtaId] = useState<string | null>(null);
+  const [conflitoDataInicio, setConflitoDataInicio] = useState<string | null>(null);
+  const [conflitoDataFim, setConflitoDataFim] = useState<string | null>(null);
   const [cancelingConflict, setCancelingConflict] = useState(false);
 
   // Aux data
@@ -307,6 +363,9 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       // Explicit UX requirement: handle exclusion_violation 23P01
       const friendlyMessage = formatSupabaseError(err);
       setErroPopup(friendlyMessage);
+      setConflitoPtaId(ptaId);
+      setConflitoDataInicio(dataInicio);
+      setConflitoDataFim(dataFim);
     } finally {
       setLoading(false);
     }
@@ -940,21 +999,69 @@ Qualquer dúvida, acione o Facilities.`;
 
         {/* Popup de erro no agendamento */}
         {erroPopup && (
-          <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full border border-rose-200 overflow-hidden">
+              {/* Header */}
               <div className="bg-rose-600 px-5 py-3.5 flex items-center gap-2.5">
                 <span className="text-xl">⚠️</span>
                 <span className="text-sm font-bold text-white">Conflito no Agendamento</span>
               </div>
+
               <div className="p-5 space-y-4">
-                <p className="text-sm text-gray-700 leading-relaxed">{erroPopup}</p>
-                <button
-                  type="button"
-                  onClick={() => setErroPopup(null)}
-                  className="w-full py-2.5 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors"
-                >
-                  Entendido
-                </button>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Esta PTA já está reservada nesse período. O que deseja fazer?
+                </p>
+
+                {/* Buscar agendamento conflitante e exibir */}
+                {conflitoPtaId && conflitoDataInicio && (
+                  <ConflitoBusca
+                    ptaId={conflitoPtaId}
+                    dataInicio={conflitoDataInicio}
+                    dataFim={conflitoDataFim || conflitoDataInicio}
+                    onCancelarConflito={async (agendamentoId: string) => {
+                      const { error } = await supabase
+                        .from('agendamentos')
+                        .update({ status: 'cancelado' })
+                        .eq('id', agendamentoId);
+                      if (!error) {
+                        setErroPopup(null);
+                        setConflitoPtaId(null);
+                        setConflitoDataInicio(null);
+                        setConflitoDataFim(null);
+                        toast.success('Cancelado', 'Agendamento conflitante cancelado. Tente confirmar novamente.');
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Opções */}
+                <div className="space-y-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErroPopup(null);
+                      setConflitoPtaId(null);
+                      setConflitoDataInicio(null);
+                      setConflitoDataFim(null);
+                    }}
+                    className="w-full py-2.5 text-sm font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-lg transition-colors"
+                  >
+                    🔄 Alterar data ou PTA e tentar novamente
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErroPopup(null);
+                      setConflitoPtaId(null);
+                      setConflitoDataInicio(null);
+                      setConflitoDataFim(null);
+                      onClose();
+                    }}
+                    className="w-full py-2.5 text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    Fechar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
