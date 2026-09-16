@@ -697,6 +697,7 @@ export const Avarias: React.FC = () => {
                     <input
                       type="file"
                       accept="image/*"
+                  capture="environment"
                       multiple
                       onChange={handlePhotoSelect}
                       className="hidden"
