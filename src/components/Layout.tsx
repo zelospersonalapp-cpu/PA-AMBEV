@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -13,11 +13,8 @@ import {
   PlusCircle,
   Building2,
   CheckCircle2,
-  Volume2,
-  VolumeX,
 } from 'lucide-react';
 import { AgendamentoModal } from './AgendamentoModal';
-import { feedback, isSoundMuted, setSoundMuted } from '../lib/feedback';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -27,27 +24,6 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [novoModalOpen, setNovoModalOpen] = useState(false);
-  const [soundMuted, setSoundMutedState] = useState<boolean>(() => isSoundMuted());
-
-  // Som + vibração global ao tocar em qualquer elemento interativo
-  useEffect(() => {
-    const handler = (e: PointerEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
-      if (target.closest('button, a, [role="button"], .tap-card')) {
-        feedback('tap');
-      }
-    };
-    document.addEventListener('pointerdown', handler);
-    return () => document.removeEventListener('pointerdown', handler);
-  }, []);
-
-  const toggleSound = () => {
-    const next = !soundMuted;
-    setSoundMuted(next);
-    setSoundMutedState(next);
-    if (!next) feedback('success');
-  };
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -96,15 +72,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
 
             {/* Header Right Action */}
             <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                type="button"
-                onClick={toggleSound}
-                aria-label={soundMuted ? 'Ativar sons' : 'Desativar sons'}
-                title={soundMuted ? 'Ativar sons' : 'Desativar sons'}
-                className="p-2 rounded-md text-[#CBD5E1] hover:text-white hover:bg-[#1E3461] transition-colors"
-              >
-                {soundMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-              </button>
               <button
                 type="button"
                 onClick={() => {
