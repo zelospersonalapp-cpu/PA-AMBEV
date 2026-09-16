@@ -256,33 +256,10 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Card 4: Taxa de Confiabilidade / SLA */}
-        <div className="bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-4 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                Pontualidade SLA
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
-                <Award className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-2 text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
-              {taxaPontualidade}%{' '}
-              <span className="text-xs font-semibold text-gray-500">score médio</span>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
-            <span>Meta Facilities:</span>
-            <span className="font-bold text-emerald-700">&gt; 90%</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Section: Próximas Atividades + Top Áreas Usuárias */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Section: Próximas Atividades */}
+      <div className="grid grid-cols-1 gap-6">
         {/* Left 2 Cols: Próximas Atividades (7 dias de v_agenda) */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
+        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
             <div>
               <h3 className="text-base font-bold text-[#1A1A1A] flex items-center gap-2">
@@ -384,76 +361,6 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Right Col: Top Áreas Usuárias & Confiabilidade SLA */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-              <div>
-                <h3 className="text-base font-bold text-[#1A1A1A] flex items-center gap-2">
-                  <Award className="w-4 h-4 text-amber-500" />
-                  Top Áreas Usuárias (SLA)
-                </h3>
-                <p className="text-xs text-gray-500">
-                  Ranking de conformidade e pontualidade por área da cervejaria.
-                </p>
-              </div>
-            </div>
-
-            {topAreas.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 text-xs">
-                Ainda não há dados suficientes para ranking de confiabilidade.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {topAreas.map((area, idx) => {
-                  const score = Number(area.score_confiabilidade) || 0;
-                  return (
-                    <div key={area.area_id || idx} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2 font-bold text-gray-800">
-                          <span
-                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                              idx === 0
-                                ? 'bg-[#F5D800] text-black font-bold'
-                                : 'bg-gray-100 text-gray-600'
-                            }`}
-                          >
-                            {idx + 1}
-                          </span>
-                          <span className="truncate max-w-[170px]">{area.area_nome}</span>
-                        </div>
-                        <span className="font-mono font-bold text-gray-900">{score}%</span>
-                      </div>
-
-                      {/* Yellow AmBev Progress Bar */}
-                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-[#F5D800] h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
-                        />
-                      </div>
-
-                      <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>{area.total_concluidos} concluídos</span>
-                        <span>{area.pct_no_prazo}% no prazo</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-gray-100">
-            <NavLink
-              to="/confiabilidade"
-              className="w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 text-gray-800 text-xs font-semibold rounded-lg border border-gray-200 flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <span>Ver painel completo de SLA & Regras</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </NavLink>
-          </div>
-        </div>
       </div>
 
       {/* Drawer & Modal */}
