@@ -21,7 +21,7 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
 }) => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
-  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  const [solicitantes, setSolicitantes] = useState<Colaborador[]>([]);
 
   // Form states
   const [nivelBateria, setNivelBateria] = useState<number>(pta?.nivel_bateria ?? 100);
@@ -39,16 +39,17 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    async function loadColaboradores() {
+    async function loadSolicitantes() {
       const { data } = await supabase
         .from('colaboradores')
         .select('*')
         .eq('ativo', true)
+        .eq('papel', 'solicitante')
         .order('nome', { ascending: true });
-      if (data) setColaboradores(data);
+      if (data) setSolicitantes(data);
     }
 
-    loadColaboradores();
+    loadSolicitantes();
     if (pta) {
       setNivelBateria(pta.nivel_bateria);
     }
@@ -115,7 +116,7 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
           nivel_bateria: nivelBateria,
           estado_geral: estadoGeral,
           avarias_visiveis: avariasVisiveis || null,
-          fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
+          fotos: uploadedUrls.length > 0 ? uploadedUrls : [],
           realizado_por: retiradoPor,
           realizado_em: new Date().toISOString(),
           assinatura_ok: true,
@@ -200,9 +201,9 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1B2A4A]"
             >
               <option value="">Selecione o operador...</option>
-              {colaboradores.map((c) => (
+              {solicitantes.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.nome} (Matrícula: {c.matricula} — {c.papel})
+                  {c.nome} (Matrícula: {c.matricula || '—'})
                 </option>
               ))}
             </select>
@@ -280,7 +281,7 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
                 <Camera className="w-4 h-4 text-gray-600" />
-                Fotos da Vistoria (Bucket Supabase 'ptas')
+                Fotos da Vistoria
               </label>
               <label className="cursor-pointer px-2.5 py-1 text-xs font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded shadow-xs inline-flex items-center gap-1 transition-colors">
                 <Upload className="w-3 h-3 text-[#F5D800]" />
