@@ -792,14 +792,14 @@ Qualquer dúvida, acione o Facilities.`;
                     </div>
 
                     <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 text-[11px] text-gray-700 space-y-1.5 max-h-48 overflow-y-auto leading-relaxed">
-                      <p className="font-bold text-gray-900 text-xs">📨 Mensagem que será enviada:</p>
-                      <p>• CHECK DE EXTRATO antes de retirar (bateria, avarias, controles)</p>
-                      <p>• Retirar do carregador com cuidado, transporte corredor autorizado</p>
-                      <p>• Usar somente no local combinado</p>
-                      <p>• Avisar Facilities <strong>imediatamente</strong> em caso de avaria ou problema técnico</p>
-                      <p>• CHECK DE EXTRATO na devolução</p>
-                      <p>• Ligar no <strong>mesmo carregador</strong> após devolver</p>
-                      <p>• Se ficar para o dia seguinte, deixar próxima a carregador disponível</p>
+                      <p className="font-bold text-gray-900 text-xs">📨 Resumo da mensagem que será enviada:</p>
+                      <p>1️⃣ <strong>Check de Extrato</strong> antes de retirar (bateria, avarias, controles)</p>
+                      <p>2️⃣ Desconectar do carregador com cuidado e transportar pelo corredor autorizado</p>
+                      <p>3️⃣ Usar somente no <strong>local combinado</strong></p>
+                      <p>4️⃣ Avisar o Facilities <strong>imediatamente</strong> em caso de avaria ou problema técnico</p>
+                      <p>5️⃣ Novo <strong>Check de Extrato</strong> na devolução</p>
+                      <p>6️⃣ Reconectar no <strong>mesmo carregador</strong> logo após devolver</p>
+                      <p>7️⃣ Se pernoitar, deixar a PTA <strong>carregando</strong> no local onde ficará</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
