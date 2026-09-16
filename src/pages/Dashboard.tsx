@@ -119,7 +119,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner / Welcome */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 animate-card-in">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h2 className="text-lg sm:text-xl font-bold text-[#1A1A1A] flex items-center gap-2 leading-tight">
             Painel Geral de PTAs
@@ -148,7 +148,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 stagger">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: PTAs por Status */}
         <NavLink to="/ptas" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
           <div>
