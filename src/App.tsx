@@ -20,7 +20,6 @@ export default function App() {
             <Route path="/ptas" element={<Ptas />} />
             <Route path="/avarias" element={<Avarias />} />
             <Route path="/recorrencias" element={<Recorrencias />} />
-} />
             <Route path="/cadastros" element={<Cadastros />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
