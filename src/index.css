@@ -15,3 +15,66 @@ input[type="search"]::placeholder,
 textarea::placeholder {
   text-transform: none;
 }
+
+/* ===== MICRO-INTERAÇÕES E ANIMAÇÕES ===== */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes drawerIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); }
+  50%      { box-shadow: 0 0 0 6px rgba(96,165,250,0); }
+}
+
+.animate-card-in   { animation: cardIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-drawer-in { animation: drawerIn 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-in   { animation: fadeIn 0.2s ease both; }
+.pulse-glow        { animation: pulseGlow 2s ease-in-out infinite; }
+
+/* Card interativo: sobe no hover (desktop), afunda no toque */
+.tap-card {
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s ease;
+  will-change: transform;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tap-card:hover  { transform: translateY(-3px); box-shadow: 0 12px 28px -10px rgba(27,42,74,0.28); }
+.tap-card:active { transform: scale(0.96); }
+
+/* Em telas de toque: sem hover-lift, só o afundar */
+@media (hover: none) {
+  .tap-card:hover  { transform: none; box-shadow: none; }
+  .tap-card:active { transform: scale(0.95); }
+}
+
+/* Entrada escalonada dos cards */
+.stagger > * { animation: cardIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.stagger > *:nth-child(1) { animation-delay: 0.03s; }
+.stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.stagger > *:nth-child(3) { animation-delay: 0.13s; }
+.stagger > *:nth-child(4) { animation-delay: 0.18s; }
+.stagger > *:nth-child(5) { animation-delay: 0.23s; }
+.stagger > *:nth-child(6) { animation-delay: 0.28s; }
+.stagger > *:nth-child(7) { animation-delay: 0.33s; }
+.stagger > *:nth-child(8) { animation-delay: 0.38s; }
+
+/* Scrollbar fina no mobile */
+@media (max-width: 1024px) {
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(27,42,74,0.3); border-radius: 4px; }
+}
+
+/* Respeita quem prefere menos animação */
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-in, .animate-drawer-in, .animate-fade-in,
+  .pulse-glow, .stagger > * { animation: none; }
+  .tap-card:hover, .tap-card:active { transform: none; }
+}
