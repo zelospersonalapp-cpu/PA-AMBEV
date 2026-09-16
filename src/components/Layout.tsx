@@ -33,7 +33,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
     { name: 'PTAs (Plataformas)', href: '/ptas', icon: Truck },
     { name: 'Avarias & Manutenção', href: '/avarias', icon: AlertOctagon },
     { name: 'Recorrências', href: '/recorrencias', icon: Repeat },
-    { name: 'Confiabilidade SLA', href: '/confiabilidade', icon: Award },
     { name: 'Cadastros Auxiliares', href: '/cadastros', icon: Database },
   ];
 
