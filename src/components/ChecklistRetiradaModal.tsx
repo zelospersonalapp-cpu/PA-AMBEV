@@ -289,6 +289,7 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
                 <input
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   multiple
                   onChange={handlePhotoSelect}
                   className="hidden"
