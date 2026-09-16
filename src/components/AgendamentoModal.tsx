@@ -37,6 +37,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [novoSolicitanteOpen, setNovoSolicitanteOpen] = useState(false);
+  const [notifPopupOpen, setNotifPopupOpen] = useState(false);
+  const [notifData, setNotifData] = useState<{ptaPatrimonio: string; ptaTipo: string; dataRetirada: string; dataEntrega: string; solicitanteNome: string; solicitanteContato: string} | null>(null);
   const [novoSolNome, setNovoSolNome] = useState('');
   const [novoSolContato, setNovoSolContato] = useState('');
   const [novoSolAreaId, setNovoSolAreaId] = useState('');
@@ -261,6 +263,19 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         if (error) throw error;
         toast.success('Agendamento Criado', 'Plataforma reservada com sucesso.');
 
+        // Abrir popup de notificação
+        const ptaSel = ptas.find((p) => p.id === ptaId);
+        const solSel = colaboradores.find((c) => c.id === solicitanteId) || filteredColaboradores.find((c) => c.id === solicitanteId);
+        setNotifData({
+          ptaPatrimonio: ptaSel?.patrimonio || ptaId,
+          ptaTipo: ptaSel?.tipo === 'articulada' ? 'Articulada' : 'Tesourinha',
+          dataRetirada: dataInicio,
+          dataEntrega: dataFim,
+          solicitanteNome: solSel?.nome || 'Solicitante',
+          solicitanteContato: solSel?.contato || '',
+        });
+        setNotifPopupOpen(true);
+
         // Gerar repetições se selecionado
         if (repeticao !== 'nenhuma') {
           const intervaloDias = repeticao === 'diaria' ? 1 : repeticao === 'semanal' ? 7 : repeticao === 'quinzenal' ? 14 : 30;
@@ -286,8 +301,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         }
       }
 
-      onSuccess();
-      onClose();
+      if (!notifPopupOpen) { onSuccess(); onClose(); }
     } catch (err: any) {
       console.error('Erro ao salvar agendamento:', err);
       // Explicit UX requirement: handle exclusion_violation 23P01
@@ -658,6 +672,110 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1B2A4A] bg-white"
             />
           </div>
+
+
+          {/* POPUP DE NOTIFICAÇÃO PÓS-AGENDAMENTO */}
+          {notifPopupOpen && notifData && (() => {
+            const dtRet = new Date(notifData.dataRetirada + 'T00:00:00').toLocaleDateString('pt-BR');
+            const dtEnt = new Date(notifData.dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR');
+            const msgTexto = `Olá ${notifData.solicitanteNome}! Seu agendamento da PTA ${notifData.ptaPatrimonio} (${notifData.ptaTipo}) foi confirmado.
+
+📅 RETIRADA: ${dtRet} | DEVOLUÇÃO: ${dtEnt}
+
+✅ INSTRUÇÕES OBRIGATÓRIAS:
+
+1. ANTES DE RETIRAR — Realize o CHECK DE EXTRATO da PTA (verificar nível de bateria, avarias visíveis e funcionamento dos controles).
+
+2. RETIRADA — Retire a PTA do carregador com cuidado. Transporte somente pelo corredor autorizado e com o equipamento desligado.
+
+3. USO — Utilize apenas no local combinado. Em caso de avaria ou problema técnico, comunique IMEDIATAMENTE ao Facilities pelo ramal/WhatsApp.
+
+4. DEVOLUÇÃO — Realize novo CHECK DE EXTRATO. Devolva a PTA limpa e sem danos ao local de origem.
+
+5. CARREGAMENTO — Ligue a PTA no carregador imediatamente após a devolução. Use SEMPRE o mesmo carregador que estava conectado.
+
+6. USO NO DIA SEGUINTE — Se a PTA permanecer na área para uso no dia seguinte, posicione-a próxima a uma tomada/carregador disponível antes de encerrar o turno.
+
+⚠️ Não deixe a PTA descarregada ou sem supervisão fora da área designada.
+
+Qualquer dúvida, acione o Facilities.`;
+
+            const msgWpp = encodeURIComponent(msgTexto);
+            const telContato = notifData.solicitanteContato.replace(/\D/g, '');
+            const wppUrl = telContato
+              ? `https://wa.me/55${telContato}?text=${msgWpp}`
+              : `https://wa.me/?text=${msgWpp}`;
+            const mailSubject = encodeURIComponent(`Agendamento PTA ${notifData.ptaPatrimonio} confirmado — Retirada em ${dtRet}`);
+            const mailBody = encodeURIComponent(msgTexto);
+            const mailUrl = `mailto:?subject=${mailSubject}&body=${mailBody}`;
+
+            return (
+              <div className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg border border-gray-200 overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-[#1B2A4A] px-5 py-4 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-white text-sm">✅ Agendamento Confirmado!</h3>
+                      <p className="text-blue-200 text-[11px] mt-0.5">PTA {notifData.ptaPatrimonio} — {notifData.ptaTipo}</p>
+                    </div>
+                    <button onClick={() => { setNotifPopupOpen(false); onSuccess(); onClose(); }} className="text-gray-300 hover:text-white">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-5 space-y-4">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+                      <p className="font-bold mb-1">📋 Notificação para: {notifData.solicitanteNome}</p>
+                      <p>Retirada: <strong>{dtRet}</strong> | Entrega: <strong>{dtEnt}</strong></p>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 text-[11px] text-gray-700 space-y-1.5 max-h-48 overflow-y-auto leading-relaxed">
+                      <p className="font-bold text-gray-900 text-xs">📨 Mensagem que será enviada:</p>
+                      <p>• CHECK DE EXTRATO antes de retirar (bateria, avarias, controles)</p>
+                      <p>• Retirar do carregador com cuidado, transporte corredor autorizado</p>
+                      <p>• Usar somente no local combinado</p>
+                      <p>• Avisar Facilities <strong>imediatamente</strong> em caso de avaria ou problema técnico</p>
+                      <p>• CHECK DE EXTRATO na devolução</p>
+                      <p>• Ligar no <strong>mesmo carregador</strong> após devolver</p>
+                      <p>• Se ficar para o dia seguinte, deixar próxima a carregador disponível</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <a
+                        href={wppUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-bold text-sm rounded-lg transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                          <path d="M12 0C5.374 0 0 5.373 0 12c0 2.112.549 4.094 1.508 5.814L0 24l6.336-1.482A11.945 11.945 0 0012 24c6.626 0 12-5.373 12-12S18.626 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.37l-.36-.214-3.724.977.994-3.63-.235-.374A9.818 9.818 0 1112 21.818z"/>
+                        </svg>
+                        WhatsApp
+                      </a>
+                      <a
+                        href={mailUrl}
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-sm rounded-lg transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        E-mail
+                      </a>
+                    </div>
+
+                    <button
+                      onClick={() => { setNotifPopupOpen(false); onSuccess(); onClose(); }}
+                      className="w-full py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Fechar sem enviar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Mini-modal: Cadastrar Novo Solicitante */}
           {novoSolicitanteOpen && (
