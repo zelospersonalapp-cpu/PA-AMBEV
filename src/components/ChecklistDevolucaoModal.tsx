@@ -143,7 +143,7 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
           nivel_bateria: nivelBateria,
           estado_geral: estadoGeral,
           avarias_visiveis: avariasVisiveis || null,
-          fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
+          fotos: uploadedUrls.length > 0 ? uploadedUrls : [],
           realizado_por: devolvidoPor,
           realizado_em: new Date().toISOString(),
           assinatura_ok: true,
@@ -165,7 +165,7 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
             descricao: avariaDescricao || avariasVisiveis || 'Avaria reportada na devolução da PTA.',
             severidade: avariaSeveridade,
             status: 'aberta',
-            fotos: uploadedUrls.length > 0 ? uploadedUrls : null,
+            fotos: uploadedUrls.length > 0 ? uploadedUrls : [],
           },
         ]);
 
@@ -261,7 +261,7 @@ export const ChecklistDevolucaoModal: React.FC<ChecklistDevolucaoModalProps> = (
               <option value="">Selecione o responsável pela devolução...</option>
               {colaboradores.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.nome} (Matrícula: {c.matricula} — {c.papel})
+                  {c.nome}
                 </option>
               ))}
             </select>
