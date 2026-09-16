@@ -454,7 +454,7 @@ export const Avarias: React.FC = () => {
             return (
               <div
                 key={avaria.id}
-                className="p-4 hover:bg-gray-50/60 transition-colors"
+                className="p-3 hover:bg-gray-50/60 transition-colors"
               >
                 {/* Cabeçalho: PTA + badges à esquerda, relator/data à direita */}
                 <div className="flex items-start justify-between gap-3">
@@ -467,7 +467,7 @@ export const Avarias: React.FC = () => {
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1B2A4A] text-[#93C5FD] border border-[#243656]">{avaria.tipo_anomalia}</span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 mt-1.5 line-clamp-2">{avaria.descricao}</p>
+                    <p className="text-[11px] text-gray-500 mt-1 line-clamp-1">{avaria.descricao}</p>
                   </div>
                   <div className="text-right shrink-0 text-[11px] text-gray-400 leading-tight">
                     <div className="font-semibold text-gray-500">{reporter?.nome || '—'}</div>
@@ -476,12 +476,12 @@ export const Avarias: React.FC = () => {
                 </div>
 
                 {/* Rodapé: ações alinhadas */}
-                <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-gray-100/80">
+                <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-gray-100/80">
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => handleEditarAvaria(avaria)}
-                      className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md flex items-center gap-1 transition-colors"
+                      className="px-2 py-1 text-[11px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-md flex items-center gap-1 transition-colors"
                     >
                       <Edit2 className="w-3 h-3" />
                       Editar
@@ -489,7 +489,7 @@ export const Avarias: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleExcluirAvaria(avaria)}
-                      className="px-2.5 py-1.5 text-[11px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md flex items-center gap-1 transition-colors"
+                      className="px-2 py-1 text-[11px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md flex items-center gap-1 transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
                       Excluir
@@ -501,7 +501,7 @@ export const Avarias: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleMarcarManutencao(avaria)}
-                          className="px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-md flex items-center gap-1 transition-colors"
+                          className="px-2 py-1 text-[11px] font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-md flex items-center gap-1 transition-colors"
                         >
                           <Wrench className="w-3 h-3" />
                           Manutenção
@@ -510,7 +510,7 @@ export const Avarias: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => { setSelectedAvariaForResolve(avaria); setResolvidoPor(''); setResolveDialogOpen(true); }}
-                        className="px-2.5 py-1.5 text-[11px] font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-md flex items-center gap-1 transition-colors"
+                        className="px-2 py-1 text-[11px] font-bold text-white bg-[#1B2A4A] hover:bg-[#152238] rounded-md flex items-center gap-1 transition-colors"
                       >
                         <CheckCircle className="w-3 h-3 text-[#F5D800]" />
                         Concluir Reparo
