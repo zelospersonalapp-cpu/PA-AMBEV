@@ -203,7 +203,7 @@ export const ChecklistRetiradaModal: React.FC<ChecklistRetiradaModalProps> = ({
               <option value="">Selecione o operador...</option>
               {solicitantes.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.nome} (Matrícula: {c.matricula || '—'})
+                  {c.nome}
                 </option>
               ))}
             </select>
