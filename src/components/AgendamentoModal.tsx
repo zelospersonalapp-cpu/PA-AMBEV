@@ -319,68 +319,91 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           </button>
         </div>
 
-        {/* Conflict Warning Box */}
-        {conflictWarning && conflictAgendamento && (
-          <div className="mx-6 mt-4 rounded-xl bg-rose-50 border border-rose-200 overflow-hidden animate-fadeIn">
-            <div className="flex items-center gap-2 bg-rose-100 border-b border-rose-200 px-4 py-2.5">
-              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span className="text-xs font-bold text-rose-800 uppercase tracking-wider">PTA com agendamento em vigor</span>
+        {/* Conflict Warning — apenas texto simples inline quando não há dados completos */}
+        {conflictWarning && !conflictAgendamento && (
+          <div className="mx-6 mt-4 p-3.5 rounded-lg bg-rose-50 border border-rose-200 flex items-start gap-3 text-sm text-rose-800">
+            <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold">Conflito de Reserva</div>
+              <div className="text-xs mt-0.5">{conflictWarning}</div>
             </div>
-            <div className="p-4 space-y-2.5">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-rose-900">
-                <div>
-                  <span className="font-semibold block text-rose-500 uppercase text-[10px]">Solicitante</span>
-                  <span className="font-bold">{conflictAgendamento.solicitante || conflictAgendamento.solicitante_nome || '—'}</span>
+          </div>
+        )}
+
+        {/* Popup Modal de Conflito */}
+        {conflictAgendamento && (
+          <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border border-rose-200 overflow-hidden">
+              <div className="bg-rose-600 px-5 py-3.5 flex items-center gap-2.5">
+                <AlertTriangle className="w-5 h-5 text-white shrink-0" />
+                <span className="text-sm font-bold text-white uppercase tracking-wide">PTA com agendamento em vigor</span>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-2 gap-x-5 gap-y-3 text-sm">
+                  <div>
+                    <span className="block text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-0.5">Solicitante</span>
+                    <span className="font-semibold text-gray-900">{conflictAgendamento.solicitante || conflictAgendamento.solicitante_nome || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-0.5">Área / Empresa</span>
+                    <span className="font-semibold text-gray-900">{conflictAgendamento.area_empresa || conflictAgendamento.area_nome || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-0.5">Período</span>
+                    <span className="font-semibold text-gray-900">{formatDateBR(conflictAgendamento.data_inicio)} → {formatDateBR(conflictAgendamento.data_fim)}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-0.5">Atividade</span>
+                    <span className="font-semibold text-gray-900">{conflictAgendamento.tipo_atividade || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-0.5">Status</span>
+                    <span className="font-semibold text-gray-900 capitalize">{conflictAgendamento.status || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-0.5">Local (UG)</span>
+                    <span className="font-semibold text-gray-900">{conflictAgendamento.ug || conflictAgendamento.local_completo || '—'}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-semibold block text-rose-500 uppercase text-[10px]">Área / Empresa</span>
-                  <span className="font-bold">{conflictAgendamento.area_empresa || conflictAgendamento.area_nome || '—'}</span>
-                </div>
-                <div>
-                  <span className="font-semibold block text-rose-500 uppercase text-[10px]">Período</span>
-                  <span className="font-bold">{formatDateBR(conflictAgendamento.data_inicio)} → {formatDateBR(conflictAgendamento.data_fim)}</span>
-                </div>
-                <div>
-                  <span className="font-semibold block text-rose-500 uppercase text-[10px]">Atividade</span>
-                  <span className="font-bold">{conflictAgendamento.tipo_atividade || '—'}</span>
-                </div>
-                <div>
-                  <span className="font-semibold block text-rose-500 uppercase text-[10px]">Status</span>
-                  <span className="font-bold capitalize">{conflictAgendamento.status || '—'}</span>
-                </div>
-                <div>
-                  <span className="font-semibold block text-rose-500 uppercase text-[10px]">Local (UG)</span>
-                  <span className="font-bold">{conflictAgendamento.ug || conflictAgendamento.local_completo || '—'}</span>
+                <p className="text-xs text-gray-500 border-t border-gray-100 pt-3">
+                  Deseja cancelar este agendamento para usar a PTA nas suas datas? O agendamento acima será marcado como cancelado.
+                </p>
+                <div className="flex gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => { setConflictAgendamento(null); setConflictWarning(null); }}
+                    className="flex-1 py-2.5 px-4 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Manter e Fechar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={cancelingConflict}
+                    onClick={async () => {
+                      setCancelingConflict(true);
+                      try {
+                        const { error } = await supabase
+                          .from('agendamentos')
+                          .update({ status: 'cancelado' })
+                          .eq('id', conflictAgendamento.id);
+                        if (error) throw error;
+                        setConflictWarning(null);
+                        setConflictAgendamento(null);
+                      } catch (err: any) {
+                        alert('Erro ao cancelar: ' + err.message);
+                      } finally {
+                        setCancelingConflict(false);
+                      }
+                    }}
+                    className="flex-1 py-2.5 px-4 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-50 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    {cancelingConflict
+                      ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>Cancelando...</span></>
+                      : <><X className="w-4 h-4" /><span>Cancelar e liberar PTA</span></>
+                    }
+                  </button>
                 </div>
               </div>
-              <button
-                type="button"
-                disabled={cancelingConflict}
-                onClick={async () => {
-                  if (!window.confirm('Cancelar o agendamento em vigor para liberar esta PTA?')) return;
-                  setCancelingConflict(true);
-                  try {
-                    const { error } = await supabase
-                      .from('agendamentos')
-                      .update({ status: 'cancelado' })
-                      .eq('id', conflictAgendamento.id);
-                    if (error) throw error;
-                    setConflictWarning(null);
-                    setConflictAgendamento(null);
-                  } catch (err: any) {
-                    alert('Erro ao cancelar: ' + err.message);
-                  } finally {
-                    setCancelingConflict(false);
-                  }
-                }}
-                className="w-full py-2 px-3 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5"
-              >
-                {cancelingConflict ? (
-                  <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>Cancelando...</span></>
-                ) : (
-                  <><X className="w-3.5 h-3.5" /><span>Cancelar agendamento em vigor e usar esta PTA</span></>
-                )}
-              </button>
             </div>
           </div>
         )}
