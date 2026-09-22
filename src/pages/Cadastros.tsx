@@ -162,10 +162,14 @@ export const Cadastros: React.FC = () => {
   };
 
   const handleDelete = async (tabela: 'areas_empresas' | 'locais' | 'colaboradores', id: string) => {
-    const confirmed = window.confirm(
-      'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'
-    );
-    if (!confirmed) return;
+    const ok = await confirm({
+      title: 'Excluir Registro',
+      message: 'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.',
+      confirmLabel: 'Excluir',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     try {
       const { error } = await supabase.from(tabela).delete().eq('id', id);
