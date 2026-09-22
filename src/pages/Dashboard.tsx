@@ -310,7 +310,7 @@ export const Dashboard: React.FC = () => {
                         {/* Linha 1: PTA + atividade + prioritário */}
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-sm text-gray-900">
-                            {item.pta_patrimonio || item.patrimonio || 'PTA'}
+                            PTA {item.pta_patrimonio || item.patrimonio || '—'}
                           </span>
                           <span className="text-gray-400">—</span>
                           <span className="text-sm text-gray-700">{item.tipo_atividade}</span>
@@ -335,7 +335,7 @@ export const Dashboard: React.FC = () => {
                           {(item.liberado_por || item.liberador_nome) && (
                             <>
                               <span>•</span>
-                              <span>Liberador: <strong className="text-gray-700">{item.liberado_por || item.liberador_nome}</strong></span>
+                              <span>Agendamento feito por: <strong className="text-gray-700">{item.liberado_por || item.liberador_nome}</strong></span>
                             </>
                           )}
                         </div>
