@@ -238,9 +238,9 @@ export const Cadastros: React.FC = () => {
     setSaving(true);
     try {
       const payload = {
-        ug: localUg.trim(),
-        descricao: localDescricao.trim() || null,
-        setor_linha: localSetorLinha.trim() || null,
+        ug: localUg.trim().toUpperCase(),
+        descricao: localDescricao.trim().toUpperCase() || null,
+        setor_linha: localSetorLinha.trim().toUpperCase() || null,
         ponto_ref: null,
         ativo: localAtivo,
       };
@@ -755,7 +755,7 @@ export const Cadastros: React.FC = () => {
                     value={localUg}
                     onChange={(e) => setLocalUg(e.target.value)}
                     placeholder="Ex: Brassagem, Filtração, Utilidades..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium uppercase"
                   />
                 </div>
                 <div>
@@ -766,7 +766,7 @@ export const Cadastros: React.FC = () => {
                     value={localDescricao}
                     onChange={(e) => setLocalDescricao(e.target.value)}
                     placeholder="Ex: Área de Envase, Sala de Compressores..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
                 </div>
                 <div>
@@ -776,7 +776,7 @@ export const Cadastros: React.FC = () => {
                     value={localSetorLinha}
                     onChange={(e) => setLocalSetorLinha(e.target.value)}
                     placeholder="Ex: Linha 501, Caldeiras..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer pt-2">
