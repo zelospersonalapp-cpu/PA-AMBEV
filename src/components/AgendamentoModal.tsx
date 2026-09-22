@@ -562,7 +562,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                       p.status === 'disponivel' ? '#16a34a' :       /* verde */
                       p.status === 'em_manutencao' ? '#dc2626' :    /* vermelho */
                       p.status === 'avariada' ? '#dc2626' :         /* vermelho */
-                      p.status === 'em_uso' ? '#2563eb' :           /* azul */
+                      p.status === 'em_uso' ? '#2563eb' :           /* azul — pode agendar para outra data */
                       '#9CA3AF',                                     /* cinza */
                     fontWeight: (p.status === 'disponivel' || p.status === 'em_manutencao' || p.status === 'avariada') ? '600' : 'normal',
                   }}
@@ -932,7 +932,7 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                       {ptas.filter((p) => p.status === 'disponivel').length === 0 ? (
                         <p className="text-xs text-gray-400">Nenhuma PTA disponível no momento.</p>
                       ) : (
-                        ptas.filter((p) => p.status === 'disponivel').map((p) => (
+                        ptas.filter((p) => p.status === 'disponivel' || p.status === 'em_uso').map((p) => (
                           <button
                             key={p.id}
                             type="button"
