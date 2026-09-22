@@ -20,6 +20,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useConfirmDialog } from './ConfirmDialog';
 import { useToast } from './Toast';
 import { formatDateBR, formatDateTimeBR, getAgendamentoStatusConfig } from '../lib/formatters';
 import type { Agendamento, VAgenda, PTA, Checklist, Colaborador } from '../types';
@@ -42,6 +43,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
   onOpenEdit,
 }) => {
   const toast = useToast();
+  const { confirm, dialog } = useConfirmDialog();
   const [loading, setLoading] = useState(false);
   const [agendamento, setAgendamento] = useState<Agendamento | null>(null);
   const [vAgendaItem, setVAgendaItem] = useState<VAgenda | null>(null);
@@ -151,7 +153,14 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
 
   const handleDeletarAgendamento = async () => {
     if (!agendamento) return;
-    if (!window.confirm('⚠️ Isso vai apagar o agendamento permanentemente do banco de dados. Não tem como desfazer. Confirma?')) return;
+    const ok = await confirm({
+      title: 'Deletar Agendamento',
+      message: 'Isso vai apagar o agendamento permanentemente do banco de dados. Esta ação não pode ser desfeita.',
+      confirmLabel: 'Deletar permanente',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       // Apagar checklists vinculados primeiro
       await supabase.from('checklists').delete().eq('agendamento_id', agendamento.id);
@@ -168,7 +177,14 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
 
   const handleCancelarAgendamento = async () => {
     if (!agendamento) return;
-    if (!window.confirm('Tem certeza que deseja cancelar este agendamento?')) return;
+    const ok2 = await confirm({
+      title: 'Cancelar Agendamento',
+      message: 'Tem certeza que deseja cancelar este agendamento? O status mudará para cancelado.',
+      confirmLabel: 'Cancelar agendamento',
+      cancelLabel: 'Manter',
+      variant: 'warning',
+    });
+    if (!ok2) return;
 
     try {
       const { error } = await supabase
