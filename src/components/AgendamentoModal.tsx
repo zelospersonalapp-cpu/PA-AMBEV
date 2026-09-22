@@ -557,7 +557,15 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               <option value="">Selecione uma PTA cadastrada...</option>
               {ptas.map((p) => (
                 <option key={p.id} value={p.id}
-                  style={{ color: (p.status === 'em_manutencao' || p.status === 'avariada' || p.status === 'inativa') ? '#9CA3AF' : 'inherit' }}
+                  style={{
+                    color:
+                      p.status === 'disponivel' ? '#16a34a' :       /* verde */
+                      p.status === 'em_manutencao' ? '#dc2626' :    /* vermelho */
+                      p.status === 'avariada' ? '#dc2626' :         /* vermelho */
+                      p.status === 'em_uso' ? '#2563eb' :           /* azul */
+                      '#9CA3AF',                                     /* cinza */
+                    fontWeight: (p.status === 'disponivel' || p.status === 'em_manutencao' || p.status === 'avariada') ? '600' : 'normal',
+                  }}
                 >
                   {p.patrimonio} — {p.tipo === 'articulada' ? 'ARTICULADA' : 'TESOURINHA'} ({p.modelo}) | {p.status === 'disponivel' ? '✓ Disponível' : p.status === 'em_uso' ? '⏳ Em uso' : p.status === 'em_manutencao' ? '🔧 Em manutenção' : p.status === 'avariada' ? '⚠️ Avariada' : p.status}
                 </option>
