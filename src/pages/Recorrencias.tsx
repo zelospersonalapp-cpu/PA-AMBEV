@@ -163,7 +163,14 @@ export const Recorrencias: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Deseja excluir esta regra de recorrência?')) return;
+    const ok = await confirm({
+      title: 'Excluir Recorrência',
+      message: 'Deseja excluir esta regra de recorrência? Os agendamentos já gerados não serão removidos.',
+      confirmLabel: 'Excluir',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       const { error } = await supabase.from('recorrencias').delete().eq('id', id);
       if (error) throw error;
