@@ -468,21 +468,25 @@ export const Agenda: React.FC = () => {
                           }}
                           className={`p-2 rounded-lg border text-xs cursor-pointer shadow-2xs hover:shadow-xs transition-all ${statusConfig.bg}`}
                         >
+                          {/* Linha 1: Local + badge prioritário */}
                           <div className="flex items-center justify-between gap-1 mb-0.5">
-                            <span className="font-bold text-gray-900 truncate">
-                              {item.solicitante_nome || item.nome_solicitante || 'Solicitante'}
+                            <span className="font-bold text-gray-900 truncate text-[11px]">
+                              {item.local_descricao || item.ug || '—'}
+                              {item.setor_linha ? ` · ${item.setor_linha}` : ''}
                             </span>
                             {isPrioritario && (
-                              <span className="px-1 py-0.2 rounded text-[9px] font-extrabold bg-[#F5D800] text-black border border-amber-400">
+                              <span className="px-1 rounded text-[9px] font-extrabold bg-[#F5D800] text-black border border-amber-400 shrink-0">
                                 ★
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] font-medium text-gray-800 truncate">
+                          {/* Linha 2: Tipo de atividade */}
+                          <div className="text-[10px] text-gray-600 truncate">
                             {item.tipo_atividade}
                           </div>
-                          <div className="text-[10px] text-gray-500 truncate mt-0.5">
-                            {item.local_descricao || item.ug || 'Local não informado'}
+                          {/* Linha 3: Solicitante */}
+                          <div className="text-[10px] text-gray-500 truncate mt-0.5 font-medium">
+                            {item.solicitante || item.solicitante_nome || item.nome_solicitante || '—'}
                           </div>
                         </div>
                       );
