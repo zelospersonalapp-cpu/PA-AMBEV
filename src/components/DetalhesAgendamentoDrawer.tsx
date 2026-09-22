@@ -149,6 +149,23 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
     }
   };
 
+  const handleDeletarAgendamento = async () => {
+    if (!agendamento) return;
+    if (!window.confirm('⚠️ Isso vai apagar o agendamento permanentemente do banco de dados. Não tem como desfazer. Confirma?')) return;
+    try {
+      // Apagar checklists vinculados primeiro
+      await supabase.from('checklists').delete().eq('agendamento_id', agendamento.id);
+      // Apagar o agendamento
+      const { error } = await supabase.from('agendamentos').delete().eq('id', agendamento.id);
+      if (error) throw error;
+      toast.success('Deletado', 'Agendamento removido permanentemente.');
+      onClose();
+      onUpdated();
+    } catch (err: any) {
+      toast.error('Erro ao deletar', err.message || 'Não foi possível remover o agendamento.');
+    }
+  };
+
   const handleCancelarAgendamento = async () => {
     if (!agendamento) return;
     if (!window.confirm('Tem certeza que deseja cancelar este agendamento?')) return;
@@ -614,19 +631,27 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                   )}
                 </div>
 
-                {/* Secondary Actions (Edit / Cancel) */}
+                {/* Secondary Actions (Edit / Cancel / Delete) */}
                 <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
-                  <div>
+                  <div className="flex items-center gap-3">
                     {agendamento.status !== 'concluido' && agendamento.status !== 'cancelado' && (
                       <button
                         type="button"
                         onClick={handleCancelarAgendamento}
-                        className="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center gap-1 hover:underline"
+                        className="text-xs text-amber-600 hover:text-amber-800 font-semibold flex items-center gap-1 hover:underline"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>Cancelar Agendamento</span>
+                        <span>Cancelar</span>
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={handleDeletarAgendamento}
+                      className="text-xs text-rose-600 hover:text-white hover:bg-rose-600 font-semibold flex items-center gap-1 border border-rose-200 hover:border-rose-600 px-2 py-1 rounded-md transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Deletar permanente</span>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-2">
