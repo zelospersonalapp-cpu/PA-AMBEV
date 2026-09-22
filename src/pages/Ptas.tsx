@@ -127,7 +127,7 @@ export const Ptas: React.FC = () => {
         altura_max_m: Number(alturaMax),
         capacidade_kg: Number(capacidadeKg),
         num_serie: numSerie.trim() || null,
-        nivel_bateria: Number(nivelBateria),
+        nivel_bateria: 100,
         status,
         observacoes: observacoes.trim() || null,
       };
@@ -209,7 +209,7 @@ export const Ptas: React.FC = () => {
             Cadastro e Gestão de PTAs
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-            Inventário de Plataformas Articuladas e Tesourinhas, nível de bateria e status de prontidão.
+            Inventário de Plataformas Articuladas e Tesourinhas e status de prontidão.
           </p>
         </div>
 
@@ -316,7 +316,7 @@ export const Ptas: React.FC = () => {
                   <div className="text-[11px] text-gray-500 space-y-0.5">
                     <div className="flex items-center gap-1.5">
                       <span className="font-semibold text-gray-700 capitalize">
-                        {item.tipo === 'articulada' ? 'Articulada' : 'Tesourinha'}
+                        {item.tipo === 'articulada' ? 'ARTICULADA' : 'TESOURINHA'}
                       </span>
                       <span className="text-gray-300">·</span>
                       <span className="truncate">{item.fabricante} {item.modelo}</span>
@@ -325,29 +325,6 @@ export const Ptas: React.FC = () => {
                       <span>{item.altura_max_m}m</span>
                       <span className="text-gray-300">·</span>
                       <span>{item.capacidade_kg}kg</span>
-                    </div>
-                  </div>
-
-                  {/* Battery Level Visual Bar */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-gray-500 font-medium flex items-center gap-1">
-                        <Battery className="w-3 h-3 text-emerald-600" />
-                        Bateria
-                      </span>
-                      <span className="font-bold text-gray-900">{item.nivel_bateria}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className={`h-1.5 rounded-full transition-all ${
-                          item.nivel_bateria > 50
-                            ? 'bg-emerald-500'
-                            : item.nivel_bateria > 20
-                            ? 'bg-amber-500'
-                            : 'bg-rose-500'
-                        }`}
-                        style={{ width: `${item.nivel_bateria}%` }}
-                      />
                     </div>
                   </div>
 
