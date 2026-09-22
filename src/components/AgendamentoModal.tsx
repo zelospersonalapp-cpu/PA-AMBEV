@@ -562,9 +562,15 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               <div className="flex gap-2">
                 <select
                   value={solicitanteId}
-                  onChange={(e) => setSolicitanteId(e.target.value)}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSolicitanteId(id);
+                    // Auto-preencher empresa do solicitante
+                    const sol = colaboradores.find((c) => c.id === id);
+                    if (sol?.area_empresa_id) setAreaEmpresaId(sol.area_empresa_id);
+                  }}
                   required
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white uppercase"
                 >
                   <option value="">Selecione o solicitante...</option>
                   {filteredColaboradores.map((c) => (
@@ -917,9 +923,9 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                     <input
                       type="text"
                       value={novoSolNome}
-                      onChange={(e) => setNovoSolNome(e.target.value)}
-                      placeholder="Ex: João Silva"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800]"
+                      onChange={(e) => setNovoSolNome(e.target.value.toUpperCase())}
+                      placeholder="Ex: JOÃO SILVA"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#F5D800] uppercase"
                       autoFocus
                     />
                   </div>
@@ -964,7 +970,7 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                           const { data, error } = await supabase
                             .from('colaboradores')
                             .insert([{
-                              nome: novoSolNome.trim(),
+                              nome: novoSolNome.trim().toUpperCase(),
                               contato: novoSolContato || null,
                               area_empresa_id: novoSolAreaId || null,
                               papel: 'solicitante',
@@ -973,9 +979,10 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                             .select()
                             .single();
                           if (error) throw error;
-                          // Atualizar lista e selecionar o novo solicitante
+                          // Atualizar lista, selecionar novo solicitante e preencher empresa
                           setColaboradores((prev) => [...prev, data]);
                           setSolicitanteId(data.id);
+                          if (data.area_empresa_id) setAreaEmpresaId(data.area_empresa_id);
                           setNovoSolicitanteOpen(false);
                         } catch (err: any) {
                           console.error(err);
