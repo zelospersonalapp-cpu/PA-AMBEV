@@ -153,7 +153,14 @@ export const Ptas: React.FC = () => {
   };
 
   const handleExcluirPta = async (pta: PTA) => {
-    if (!window.confirm(`Excluir PTA ${pta.patrimonio}? Esta ação não pode ser desfeita.`)) return;
+    const ok = await confirm({
+      title: `Excluir PTA ${pta.patrimonio}`,
+      message: 'Esta ação não pode ser desfeita. Histórico de avarias e agendamentos vinculados serão mantidos.',
+      confirmLabel: 'Excluir PTA',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       const { error } = await supabase.from('ptas').delete().eq('id', pta.id);
       if (error) throw error;
