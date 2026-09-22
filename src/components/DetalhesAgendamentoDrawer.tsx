@@ -517,7 +517,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                         <span>
                           Solicitante:{' '}
                           <strong>
-                            {vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || '-'}
+                            {vAgendaItem?.solicitante || vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || '-'}
                           </strong>
                         </span>
                       </div>
@@ -531,7 +531,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                         <div>
                           <span className="text-gray-500 block">Liberado por:</span>
                           <span className="font-semibold text-gray-900">
-                            {vAgendaItem?.liberador_nome || 'Facilities'}
+                            {vAgendaItem?.liberado_por || vAgendaItem?.liberador_nome || 'Facilities'}
                           </span>
                           <span className="text-[10px] text-gray-400 block">
                             {formatDateTimeBR(agendamento.liberado_em)}
@@ -542,7 +542,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                         <div>
                           <span className="text-gray-500 block">Retirado por:</span>
                           <span className="font-semibold text-gray-900">
-                            {vAgendaItem?.retirador_nome || 'Operador'}
+                            {vAgendaItem?.retirado_por || vAgendaItem?.retirador_nome || 'Operador'}
                           </span>
                           <span className="text-[10px] text-gray-400 block">
                             {formatDateTimeBR(agendamento.retirado_em)}
@@ -680,7 +680,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
       {sharePopupOpen && agendamento && (() => {
         const patr = vAgendaItem?.pta_patrimonio || vAgendaItem?.patrimonio || pta?.patrimonio || 'PTA';
         const tipoPta = (pta?.tipo || vAgendaItem?.pta_tipo) === 'articulada' ? 'Articulada' : 'Tesourinha';
-        const solNome = vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || 'Solicitante';
+        const solNome = vAgendaItem?.solicitante || vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || 'Solicitante';
         const solObj = colaboradores.find((c) => c.id === agendamento.solicitante_id);
         const solContato = solObj?.contato || '';
         const dtRet = formatDateBR(agendamento.data_inicio);
