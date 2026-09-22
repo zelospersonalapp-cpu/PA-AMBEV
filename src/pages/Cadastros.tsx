@@ -464,10 +464,9 @@ export const Cadastros: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
               <tr>
+                <th className="py-3 px-4">UG</th>
                 <th className="py-3 px-4">LOCAL DE UTILIZAÇÃO</th>
                 <th className="py-3 px-4">Setor / Linha</th>
-                <th className="py-3 px-4">Ponto de Referência</th>
-                <th className="py-3 px-4">Descrição</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Ações</th>
               </tr>
@@ -481,10 +480,9 @@ export const Cadastros: React.FC = () => {
                 )
                 .map((loc) => (
                   <tr key={loc.id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4 font-bold text-gray-900">{loc.ug}</td>
-                    <td className="py-3 px-4 text-gray-800">{loc.setor_linha}</td>
-                    <td className="py-3 px-4 text-gray-600">{loc.ponto_ref || '-'}</td>
-                    <td className="py-3 px-4 text-gray-500 max-w-xs truncate">{loc.descricao || '-'}</td>
+                    <td className="py-3 px-4 font-bold text-gray-900 text-[11px]">{loc.ug}</td>
+                    <td className="py-3 px-4 text-gray-800">{loc.descricao || '-'}</td>
+                    <td className="py-3 px-4 text-gray-600">{loc.setor_linha || '-'}</td>
                     <td className="py-3 px-4">
                       {loc.ativo ? (
                         <span className="text-emerald-700 font-bold">Ativo</span>
