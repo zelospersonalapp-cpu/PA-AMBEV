@@ -633,7 +633,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               <option value="">Selecione a UG...</option>
               {locais.map((loc) => (
                 <option key={loc.id} value={loc.id}>
-                  {loc.ug}{loc.descricao && loc.descricao !== loc.ug ? ` — ${loc.descricao}` : ""}
+                  {loc.ug}{loc.descricao && loc.descricao !== loc.ug ? ` — ${loc.descricao}` : ""}{loc.setor_linha ? ` · ${loc.setor_linha}` : ""}
                 </option>
               ))}
             </select>
