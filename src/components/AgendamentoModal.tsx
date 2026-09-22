@@ -89,6 +89,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [novoSolicitanteOpen, setNovoSolicitanteOpen] = useState(false);
+  const [ptaBloqueadaPopup, setPtaBloqueadaPopup] = useState(false);
+  const [ptaBloqueadaNome, setPtaBloqueadaNome] = useState('');
   const [notifPopupOpen, setNotifPopupOpen] = useState(false);
   const [notifData, setNotifData] = useState<{ptaPatrimonio: string; ptaTipo: string; dataRetirada: string; dataEntrega: string; solicitanteNome: string; solicitanteContato: string} | null>(null);
   const [novoSolNome, setNovoSolNome] = useState('');
@@ -494,14 +496,24 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             </label>
             <select
               value={ptaId}
-              onChange={(e) => setPtaId(e.target.value)}
+              onChange={(e) => {
+                const sel = ptas.find((p) => p.id === e.target.value);
+                if (sel && (sel.status === 'em_manutencao' || sel.status === 'avariada' || sel.status === 'inativa')) {
+                  setPtaBloqueadaNome(`${sel.patrimonio} (${sel.status === 'em_manutencao' ? 'Em manutenção' : sel.status === 'avariada' ? 'Avariada' : 'Inativa'})`);
+                  setPtaBloqueadaPopup(true);
+                  return;
+                }
+                setPtaId(e.target.value);
+              }}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
             >
               <option value="">Selecione uma PTA cadastrada...</option>
               {ptas.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.patrimonio} — {p.tipo === 'articulada' ? 'Articulada' : 'Tesourinha'} ({p.modelo}) | Bateria: {p.nivel_bateria}% | Status: {p.status}
+                <option key={p.id} value={p.id}
+                  style={{ color: (p.status === 'em_manutencao' || p.status === 'avariada' || p.status === 'inativa') ? '#9CA3AF' : 'inherit' }}
+                >
+                  {p.patrimonio} — {p.tipo === 'articulada' ? 'ARTICULADA' : 'TESOURINHA'} ({p.modelo}) | {p.status === 'disponivel' ? '✓ Disponível' : p.status === 'em_uso' ? '⏳ Em uso' : p.status === 'em_manutencao' ? '🔧 Em manutenção' : p.status === 'avariada' ? '⚠️ Avariada' : p.status}
                 </option>
               ))}
             </select>
@@ -841,6 +853,53 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
               </div>
             );
           })()}
+
+          {/* Popup: PTA indisponível */}
+          {ptaBloqueadaPopup && (
+            <div className="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm border border-rose-200 overflow-hidden">
+                <div className="bg-rose-600 px-5 py-4 flex items-center gap-2.5">
+                  <span className="text-white text-xl">🔧</span>
+                  <h3 className="font-bold text-white text-sm">PTA Indisponível</h3>
+                </div>
+                <div className="p-5 space-y-4">
+                  <p className="text-sm text-gray-700">
+                    <strong>{ptaBloqueadaNome}</strong> não está disponível para agendamento.
+                  </p>
+                  <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                    <p className="text-xs font-bold text-gray-600 mb-2">PTAs disponíveis na data:</p>
+                    <div className="space-y-1.5">
+                      {ptas.filter((p) => p.status === 'disponivel').length === 0 ? (
+                        <p className="text-xs text-gray-400">Nenhuma PTA disponível no momento.</p>
+                      ) : (
+                        ptas.filter((p) => p.status === 'disponivel').map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              setPtaId(p.id);
+                              setPtaBloqueadaPopup(false);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-lg bg-white border border-gray-200 hover:border-[#2563EB] hover:bg-blue-50 transition-colors text-xs"
+                          >
+                            <span className="font-bold text-gray-900">{p.patrimonio}</span>
+                            <span className="text-gray-500 ml-1.5">{p.tipo === 'articulada' ? 'Articulada' : 'Tesourinha'} · {p.altura_max_m}m · {p.capacidade_kg}kg</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPtaBloqueadaPopup(false)}
+                    className="w-full py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Mini-modal: Cadastrar Novo Solicitante */}
           {novoSolicitanteOpen && (
