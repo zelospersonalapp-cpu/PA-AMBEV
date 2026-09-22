@@ -60,20 +60,66 @@ const ConflitoBusca: React.FC<{
   const dtFim = new Date(agendamento.data_fim + 'T00:00:00').toLocaleDateString('pt-BR');
 
   return (
-    <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-xs space-y-2">
-      <p className="font-bold text-rose-800">📋 Agendamento em conflito:</p>
-      <p className="text-rose-700">
-        <strong>{agendamento.area_empresa || agendamento.solicitante || 'Área'}</strong>
-        {' — '}{dtIni}{dtIni !== dtFim ? ` até ${dtFim}` : ''}
-      </p>
-      <p className="text-rose-600">Status: <strong>{agendamento.status?.toUpperCase()}</strong></p>
-      <button
-        type="button"
-        onClick={() => onCancelarConflito(agendamento.id)}
-        className="w-full py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors"
-      >
-        ❌ Cancelar este agendamento e liberar a PTA
-      </button>
+    <div className="bg-rose-50 border-2 border-rose-300 rounded-xl overflow-hidden text-xs">
+      {/* Header */}
+      <div className="bg-rose-600 px-4 py-2.5 flex items-center gap-2">
+        <span className="text-white font-bold text-[11px] uppercase tracking-wider">⚠️ PTA com agendamento em vigor</span>
+      </div>
+
+      {/* Grid de informações */}
+      <div className="p-3 grid grid-cols-2 gap-x-4 gap-y-2.5">
+        <div>
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Solicitante</p>
+          <p className="font-semibold text-gray-900">{agendamento.solicitante || '—'}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Área / Empresa</p>
+          <p className="font-semibold text-gray-900">{agendamento.area_empresa || '—'}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Período</p>
+          <p className="font-semibold text-gray-900">{dtIni}{dtIni !== dtFim ? ` → ${dtFim}` : ''}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Liberador</p>
+          <p className="font-semibold text-gray-900">{agendamento.liberado_por || '—'}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Local de Utilização</p>
+          <p className="font-semibold text-gray-900">
+            {agendamento.local_descricao || agendamento.ug || '—'}
+            {agendamento.setor_linha ? ` · ${agendamento.setor_linha}` : ''}
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Status</p>
+          <p className="font-semibold text-gray-900">{agendamento.status?.toUpperCase()}</p>
+        </div>
+        <div className="col-span-2">
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Tipo de Atividade</p>
+          <p className="font-semibold text-gray-900">{agendamento.tipo_atividade || '—'}</p>
+        </div>
+        {agendamento.descricao && (
+          <div className="col-span-2">
+            <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Descrição da Atividade</p>
+            <p className="text-gray-700 italic">{agendamento.descricao}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="px-3 pb-3 text-[10px] text-gray-500 italic border-t border-rose-200 pt-2">
+        Apenas este agendamento específico será cancelado. Os demais agendamentos recorrentes da mesma série continuam ativos.
+      </div>
+
+      <div className="px-3 pb-3">
+        <button
+          type="button"
+          onClick={() => onCancelarConflito(agendamento.id)}
+          className="w-full py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+        >
+          ✕ Cancelar e liberar a PTA
+        </button>
+      </div>
     </div>
   );
 };
