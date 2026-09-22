@@ -24,6 +24,7 @@ import { GRUPOS_ANOMALIA } from '../data/anomalias';
 
 export const Avarias: React.FC = () => {
   const toast = useToast();
+  const { confirm, dialog } = useConfirmDialog();
   const [loading, setLoading] = useState(true);
   const [avarias, setAvarias] = useState<Avaria[]>([]);
   const [resumoPtas, setResumoPtas] = useState<VAvariasPTA[]>([]);
