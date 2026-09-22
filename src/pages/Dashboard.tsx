@@ -307,10 +307,13 @@ export const Dashboard: React.FC = () => {
                       </div>
 
                       <div className="min-w-0">
+                        {/* Linha 1: PTA + atividade + prioritário */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-sm text-gray-900 truncate">
-                            {item.pta_patrimonio || item.patrimonio || 'PTA'} — {item.tipo_atividade}
+                          <span className="font-bold text-sm text-gray-900">
+                            {item.pta_patrimonio || item.patrimonio || 'PTA'}
                           </span>
+                          <span className="text-gray-400">—</span>
+                          <span className="text-sm text-gray-700">{item.tipo_atividade}</span>
                           {isPrioritario && (
                             <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#F5D800] text-[#1B2A4A] border border-amber-300">
                               ★ PRIORITÁRIO
@@ -318,12 +321,23 @@ export const Dashboard: React.FC = () => {
                           )}
                         </div>
 
+                        {/* Linha 2: Local de Utilização */}
+                        <div className="text-xs text-gray-600 mt-0.5 flex items-center gap-1.5">
+                          <span className="font-semibold">
+                            {item.local_descricao || item.ug || '—'}
+                            {item.setor_linha ? ` · ${item.setor_linha}` : ''}
+                          </span>
+                        </div>
+
+                        {/* Linha 3: Solicitante e Liberador */}
                         <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
-                          <span>Área: <strong>{item.area_nome || item.nome_area || 'Área'}</strong></span>
-                          <span>•</span>
-                          <span>UG: <strong>{item.ug || 'Principal'}</strong></span>
-                          <span>•</span>
-                          <span>Solicitante: {item.solicitante_nome || item.nome_solicitante || '-'}</span>
+                          <span>Solicitante: <strong className="text-gray-700">{item.solicitante || item.solicitante_nome || item.nome_solicitante || '-'}</strong></span>
+                          {(item.liberado_por || item.liberador_nome) && (
+                            <>
+                              <span>•</span>
+                              <span>Liberador: <strong className="text-gray-700">{item.liberado_por || item.liberador_nome}</strong></span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
