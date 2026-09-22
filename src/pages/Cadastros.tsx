@@ -8,6 +8,7 @@ import {
   PlusCircle,
   Edit2,
   Trash2,
+  Copy,
   CheckCircle,
   X,
   Search,
@@ -498,6 +499,21 @@ export const Cadastros: React.FC = () => {
                           title="Editar"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingLocal(null);
+                            setLocalUg(loc.ug || '');
+                            setLocalDescricao(loc.descricao || loc.ug || '');
+                            setLocalSetorLinha(loc.setor_linha || '');
+                            setLocalPontoRef('');
+                            setLocalAtivo(true);
+                            setModalOpen(true);
+                          }}
+                          className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                          title="Duplicar"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete('locais', loc.id)}
