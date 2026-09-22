@@ -251,7 +251,7 @@ export const Cadastros: React.FC = () => {
       } else {
         const { error } = await supabase.from('locais').insert([payload]);
         if (error) throw error;
-        toast.success('Local Cadastrado', 'Novo local/UG registrado.');
+        toast.success('Local Cadastrado', 'Novo local de utilização registrado.');
       }
       setModalOpen(false);
       loadAll();
@@ -315,7 +315,7 @@ export const Cadastros: React.FC = () => {
             {activeTab === 'areas'
               ? 'Nova Empresa'
               : activeTab === 'locais'
-              ? 'Novo Local (UG)'
+              ? 'Novo Local de Utilização'
               : 'Novo Colaborador'}
           </span>
         </button>
@@ -350,7 +350,7 @@ export const Cadastros: React.FC = () => {
           }`}
         >
           <MapPin className="w-4 h-4" />
-          <span>Locais & UGs ({locais.length})</span>
+          <span>Locais de Utilização ({locais.length})</span>
         </button>
 
         <button
@@ -464,7 +464,7 @@ export const Cadastros: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
               <tr>
-                <th className="py-3 px-4">UG (Unidade Gerencial)</th>
+                <th className="py-3 px-4">LOCAL DE UTILIZAÇÃO</th>
                 <th className="py-3 px-4">Setor / Linha</th>
                 <th className="py-3 px-4">Ponto de Referência</th>
                 <th className="py-3 px-4">Descrição</th>
@@ -672,8 +672,8 @@ export const Cadastros: React.FC = () => {
                     : 'Nova Empresa'
                   : activeTab === 'locais'
                   ? editingLocal
-                    ? 'Editar Local'
-                    : 'Novo Local (UG)'
+                    ? 'Editar Local de Utilização'
+                    : 'Novo Local de Utilização'
                   : editingColab
                   ? 'Editar Colaborador'
                   : 'Novo Colaborador'}
@@ -750,13 +750,13 @@ export const Cadastros: React.FC = () => {
             {activeTab === 'locais' && (
               <form onSubmit={handleSaveLocal} className="p-6 space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Unidade Gerencial (UG) *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Local de Utilização *</label>
                   <input
                     type="text"
                     required
                     value={localUg}
                     onChange={(e) => setLocalUg(e.target.value)}
-                    placeholder="Ex: UG-01, UG-Envase, UG-Utilidades"
+                    placeholder="Ex: Brassagem, Filtração, Utilidades, Retornáveis..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium"
                   />
                 </div>
