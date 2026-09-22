@@ -141,10 +141,10 @@ export const Cadastros: React.FC = () => {
 
   const handleEditLocal = (item: Local) => {
     setEditingLocal(item);
-    setLocalUg(item.ug);
-    setLocalSetorLinha(item.setor_linha);
+    setLocalUg(item.ug || '');
+    setLocalSetorLinha(item.setor_linha || '');
     setLocalPontoRef(item.ponto_ref || '');
-    setLocalDescricao(item.descricao || '');
+    setLocalDescricao(item.descricao || item.ug || '');
     setLocalAtivo(item.ativo);
     setModalOpen(true);
   };
@@ -234,13 +234,13 @@ export const Cadastros: React.FC = () => {
 
   const handleSaveLocal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!localUg.trim() || !localDescricao.trim()) return;
+    if (!(localUg || '').trim() || !(localDescricao || '').trim()) return;
     setSaving(true);
     try {
       const payload = {
-        ug: localUg.trim().toUpperCase(),
-        descricao: localDescricao.trim().toUpperCase() || null,
-        setor_linha: localSetorLinha.trim().toUpperCase() || null,
+        ug: (localUg || '').trim().toUpperCase(),
+        descricao: (localDescricao || '').trim().toUpperCase() || null,
+        setor_linha: (localSetorLinha || '').trim().toUpperCase() || null,
         ponto_ref: null,
         ativo: localAtivo,
       };
