@@ -234,14 +234,14 @@ export const Cadastros: React.FC = () => {
 
   const handleSaveLocal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!localUg.trim() || !localSetorLinha.trim()) return;
+    if (!localUg.trim() || !localDescricao.trim()) return;
     setSaving(true);
     try {
       const payload = {
         ug: localUg.trim(),
-        setor_linha: localSetorLinha.trim(),
-        ponto_ref: localPontoRef.trim() || null,
         descricao: localDescricao.trim() || null,
+        setor_linha: localSetorLinha.trim() || null,
+        ponto_ref: null,
         ativo: localAtivo,
       };
       if (editingLocal) {
@@ -748,44 +748,34 @@ export const Cadastros: React.FC = () => {
             {activeTab === 'locais' && (
               <form onSubmit={handleSaveLocal} className="p-6 space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Local de Utilização *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">UG *</label>
                   <input
                     type="text"
                     required
                     value={localUg}
                     onChange={(e) => setLocalUg(e.target.value)}
-                    placeholder="Ex: Brassagem, Filtração, Utilidades, Retornáveis..."
+                    placeholder="Ex: Brassagem, Filtração, Utilidades..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Setor / Linha *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Local de Utilização *</label>
                   <input
                     type="text"
                     required
-                    value={localSetorLinha}
-                    onChange={(e) => setLocalSetorLinha(e.target.value)}
-                    placeholder="Ex: Linha 501, Sala de Compressores, Caldeiras..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Ponto de Referência</label>
-                  <input
-                    type="text"
-                    value={localPontoRef}
-                    onChange={(e) => setLocalPontoRef(e.target.value)}
-                    placeholder="Ex: Próximo ao Portão 4, Mezanino Sul..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Descrição / Restrições</label>
-                  <textarea
-                    rows={2}
                     value={localDescricao}
                     onChange={(e) => setLocalDescricao(e.target.value)}
-                    placeholder="Tomadas 220V/380V, piso reforçado, restrições de tráfego..."
+                    placeholder="Ex: Área de Envase, Sala de Compressores..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Setor / Linha <span className="text-gray-400 font-normal">(opcional)</span></label>
+                  <input
+                    type="text"
+                    value={localSetorLinha}
+                    onChange={(e) => setLocalSetorLinha(e.target.value)}
+                    placeholder="Ex: Linha 501, Caldeiras..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
                   />
                 </div>
