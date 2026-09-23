@@ -970,8 +970,8 @@ Aguardamos sua confirmação. Bom trabalho! 💪`;
               >
                 <span className="mt-0.5 w-5 h-5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
                 <div>
-                  <p className="text-sm font-bold text-gray-800">Somente este agendamento</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Remove apenas este agendamento da série. Os demais permanecem.</p>
+                  <p className="text-sm font-bold text-gray-800">Somente este agendamento para esse solicitante</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Remove apenas este. Os demais agendamentos recorrentes já cadastrados permanecem.</p>
                 </div>
               </button>
               <button
@@ -980,8 +980,8 @@ Aguardamos sua confirmação. Bom trabalho! 💪`;
               >
                 <span className="mt-0.5 w-5 h-5 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
                 <div>
-                  <p className="text-sm font-bold text-gray-800">Todos os agendamentos da série</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Remove este e todos os outros da mesma recorrência. Ação irreversível.</p>
+                  <p className="text-sm font-bold text-gray-800">Este e todos os outros recorrentes para esse solicitante</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Remove este e todos os outros agendamentos recorrentes já cadastrados para esta mesma regra. Ação irreversível.</p>
                 </div>
               </button>
               <button
