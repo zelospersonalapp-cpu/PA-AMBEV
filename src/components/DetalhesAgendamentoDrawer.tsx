@@ -157,7 +157,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
   const handleDeletarAgendamento = () => {
     if (!agendamento) return;
     // Se for recorrente, abre modal de escolha; senão confirma direto
-    if (agendamento.origem === 'recorrente' && agendamento.recorrencia_id) {
+    if (agendamento.origem === 'recorrente') {
       setDeleteRecorrenteOpen(true);
     } else {
       handleConfirmarDeleteSingle();
@@ -181,19 +181,27 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
     if (!agendamento) return;
     setDeleteRecorrenteOpen(false);
     try {
-      if (modo === 'todos' && agendamento.recorrencia_id) {
-        // Buscar todos os agendamentos da mesma recorrência
-        const { data: irmãos } = await supabase
+      if (modo === 'todos') {
+        // Buscar todos os agendamentos recorrentes do mesmo solicitante + PTA
+        let query = supabase
           .from('agendamentos')
           .select('id')
-          .eq('recorrencia_id', agendamento.recorrencia_id);
-        const ids = (irmãos || []).map((a: any) => a.id);
+          .eq('origem', 'recorrente');
+        if (agendamento.recorrencia_id) {
+          query = query.eq('recorrencia_id', agendamento.recorrencia_id);
+        } else {
+          // Fallback: mesmo solicitante e mesma PTA
+          if (agendamento.solicitante_id) query = query.eq('solicitante_id', agendamento.solicitante_id);
+          if (agendamento.pta_id) query = query.eq('pta_id', agendamento.pta_id);
+        }
+        const { data: irmaos } = await query;
+        const ids = (irmaos || []).map((a: any) => a.id);
         if (ids.length > 0) {
           await supabase.from('checklists').delete().in('agendamento_id', ids);
           const { error } = await supabase.from('agendamentos').delete().in('id', ids);
           if (error) throw error;
         }
-        toast.success('Deletados', `${ids.length} agendamentos recorrentes removidos.`);
+        toast.success('Deletados', `${ids.length} agendamento(s) recorrente(s) removido(s).`);
       } else {
         await supabase.from('checklists').delete().eq('agendamento_id', agendamento.id);
         const { error } = await supabase.from('agendamentos').delete().eq('id', agendamento.id);
