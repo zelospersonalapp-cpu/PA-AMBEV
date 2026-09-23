@@ -702,6 +702,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               </label>
               <div className="relative">
                 <input
+                  id="campo-data-inicio"
                   type="date"
                   value={dataInicio}
                   onChange={(e) => {
@@ -1001,7 +1002,18 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                   <div className="grid grid-cols-2 gap-2 pt-1">
                     <button
                       type="button"
-                      onClick={() => setConflictPopupOpen(false)}
+                      onClick={() => {
+                        setConflictPopupOpen(false);
+                        setConflictAgendamento(null);
+                        setConflictWarning(null);
+                        setDataInicio('');
+                        setDataFim('');
+                        // Foco no campo de data após fechar
+                        setTimeout(() => {
+                          const el = document.getElementById('campo-data-inicio');
+                          if (el) el.focus();
+                        }, 100);
+                      }}
                       className="py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       Mudar a data
