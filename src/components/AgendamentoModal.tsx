@@ -146,6 +146,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const [checkingConflict, setCheckingConflict] = useState(false);
   const [conflictWarning, setConflictWarning] = useState<string | null>(null);
   const [conflictAgendamento, setConflictAgendamento] = useState<any | null>(null);
+  const [conflictPopupOpen, setConflictPopupOpen] = useState(false);
   const [erroPopup, setErroPopup] = useState<string | null>(null);
   const [agendamentoConflitante, setAgendamentoConflitante] = useState<any | null>(null);
   const [conflitoPtaId, setConflitoPtaId] = useState<string | null>(null);
@@ -288,12 +289,12 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         if (hasConflict && conflictingAgendamentos.length > 0) {
           const c = conflictingAgendamentos[0];
           setConflictAgendamento(c);
-          setConflictWarning(
-            `Atenção: Esta PTA já possui agendamento de ${formatDateBR(c.data_inicio)} até ${formatDateBR(c.data_fim)} (${c.tipo_atividade}). O banco de dados rejeitará a sobreposição.`
-          );
+          setConflictWarning(null);
+          setConflictPopupOpen(true); // Abrir popup automaticamente
         } else {
           setConflictWarning(null);
           setConflictAgendamento(null);
+          setConflictPopupOpen(false);
         }
       }
     }, 350);
@@ -956,6 +957,74 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                   >
                     Cancelar
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Popup automático de conflito ao escolher data */}
+          {conflictPopupOpen && conflictAgendamento && (
+            <div className="fixed inset-0 z-[80] bg-black/70 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-md border border-rose-200 overflow-hidden">
+                <div className="bg-rose-600 px-5 py-3 flex items-center gap-2">
+                  <span className="text-white text-lg">⚠️</span>
+                  <h3 className="font-bold text-white text-sm">Conflito de Agendamento</h3>
+                </div>
+                <div className="p-4 space-y-3">
+                  <p className="text-xs text-gray-600">Esta PTA já está reservada no período escolhido:</p>
+                  <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                    <div>
+                      <p className="text-[10px] font-bold text-rose-600 uppercase">Solicitante</p>
+                      <p className="font-semibold text-gray-900">{conflictAgendamento.solicitante || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-rose-600 uppercase">Área / Empresa</p>
+                      <p className="font-semibold text-gray-900">{conflictAgendamento.area_empresa || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-rose-600 uppercase">Período</p>
+                      <p className="font-semibold text-gray-900">{formatDateBR(conflictAgendamento.data_inicio)} → {formatDateBR(conflictAgendamento.data_fim)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-rose-600 uppercase">Liberador</p>
+                      <p className="font-semibold text-gray-900">{conflictAgendamento.liberado_por || '—'}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] font-bold text-rose-600 uppercase">Tipo de Atividade</p>
+                      <p className="font-semibold text-gray-900">{conflictAgendamento.tipo_atividade || '—'}</p>
+                    </div>
+                    {conflictAgendamento.descricao && (
+                      <div className="col-span-2">
+                        <p className="text-[10px] font-bold text-rose-600 uppercase">Descrição</p>
+                        <p className="text-gray-700 italic">{conflictAgendamento.descricao}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setConflictPopupOpen(false)}
+                      className="py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Mudar a data
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await supabase.from('agendamentos').update({ status: 'cancelado' }).eq('id', conflictAgendamento.id);
+                          setConflictAgendamento(null);
+                          setConflictPopupOpen(false);
+                          setConflictWarning(null);
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      className="py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors"
+                    >
+                      Cancelar e liberar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
