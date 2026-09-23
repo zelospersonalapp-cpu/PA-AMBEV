@@ -216,7 +216,7 @@ export const Desconformidades: React.FC = () => {
           ) : (
             <div className="divide-y divide-gray-100">
               {rankingSolicitantes.map((s, i) => (
-                <div key={s.nome} className="p-3.5 flex items-center justify-between gap-3">
+                <div key={(s.nome || '').toUpperCase()} className="p-3.5 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] shrink-0 ${
                       i === 0 ? 'bg-rose-600 text-white' : i === 1 ? 'bg-rose-100 text-rose-700' : 'bg-gray-100 text-gray-500'
@@ -224,7 +224,7 @@ export const Desconformidades: React.FC = () => {
                       {i + 1}º
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-sm text-gray-900 truncate">{s.nome}</div>
+                      <div className="font-bold text-sm text-gray-900 truncate">{(s.nome || '').toUpperCase()}</div>
                       <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                         {s.prazo > 0 && <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">{s.prazo} prazo</span>}
                         {s.local > 0 && <span className="text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-full">{s.local} local</span>}
@@ -257,14 +257,14 @@ export const Desconformidades: React.FC = () => {
           ) : (
             <div className="divide-y divide-gray-100">
               {rankingEmpresas.map((e, i) => (
-                <div key={e.nome} className="p-3.5 flex items-center justify-between gap-3">
+                <div key={(e.nome || '').toUpperCase()} className="p-3.5 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] shrink-0 ${
                       i === 0 ? 'bg-rose-600 text-white' : 'bg-gray-100 text-gray-500'
                     }`}>
                       {i + 1}º
                     </div>
-                    <div className="font-bold text-sm text-gray-900 truncate">{e.nome}</div>
+                    <div className="font-bold text-sm text-gray-900 truncate">{(e.nome || '').toUpperCase()}</div>
                   </div>
                   <div className="text-lg font-extrabold text-rose-600 shrink-0">{e.total}</div>
                 </div>
@@ -295,7 +295,7 @@ export const Desconformidades: React.FC = () => {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-bold text-sm text-gray-900">{r.patrimonio || 'PTA'}</span>
+                      <span className="font-bold text-sm text-gray-900">{(r.patrimonio || 'PTA').toUpperCase()}</span>
                       {r.entregou_no_prazo === false && (
                         <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Fora do prazo</span>
                       )}
@@ -307,9 +307,9 @@ export const Desconformidades: React.FC = () => {
                       )}
                     </div>
                     <div className="text-[11px] text-gray-500 mt-1 flex items-center gap-1.5 flex-wrap">
-                      <span className="font-semibold text-gray-700">{r.solicitante || 'Não informado'}</span>
-                      {r.area_empresa && (<><span className="text-gray-300">·</span><span>{r.area_empresa}</span></>)}
-                      {r.tipo_atividade && (<><span className="text-gray-300">·</span><span>{r.tipo_atividade}</span></>)}
+                      <span className="font-semibold text-gray-700">{(r.solicitante || 'NÃO INFORMADO').toUpperCase()}</span>
+                      {r.area_empresa && (<><span className="text-gray-300">·</span><span>{(r.area_empresa || '').toUpperCase()}</span></>)}
+                      {r.tipo_atividade && (<><span className="text-gray-300">·</span><span>{(r.tipo_atividade || '').toUpperCase()}</span></>)}
                     </div>
                   </div>
                   <div className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-100 px-2 py-1 rounded-md whitespace-nowrap">
