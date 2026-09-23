@@ -218,7 +218,15 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
       <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex justify-end transition-opacity">
         <div className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col border-l border-gray-200">
           {/* Header */}
-          <div className="p-5 border-b border-gray-200 bg-gray-50 flex items-start justify-between">
+          <div className="p-5 pr-12 border-b border-gray-200 bg-gray-50 flex items-start justify-between relative">
+            {/* Botão fechar fixo no canto superior direito */}
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200 z-10"
+              title="Fechar"
+            >
+              <X className="w-5 h-5" />
+            </button>
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
@@ -286,12 +294,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                     <span className="text-xs font-semibold hidden sm:inline">Editar</span>
                   </button>
                 )}
-              <button
-                onClick={onClose}
-                className="p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
             </div>
           </div>
 
