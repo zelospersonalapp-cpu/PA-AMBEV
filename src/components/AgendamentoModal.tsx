@@ -819,21 +819,19 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
 Para que tudo corra bem, siga as instruções abaixo:
 
-1️⃣ ANTES DE RETIRAR: faça o Check de Extrato da PTA — confira nível de bateria, avarias visíveis e o funcionamento dos controles.
+1️⃣ ANTES DE RETIRAR: faça o Check da PTA — confira nível de bateria, avarias visíveis e o funcionamento dos controles.
 
-2️⃣ RETIRADA: desconecte do carregador com cuidado e transite somente por locais autorizados.
+2️⃣ DURANTE O USO: utilize apenas no local combinado. Qualquer avaria ou problema técnico, avise o Facilities IMEDIATAMENTE.
 
-3️⃣ DURANTE O USO: utilize apenas no local combinado. Qualquer avaria ou problema técnico, avise o Facilities IMEDIATAMENTE.
+3️⃣ NA DEVOLUÇÃO: faça um novo Check e entregue a PTA limpa e sem danos no local de origem.
 
-4️⃣ NA DEVOLUÇÃO: faça um novo Check de Extrato e entregue a PTA limpa e sem danos no local de origem.
+4️⃣ CARREGAMENTO: logo após devolver, conecte a PTA no carregador de onde a retirou.
 
-5️⃣ CARREGAMENTO: logo após devolver, conecte a PTA no MESMO carregador que estava sendo usado.
+5️⃣ SE FICAR PARA O DIA SEGUINTE: deixe a plataforma carregando no local onde ela ficará, antes de encerrar a atividade.
 
-6️⃣ SE FICAR PARA O DIA SEGUINTE: deixe a plataforma carregando no local onde ela ficará, antes de encerrar o turno.
+⚠️ ATENÇÃO: não devolver a PTA no prazo ou deixá-la sem carga após o uso impacta equipes agendadas para o dia seguinte e pode acarretar restrições nos seus futuros agendamentos.
 
 🚫 IMPORTANTE: em hipótese alguma a PTA pode deixar de ser devolvida no mesmo dia, salvo quando previamente alinhado com o Facilities.
-
-⚠️ Nunca deixe a PTA descarregada ou sem supervisão fora da área designada.
 
 Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
 
@@ -869,13 +867,13 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
 
                     <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 text-[11px] text-gray-700 space-y-1.5 max-h-48 overflow-y-auto leading-relaxed">
                       <p className="font-bold text-gray-900 text-xs">📨 Resumo da mensagem que será enviada:</p>
-                      <p>1️⃣ <strong>Check de Extrato</strong> antes de retirar (bateria, avarias, controles)</p>
-                      <p>2️⃣ Desconectar do carregador com cuidado e transitar somente por locais autorizados</p>
-                      <p>3️⃣ Usar somente no <strong>local combinado</strong></p>
-                      <p>4️⃣ Avisar o Facilities <strong>imediatamente</strong> em caso de avaria ou problema técnico</p>
-                      <p>5️⃣ Novo <strong>Check de Extrato</strong> na devolução</p>
-                      <p>6️⃣ Reconectar no <strong>mesmo carregador</strong> logo após devolver</p>
-                      <p>7️⃣ Se pernoitar, deixar a PTA <strong>carregando</strong> no local onde ficará</p>
+                      <p>1️⃣ <strong>Check</strong> antes de retirar (bateria, avarias, controles)</p>
+                      <p>2️⃣ Usar somente no <strong>local combinado</strong></p>
+                      <p>3️⃣ Avisar o Facilities <strong>imediatamente</strong> em caso de avaria ou problema técnico</p>
+                      <p>4️⃣ Novo <strong>Check</strong> na devolução — entregar limpa e sem danos</p>
+                      <p>5️⃣ Conectar no carregador de onde retirou logo após devolver</p>
+                      <p>6️⃣ Se ficar para o dia seguinte, deixar carregando antes de encerrar a atividade</p>
+                      <p>⚠️ Não devolver no prazo ou deixar sem carga impacta outras equipes e pode restringir futuros agendamentos</p>
                       <p>🚫 Em hipótese alguma deixar de devolver a PTA no <strong>mesmo dia</strong>, salvo alinhamento prévio com o Facilities</p>
                     </div>
 
