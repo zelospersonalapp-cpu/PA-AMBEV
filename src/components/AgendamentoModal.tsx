@@ -81,7 +81,7 @@ const ConflitoBusca: React.FC<{
           <p className="font-semibold text-gray-900">{dtIni}{dtIni !== dtFim ? ` → ${dtFim}` : ''}</p>
         </div>
         <div>
-          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Liberador</p>
+          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Agendado por</p>
           <p className="font-semibold text-gray-900">{agendamento.liberado_por || '—'}</p>
         </div>
         <div>
@@ -568,7 +568,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                     fontWeight: (p.status === 'disponivel' || p.status === 'em_manutencao' || p.status === 'avariada') ? '600' : 'normal',
                   }}
                 >
-                  {p.patrimonio} — {p.tipo === 'articulada' ? 'ARTICULADA' : 'TESOURINHA'} ({p.modelo}) | {p.status === 'disponivel' ? '✓ Disponível' : p.status === 'em_uso' ? '⏳ Em uso' : p.status === 'em_manutencao' ? '🔧 Em manutenção' : p.status === 'avariada' ? '⚠️ Avariada' : p.status}
+                  {p.patrimonio} — {p.tipo === 'articulada' ? 'ARTICULADA' : 'TESOURINHA'} ({p.modelo}) | {p.status === 'disponivel' ? '✓ Disponível' : p.status === 'em_manutencao' ? '🔧 Em manutenção' : p.status === 'avariada' ? '⚠️ Avariada' : '✓ Disponível'}
                 </option>
               ))}
             </select>
@@ -594,7 +594,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Liberador *
+                Agendado por *
               </label>
               <select
                 value={liberadorId}
@@ -672,7 +672,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-200 space-y-2">
             <div className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-amber-500" />
-              UG / Localização na Fábrica *
+              Local de Utilização *
             </div>
             <select
               value={localId}
@@ -984,7 +984,7 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
                       <p className="font-semibold text-gray-900">{formatDateBR(conflictAgendamento.data_inicio)} → {formatDateBR(conflictAgendamento.data_fim)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-rose-600 uppercase">Liberador</p>
+                      <p className="text-[10px] font-bold text-rose-600 uppercase">Agendado por</p>
                       <p className="font-semibold text-gray-900">{conflictAgendamento.liberado_por || '—'}</p>
                     </div>
                     <div className="col-span-2">
