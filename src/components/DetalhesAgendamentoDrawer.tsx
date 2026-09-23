@@ -256,84 +256,82 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
       <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex justify-end transition-opacity">
         <div className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col border-l border-gray-200">
           {/* Header */}
-          <div className="p-5 pr-12 border-b border-gray-200 bg-gray-50 flex items-start justify-between relative">
-            {/* Botão fechar fixo no canto superior direito */}
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200 z-10"
-              title="Fechar"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
+          <div className="px-4 pt-4 pb-3 border-b border-gray-200 bg-gray-50">
+            {/* Linha 1: ID + badges + X */}
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                   Agendamento #{agendamento?.id.substring(0, 8)}
                 </span>
-                {agendamento?.prioridade === 'prioritario' && (
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#F5D800] text-[#1B2A4A] border border-amber-300">
-                    ★ PRIORITÁRIO
-                  </span>
-                )}
                 {agendamento?.origem === 'recorrente' && (
                   <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-100 text-purple-800 border border-purple-200">
                     Recorrente
                   </span>
                 )}
-              </div>
-              <h2 className="text-lg font-bold text-[#1A1A1A]">
-                {vAgendaItem?.pta_patrimonio || vAgendaItem?.patrimonio || pta?.patrimonio || 'PTA'} —{' '}
-                {vAgendaItem?.pta_modelo || pta?.modelo || 'Plataforma'}
-              </h2>
-              <div className="text-xs text-gray-500 mt-0.5">
-                Tipo: <strong className="capitalize">{pta?.tipo || vAgendaItem?.pta_tipo || 'PTA'}</strong> • Fabricante: {pta?.fabricante || 'AmBev'}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {statusConfig && (
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${statusConfig.bg}`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
-                  {statusConfig.label}
-                </span>
-              )}
-              {agendamento && (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setLembretePopupOpen(true)}
-                    title="Enviar lembrete ao solicitante"
-                    className="p-1.5 text-amber-700 hover:text-white bg-amber-50 hover:bg-amber-500 rounded-md transition-colors flex items-center gap-1 px-2"
-                  >
-                    <Bell className="w-4 h-4" />
-                    <span className="text-xs font-semibold hidden sm:inline">Lembrete</span>
-                  </button>
-                  <button
-                    onClick={() => setSharePopupOpen(true)}
-                    title="Compartilhar com solicitante"
-                    className="p-1.5 text-emerald-700 hover:text-white bg-emerald-50 hover:bg-emerald-600 rounded-md transition-colors flex items-center gap-1 px-2"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span className="text-xs font-semibold hidden sm:inline">Compartilhar</span>
-                  </button>
-                </div>
-              )}
-              {onOpenEdit &&
-                agendamento &&
-                agendamento.status !== 'concluido' &&
-                agendamento.status !== 'cancelado' && (
-                  <button
-                    onClick={() => { onOpenEdit(agendamento); onClose(); }}
-                    title="Editar agendamento"
-                    className="p-1.5 text-[#1B2A4A] hover:text-white bg-gray-100 hover:bg-[#1B2A4A] rounded-md transition-colors flex items-center gap-1 px-2"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    <span className="text-xs font-semibold hidden sm:inline">Editar</span>
-                  </button>
+                {agendamento?.prioridade === 'prioritario' && (
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#F5D800] text-[#1B2A4A] border border-amber-300">
+                    ★ PRIORITÁRIO
+                  </span>
                 )}
-
+                {statusConfig && (
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1 ${statusConfig.bg}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} />
+                    {statusConfig.label}
+                  </span>
+                )}
+              </div>
+              {/* X sempre visível */}
+              <button
+                onClick={onClose}
+                className="ml-2 p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200 flex-shrink-0"
+                title="Fechar"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
+
+            {/* Linha 2: nome da PTA */}
+            <h2 className="text-base font-bold text-[#1A1A1A] leading-snug">
+              {vAgendaItem?.pta_patrimonio || vAgendaItem?.patrimonio || pta?.patrimonio || 'PTA'} —{' '}
+              {vAgendaItem?.pta_modelo || pta?.modelo || 'Plataforma'}
+            </h2>
+            <div className="text-xs text-gray-500 mt-0.5 mb-3">
+              Tipo: <strong className="capitalize">{pta?.tipo || vAgendaItem?.pta_tipo || 'PTA'}</strong> • Fabricante: {pta?.fabricante || 'AmBev'}
+            </div>
+
+            {/* Linha 3: botões de ação — quebra linha se necessário */}
+            {agendamento && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  onClick={() => setLembretePopupOpen(true)}
+                  title="Enviar lembrete ao solicitante"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-500 hover:text-white rounded-md transition-colors"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  Lembrete
+                </button>
+                <button
+                  onClick={() => setSharePopupOpen(true)}
+                  title="Compartilhar com solicitante"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white rounded-md transition-colors"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  Compartilhar
+                </button>
+                {onOpenEdit &&
+                  agendamento.status !== 'concluido' &&
+                  agendamento.status !== 'cancelado' && (
+                    <button
+                      onClick={() => { onOpenEdit(agendamento); onClose(); }}
+                      title="Editar agendamento"
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-[#1B2A4A] bg-gray-100 hover:bg-[#1B2A4A] hover:text-white rounded-md transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      Editar
+                    </button>
+                  )}
+              </div>
+            )}
           </div>
 
           {/* Body Content */}
