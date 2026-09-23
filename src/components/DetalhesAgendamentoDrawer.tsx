@@ -920,6 +920,9 @@ Aguardamos sua confirmação. Bom trabalho! 💪`;
           pta={pta}
         />
       )}
+
+      {/* ConfirmDialog — obrigatório para Deletar e Cancelar funcionarem */}
+      {dialog}
     </>
   );
 };
