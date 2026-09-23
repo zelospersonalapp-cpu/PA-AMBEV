@@ -195,7 +195,7 @@ export const Agenda: React.FC = () => {
 
   // Check if an item is active on date YYYY-MM-DD
   const getAgendamentosForDate = (date: Date) => {
-    const dStr = date.toISOString().substring(0, 10);
+    const dStr = date.toLocaleDateString('en-CA');
     return filteredAgendamentos.filter((a) => {
       const start = a.data_inicio ? a.data_inicio.substring(0, 10) : '';
       const end = a.data_fim ? a.data_fim.substring(0, 10) : '';
@@ -419,7 +419,7 @@ export const Agenda: React.FC = () => {
         <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
           <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 text-center text-xs font-bold text-gray-700 divide-x divide-gray-200">
             {weekDays.map((d, i) => {
-              const isToday = d.toISOString().substring(0, 10) === new Date().toISOString().substring(0, 10);
+              const isToday = d.toLocaleDateString('en-CA') === new Date().toLocaleDateString('en-CA');
               return (
                 <div key={i} className={`py-2.5 px-1 ${isToday ? 'bg-amber-100/60' : ''}`}>
                   <div className="uppercase text-[10px] text-gray-500">{getDayOfWeekName(d.getDay()).substring(0, 3)}</div>
@@ -434,8 +434,8 @@ export const Agenda: React.FC = () => {
           <div className="grid grid-cols-7 min-h-[460px] divide-x divide-gray-200">
             {weekDays.map((d, colIndex) => {
               const items = getAgendamentosForDate(d);
-              const dateStr = d.toISOString().substring(0, 10);
-              const isToday = dateStr === new Date().toISOString().substring(0, 10);
+              const dateStr = d.toLocaleDateString('en-CA');
+              const isToday = dateStr === new Date().toLocaleDateString('en-CA');
 
               return (
                 <div
@@ -511,8 +511,8 @@ export const Agenda: React.FC = () => {
           <div className="grid grid-cols-7 divide-x divide-y divide-gray-200">
             {monthDays.map(({ date, isCurrentMonth }, idx) => {
               const items = getAgendamentosForDate(date);
-              const dateStr = date.toISOString().substring(0, 10);
-              const isToday = dateStr === new Date().toISOString().substring(0, 10);
+              const dateStr = date.toLocaleDateString('en-CA');
+              const isToday = dateStr === new Date().toLocaleDateString('en-CA');
 
               return (
                 <div
