@@ -708,7 +708,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                   onChange={(e) => {
                     const novaInicio = e.target.value;
                     setDataInicio(novaInicio);
-                    if (dataFim && novaInicio > dataFim) {
+                    // Preenche entrega automaticamente se estiver vazia ou se a retirada passar da entrega
+                    if (!dataFim || novaInicio > dataFim) {
                       setDataFim(novaInicio);
                     }
                   }}
