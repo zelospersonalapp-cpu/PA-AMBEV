@@ -731,7 +731,7 @@ Este é um lembrete do Facilities sobre seu agendamento de PTA.
 ⏰ Seu agendamento é *${quando}*. Certifique-se de estar pronto para retirar a PTA no horário combinado com o Facilities.
 
 ✅ *Lembretes importantes:*
-• Faça o Check de Extrato antes de retirar
+• Faça o Check antes de retirar (bateria, avarias, controles)
 • Devolva no mesmo dia, salvo alinhamento prévio
 • Reconecte no mesmo carregador após devolver
 • Avise o Facilities imediatamente em caso de avaria
@@ -791,7 +791,7 @@ Qualquer dúvida, entre em contato. Bom trabalho! 💪`;
         const solContato = solObj?.contato || '';
         const dtRet = formatDateBR(agendamento.data_inicio);
         const dtEnt = formatDateBR(agendamento.data_fim);
-        const msgTexto = `Olá, ${solNome}! Seu agendamento da PTA ${patr} (${tipoPta}) foi confirmado pelo Facilities. ✅\n\n📅 Retirada: ${dtRet}\n📅 Devolução: ${dtEnt}\n\nPara que tudo corra bem, siga as instruções abaixo:\n\n1️⃣ ANTES DE RETIRAR: faça o Check de Extrato da PTA — confira nível de bateria, avarias visíveis e o funcionamento dos controles.\n\n2️⃣ RETIRADA: desconecte do carregador com cuidado e transite somente por locais autorizados.\n\n3️⃣ DURANTE O USO: utilize apenas no local combinado. Qualquer avaria ou problema técnico, avise o Facilities IMEDIATAMENTE.\n\n4️⃣ NA DEVOLUÇÃO: faça um novo Check de Extrato e entregue a PTA limpa e sem danos no local de origem.\n\n5️⃣ CARREGAMENTO: logo após devolver, conecte a PTA no MESMO carregador que estava sendo usado.\n\n6️⃣ SE FICAR PARA O DIA SEGUINTE: deixe a plataforma carregando no local onde ela ficará, antes de encerrar o turno.\n\n🚫 IMPORTANTE: em hipótese alguma a PTA pode deixar de ser devolvida no mesmo dia, salvo quando previamente alinhado com o Facilities.\n\n⚠️ Nunca deixe a PTA descarregada ou sem supervisão fora da área designada.\n\nQualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
+        const msgTexto = `Olá, ${solNome}! Seu agendamento da PTA ${patr} (${tipoPta}) foi confirmado pelo Facilities. ✅\n\n📅 Retirada: ${dtRet}\n📅 Devolução: ${dtEnt}\n\nPara que tudo corra bem, siga as instruções abaixo:\n\n1️⃣ ANTES DE RETIRAR: faça o Check da PTA — confira nível de bateria, avarias visíveis e o funcionamento dos controles.\n\n2️⃣ RETIRADA: desconecte do carregador com cuidado e transite somente por locais autorizados.\n\n3️⃣ DURANTE O USO: utilize apenas no local combinado. Qualquer avaria ou problema técnico, avise o Facilities IMEDIATAMENTE.\n\n4️⃣ NA DEVOLUÇÃO: faça um novo Check e entregue a PTA limpa e sem danos no local de origem.\n\n5️⃣ CARREGAMENTO: logo após devolver, conecte a PTA no MESMO carregador que estava sendo usado.\n\n6️⃣ SE FICAR PARA O DIA SEGUINTE: deixe a plataforma carregando no local onde ela ficará, antes de encerrar o turno.\n\n🚫 IMPORTANTE: em hipótese alguma a PTA pode deixar de ser devolvida no mesmo dia, salvo quando previamente alinhado com o Facilities.\n\n⚠️ Nunca deixe a PTA descarregada ou sem supervisão fora da área designada.\n\nQualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
         const msgWpp = encodeURIComponent(msgTexto);
         const tel = solContato.replace(/\D/g, '');
         const wppUrl = tel ? `https://wa.me/55${tel}?text=${msgWpp}` : `https://wa.me/?text=${msgWpp}`;
