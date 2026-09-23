@@ -59,6 +59,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
   const [devolucaoModalOpen, setDevolucaoModalOpen] = useState(false);
   const [sharePopupOpen, setSharePopupOpen] = useState(false);
   const [lembretePopupOpen, setLembretePopupOpen] = useState(false);
+  const [deleteRecorrenteOpen, setDeleteRecorrenteOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !agendamentoId) return;
@@ -153,7 +154,17 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
     }
   };
 
-  const handleDeletarAgendamento = async () => {
+  const handleDeletarAgendamento = () => {
+    if (!agendamento) return;
+    // Se for recorrente, abre modal de escolha; senão confirma direto
+    if (agendamento.origem === 'recorrente' && agendamento.recorrencia_id) {
+      setDeleteRecorrenteOpen(true);
+    } else {
+      handleConfirmarDeleteSingle();
+    }
+  };
+
+  const handleConfirmarDeleteSingle = async () => {
     if (!agendamento) return;
     const ok = await confirm({
       title: 'Deletar Agendamento',
@@ -163,13 +174,32 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
       variant: 'danger',
     });
     if (!ok) return;
+    await executarDelete('single');
+  };
+
+  const executarDelete = async (modo: 'single' | 'todos') => {
+    if (!agendamento) return;
+    setDeleteRecorrenteOpen(false);
     try {
-      // Apagar checklists vinculados primeiro
-      await supabase.from('checklists').delete().eq('agendamento_id', agendamento.id);
-      // Apagar o agendamento
-      const { error } = await supabase.from('agendamentos').delete().eq('id', agendamento.id);
-      if (error) throw error;
-      toast.success('Deletado', 'Agendamento removido permanentemente.');
+      if (modo === 'todos' && agendamento.recorrencia_id) {
+        // Buscar todos os agendamentos da mesma recorrência
+        const { data: irmãos } = await supabase
+          .from('agendamentos')
+          .select('id')
+          .eq('recorrencia_id', agendamento.recorrencia_id);
+        const ids = (irmãos || []).map((a: any) => a.id);
+        if (ids.length > 0) {
+          await supabase.from('checklists').delete().in('agendamento_id', ids);
+          const { error } = await supabase.from('agendamentos').delete().in('id', ids);
+          if (error) throw error;
+        }
+        toast.success('Deletados', `${ids.length} agendamentos recorrentes removidos.`);
+      } else {
+        await supabase.from('checklists').delete().eq('agendamento_id', agendamento.id);
+        const { error } = await supabase.from('agendamentos').delete().eq('id', agendamento.id);
+        if (error) throw error;
+        toast.success('Deletado', 'Agendamento removido permanentemente.');
+      }
       onClose();
       onUpdated();
     } catch (err: any) {
@@ -922,6 +952,47 @@ Aguardamos sua confirmação. Bom trabalho! 💪`;
           agendamento={agendamento}
           pta={pta}
         />
+      )}
+
+      {/* Modal: delete de agendamento recorrente */}
+      {deleteRecorrenteOpen && agendamento && (
+        <div className="fixed inset-0 z-[95] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm border border-gray-200 overflow-hidden">
+            <div className="bg-rose-600 px-5 py-4 flex items-center gap-2.5">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              <h3 className="font-bold text-white text-sm">Deletar Agendamento Recorrente</h3>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-gray-600">Este agendamento faz parte de uma série recorrente. O que deseja fazer?</p>
+              <button
+                onClick={() => executarDelete('single')}
+                className="w-full flex items-start gap-3 p-3 border-2 border-gray-200 hover:border-amber-400 hover:bg-amber-50 rounded-lg transition-colors text-left"
+              >
+                <span className="mt-0.5 w-5 h-5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-800">Somente este agendamento</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Remove apenas este agendamento da série. Os demais permanecem.</p>
+                </div>
+              </button>
+              <button
+                onClick={() => executarDelete('todos')}
+                className="w-full flex items-start gap-3 p-3 border-2 border-gray-200 hover:border-rose-500 hover:bg-rose-50 rounded-lg transition-colors text-left"
+              >
+                <span className="mt-0.5 w-5 h-5 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-800">Todos os agendamentos da série</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Remove este e todos os outros da mesma recorrência. Ação irreversível.</p>
+                </div>
+              </button>
+              <button
+                onClick={() => setDeleteRecorrenteOpen(false)}
+                className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ConfirmDialog — obrigatório para Deletar e Cancelar funcionarem */}
