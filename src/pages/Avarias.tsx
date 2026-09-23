@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase, uploadPtaPhoto } from '../lib/supabase';
 import { useToast } from '../components/Toast';
+import { useConfirmDialog } from '../components/ConfirmDialog';
 import type { Avaria, PTA, Colaborador, Agendamento, VAvariasPTA, SeveridadeAvaria, StatusAvaria } from '../types';
 import { formatDateBR, formatDateTimeBR, getSeveridadeAvariaConfig, getStatusAvariaConfig } from '../lib/formatters';
 import { GRUPOS_ANOMALIA } from '../data/anomalias';
