@@ -721,22 +721,25 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
 
 Este é um lembrete do Facilities sobre seu agendamento de PTA.
 
-📋 *AGENDAMENTO CONFIRMADO*
+📋 *AGENDAMENTO PROGRAMADO*
 🚛 PTA: *${patr}*
 📅 Retirada: *${dtRet}*
 📅 Devolução: *${dtEnt}*
 📍 Local: *${local}${setor}*
 🔧 Atividade: *${atividade}*
 
-⏰ Seu agendamento é *${quando}*. Certifique-se de estar pronto para retirar a PTA no horário combinado com o Facilities.
+⏰ Seu agendamento é *${quando}*.
+
+*Você confirma a retirada da PTA conforme agendado?*
+Responda *SIM* para confirmar ou *NÃO* caso precise reagendar ou cancelar.
 
 ✅ *Lembretes importantes:*
 • Faça o Check antes de retirar (bateria, avarias, controles)
-• Devolva no mesmo dia, salvo alinhamento prévio
+• Devolva no mesmo dia, salvo alinhamento prévio com o Facilities
 • Reconecte no mesmo carregador após devolver
 • Avise o Facilities imediatamente em caso de avaria
 
-Qualquer dúvida, entre em contato. Bom trabalho! 💪`;
+Aguardamos sua confirmação. Bom trabalho! 💪`;
         const tel = solContato.replace(/\D/g, '');
         const wppUrl = tel ? `https://wa.me/55${tel}?text=${encodeURIComponent(msgTexto)}` : `https://wa.me/?text=${encodeURIComponent(msgTexto)}`;
         return (
