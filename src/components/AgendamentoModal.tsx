@@ -261,49 +261,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
   const filteredColaboradores = colaboradores;
 
-  // Real-time conflict preview check
-  useEffect(() => {
-    if (!ptaId || !dataInicio || !dataFim) {
-      setConflictWarning(null);
-      return;
-    }
-
-    if (dataInicio > dataFim) {
-      setConflictWarning('A data de início não pode ser posterior à data de término.');
-      return;
-    }
-
-    let isSubscribed = true;
-    setCheckingConflict(true);
-
-    const timer = setTimeout(async () => {
-      const { hasConflict, conflictingAgendamentos } = await checkPtaConflict(
-        ptaId,
-        dataInicio,
-        dataFim,
-        editingAgendamento?.id
-      );
-
-      if (isSubscribed) {
-        setCheckingConflict(false);
-        if (hasConflict && conflictingAgendamentos.length > 0) {
-          const c = conflictingAgendamentos[0];
-          setConflictAgendamento(c);
-          setConflictWarning(null);
-          setConflictPopupOpen(true); // Abrir popup automaticamente
-        } else {
-          setConflictWarning(null);
-          setConflictAgendamento(null);
-          setConflictPopupOpen(false);
-        }
-      }
-    }, 350);
-
-    return () => {
-      isSubscribed = false;
-      clearTimeout(timer);
-    };
-  }, [ptaId, dataInicio, dataFim, editingAgendamento]);
+  // Conflito verificado apenas no submit (removida verificação em tempo real)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -330,7 +288,22 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       return;
     }
 
+    // Verificar conflito ANTES de salvar
     setLoading(true);
+    try {
+      const { hasConflict, conflictingAgendamentos } = await checkPtaConflict(
+        ptaId, dataInicio, dataFim, editingAgendamento?.id
+      );
+      if (hasConflict && conflictingAgendamentos.length > 0) {
+        setConflictAgendamento(conflictingAgendamentos[0]);
+        setConflictPopupOpen(true);
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.error('Erro ao verificar conflito:', err);
+    }
+
     let abriuPopup = false;
 
     try {
