@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Battery,
   Share2,
+  Bell,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useConfirmDialog } from './ConfirmDialog';
@@ -57,6 +58,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
   const [retiradaModalOpen, setRetiradaModalOpen] = useState(false);
   const [devolucaoModalOpen, setDevolucaoModalOpen] = useState(false);
   const [sharePopupOpen, setSharePopupOpen] = useState(false);
+  const [lembretePopupOpen, setLembretePopupOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !agendamentoId) return;
@@ -252,14 +254,24 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                 </span>
               )}
               {agendamento && (
-                <button
-                  onClick={() => setSharePopupOpen(true)}
-                  title="Compartilhar com solicitante"
-                  className="p-1.5 text-emerald-700 hover:text-white bg-emerald-50 hover:bg-emerald-600 rounded-md transition-colors flex items-center gap-1 px-2"
-                >
-                  <Share2 className="w-4 h-4" />
-                  <span className="text-xs font-semibold hidden sm:inline">Compartilhar</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setLembretePopupOpen(true)}
+                    title="Enviar lembrete ao solicitante"
+                    className="p-1.5 text-amber-700 hover:text-white bg-amber-50 hover:bg-amber-500 rounded-md transition-colors flex items-center gap-1 px-2"
+                  >
+                    <Bell className="w-4 h-4" />
+                    <span className="text-xs font-semibold hidden sm:inline">Lembrete</span>
+                  </button>
+                  <button
+                    onClick={() => setSharePopupOpen(true)}
+                    title="Compartilhar com solicitante"
+                    className="p-1.5 text-emerald-700 hover:text-white bg-emerald-50 hover:bg-emerald-600 rounded-md transition-colors flex items-center gap-1 px-2"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span className="text-xs font-semibold hidden sm:inline">Compartilhar</span>
+                  </button>
+                </div>
               )}
               {onOpenEdit &&
                 agendamento &&
@@ -691,6 +703,84 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
           </div>
         </div>
       </div>
+
+      {/* Popup Lembrete WhatsApp */}
+      {lembretePopupOpen && agendamento && (() => {
+        const patr = vAgendaItem?.patrimonio || 'PTA';
+        const solNome = vAgendaItem?.solicitante || 'Solicitante';
+        const solObj = colaboradores.find((c) => c.id === agendamento.solicitante_id);
+        const solContato = solObj?.contato || '';
+        const dtRet = formatDateBR(agendamento.data_inicio);
+        const dtEnt = formatDateBR(agendamento.data_fim);
+        const local = vAgendaItem?.local_descricao || vAgendaItem?.ug || 'local combinado';
+        const setor = vAgendaItem?.setor_linha ? ` — ${vAgendaItem.setor_linha}` : '';
+        const atividade = agendamento.tipo_atividade || 'atividade programada';
+        const diasRestantes = Math.ceil((new Date(agendamento.data_inicio + 'T00:00:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000);
+        const quando = diasRestantes === 0 ? 'HOJE' : diasRestantes === 1 ? 'AMANHÃ' : `em ${diasRestantes} dias (${dtRet})`;
+        const msgTexto = `Olá, ${solNome}! 👷
+
+Este é um lembrete do Facilities sobre seu agendamento de PTA.
+
+📋 *AGENDAMENTO CONFIRMADO*
+🚛 PTA: *${patr}*
+📅 Retirada: *${dtRet}*
+📅 Devolução: *${dtEnt}*
+📍 Local: *${local}${setor}*
+🔧 Atividade: *${atividade}*
+
+⏰ Seu agendamento é *${quando}*. Certifique-se de estar pronto para retirar a PTA no horário combinado com o Facilities.
+
+✅ *Lembretes importantes:*
+• Faça o Check de Extrato antes de retirar
+• Devolva no mesmo dia, salvo alinhamento prévio
+• Reconecte no mesmo carregador após devolver
+• Avise o Facilities imediatamente em caso de avaria
+
+Qualquer dúvida, entre em contato. Bom trabalho! 💪`;
+        const tel = solContato.replace(/\D/g, '');
+        const wppUrl = tel ? `https://wa.me/55${tel}?text=${encodeURIComponent(msgTexto)}` : `https://wa.me/?text=${encodeURIComponent(msgTexto)}`;
+        return (
+          <div className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
+              <div className="bg-amber-500 px-5 py-4 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                    <Bell className="w-4 h-4" /> Lembrete de Agendamento
+                  </h3>
+                  <p className="text-amber-100 text-[11px] mt-0.5">Para: {solNome} · {quando}</p>
+                </div>
+                <button onClick={() => setLembretePopupOpen(false)} className="text-white/70 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 space-y-1">
+                  <p>🚛 <strong>{patr}</strong> · {dtRet} → {dtEnt}</p>
+                  <p>📍 {local}{setor}</p>
+                  <p>🔧 {atividade}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-3 text-xs text-gray-600 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto font-mono">
+                  {msgTexto}
+                </div>
+                <a href={wppUrl} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-bold text-sm rounded-lg transition-colors"
+                  onClick={() => setLembretePopupOpen(false)}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 2.112.549 4.094 1.508 5.814L0 24l6.336-1.482A11.945 11.945 0 0012 24c6.626 0 12-5.373 12-12S18.626 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.37l-.36-.214-3.724.977.994-3.63-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+                  Enviar Lembrete via WhatsApp
+                </a>
+                {!solContato && (
+                  <p className="text-[11px] text-amber-600 text-center">Solicitante sem contato cadastrado — você poderá escolher o destinatário no WhatsApp.</p>
+                )}
+                <button onClick={() => setLembretePopupOpen(false)}
+                  className="w-full py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Popup Compartilhar com Solicitante */}
       {sharePopupOpen && agendamento && (() => {
