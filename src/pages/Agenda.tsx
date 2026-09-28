@@ -484,13 +484,16 @@ export const Agenda: React.FC = () => {
                           <div className="text-[10px] text-gray-600 truncate">
                             {item.tipo_atividade}
                           </div>
-                          {/* Linha 3: Solicitante + Empresa */}
+                          {/* Linha 3: Solicitante */}
                           <div className="text-[10px] text-gray-500 truncate mt-0.5 font-medium">
                             {item.solicitante || item.solicitante_nome || item.nome_solicitante || '—'}
-                            {(item.area_empresa || item.area_nome || item.nome_area) && (
-                              <span className="text-gray-400 font-normal"> · {item.area_empresa || item.area_nome || item.nome_area}</span>
-                            )}
                           </div>
+                          {/* Linha 4: Empresa */}
+                          {(item.area_empresa || item.area_nome || item.nome_area) && (
+                            <div className="text-[10px] text-gray-400 truncate font-normal">
+                              {item.area_empresa || item.area_nome || item.nome_area}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
