@@ -571,7 +571,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                     </div>
                   </div>
 
-                  {/* Empresa + Agendador separados */}
+                  {/* Empresa + Solicitante separados */}
                   <div className="p-3.5 flex items-start gap-3">
                     <Building className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2 flex-1">
@@ -582,7 +582,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-gray-400 uppercase tracking-wide">Agendador</div>
+                        <div className="text-[10px] text-gray-400 uppercase tracking-wide">Solicitante</div>
                         <div className="font-semibold text-gray-900 flex items-center gap-1">
                           <User className="w-3 h-3 text-gray-400 shrink-0" />
                           {vAgendaItem?.solicitante || vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || '—'}
