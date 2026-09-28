@@ -466,8 +466,16 @@ export const Agenda: React.FC = () => {
                             setSelectedAgendamentoId(item.id);
                             setDrawerOpen(true);
                           }}
-                          className={`p-2 rounded-lg border text-xs cursor-pointer shadow-2xs hover:shadow-xs transition-all ${statusConfig.bg}`}
+                          className={`p-2 rounded-lg border text-xs cursor-pointer shadow-2xs hover:shadow-xs transition-all relative group ${statusConfig.bg}`}
                         >
+                          {/* Tooltip hover */}
+                          <div className="absolute z-50 bottom-full left-0 mb-1.5 hidden group-hover:block w-56 bg-[#1B2A4A] text-white text-[11px] rounded-lg shadow-lg p-2.5 pointer-events-none">
+                            <div className="font-bold text-[#7EB3FF] mb-1">{item.patrimonio || item.pta_patrimonio || '—'}</div>
+                            <div className="text-gray-300 mb-0.5">📋 {item.tipo_atividade || '—'}</div>
+                            <div className="text-gray-300">👤 {item.solicitante || item.solicitante_nome || '—'}</div>
+                            {/* seta */}
+                            <div className="absolute top-full left-4 border-4 border-transparent border-t-[#1B2A4A]"></div>
+                          </div>
                           {/* Linha 1: Local + badge prioritário */}
                           <div className="flex items-center justify-between gap-1 mb-0.5">
                             <span className="font-bold text-gray-900 truncate text-[11px]">
