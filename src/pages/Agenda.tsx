@@ -470,7 +470,7 @@ export const Agenda: React.FC = () => {
                         >
                           {/* Tooltip hover */}
                           <div className="absolute z-50 bottom-full left-0 mb-1.5 hidden group-hover:block w-56 bg-[#1B2A4A] text-white text-[11px] rounded-lg shadow-lg p-2.5 pointer-events-none">
-                            <div className="font-bold text-[#7EB3FF] mb-1">{item.patrimonio || item.pta_patrimonio || '—'}</div>
+                            <div className="font-bold text-[#7EB3FF] mb-1">🏗️ {item.tipo_pta || item.tipo || '—'}</div>
                             <div className="text-gray-300 mb-0.5">📋 {item.tipo_atividade || '—'}</div>
                             <div className="text-gray-300">👤 {item.solicitante || item.solicitante_nome || '—'}</div>
                             {/* seta */}
