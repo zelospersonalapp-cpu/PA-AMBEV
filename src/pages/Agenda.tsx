@@ -484,9 +484,12 @@ export const Agenda: React.FC = () => {
                           <div className="text-[10px] text-gray-600 truncate">
                             {item.tipo_atividade}
                           </div>
-                          {/* Linha 3: Solicitante */}
+                          {/* Linha 3: Solicitante + Empresa */}
                           <div className="text-[10px] text-gray-500 truncate mt-0.5 font-medium">
                             {item.solicitante || item.solicitante_nome || item.nome_solicitante || '—'}
+                            {(item.area_empresa || item.area_nome || item.nome_area) && (
+                              <span className="text-gray-400 font-normal"> · {item.area_empresa || item.area_nome || item.nome_area}</span>
+                            )}
                           </div>
                         </div>
                       );
@@ -548,7 +551,9 @@ export const Agenda: React.FC = () => {
                           title={`${item.solicitante_nome || item.solicitante || 'Solicitante'} — ${item.ug || ''} — ${item.tipo_atividade}`}
                         >
                           <span className="truncate">
-                            {item.solicitante_nome || item.solicitante || 'Solicitante'} · {item.ug || item.tipo_atividade}
+                            {item.solicitante_nome || item.solicitante || 'Solicitante'}
+                            {(item.area_empresa || item.area_nome || item.nome_area) && ` · ${item.area_empresa || item.area_nome || item.nome_area}`}
+                            {' · '}{item.ug || item.tipo_atividade}
                           </span>
                           {isPrioritario && <span className="text-[#927300] font-bold">★</span>}
                         </div>
