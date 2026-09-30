@@ -214,6 +214,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setPtaId(editingAgendamento.pta_id);
       setLiberadorId(editingAgendamento.liberado_por || '');
       setSolicitanteId(editingAgendamento.solicitante_id);
+      setAreaEmpresaId(editingAgendamento.area_empresa_id || '');
       setLocalId(editingAgendamento.local_id);
       setDataInicio(editingAgendamento.data_inicio ? editingAgendamento.data_inicio.substring(0, 10) : '');
       setDataFim(editingAgendamento.data_fim ? editingAgendamento.data_fim.substring(0, 10) : '');
