@@ -166,6 +166,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const [areaEmpresaId, setAreaEmpresaId] = useState('');
   const [liberadorId, setLiberadorId] = useState('');
   const [solicitanteId, setSolicitanteId] = useState('');
+  const [solicitanteBusca, setSolicitanteBusca] = useState('');
+  const [solicitanteDropdownOpen, setSolicitanteDropdownOpen] = useState(false);
 
   // Cascading Local fields
   const [selectedUG, setSelectedUG] = useState('');
@@ -214,6 +216,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setPtaId(editingAgendamento.pta_id);
       setLiberadorId(editingAgendamento.liberado_por || '');
       setSolicitanteId(editingAgendamento.solicitante_id);
+      setSolicitanteBusca((editingAgendamento as any).solicitante || (editingAgendamento as any).nome_solicitante || '');
       setAreaEmpresaId(editingAgendamento.area_empresa_id || '');
       setLocalId(editingAgendamento.local_id);
       setDataInicio(editingAgendamento.data_inicio ? editingAgendamento.data_inicio.substring(0, 10) : '');
@@ -228,6 +231,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       setPtaId(initialPtaId || '');
       setLiberadorId('');
       setSolicitanteId('');
+      setSolicitanteBusca('');
+      setSolicitanteDropdownOpen(false);
       setAreaEmpresaId('');
       setSelectedUG('');
       setLocalId('');
@@ -589,25 +594,52 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 Solicitante *
               </label>
               <div className="flex gap-2">
-                <select
-                  value={solicitanteId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setSolicitanteId(id);
-                    // Auto-preencher empresa do solicitante
-                    const sol = colaboradores.find((c) => c.id === id);
-                    if (sol?.area_empresa_id) setAreaEmpresaId(sol.area_empresa_id);
-                  }}
-                  required
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white uppercase"
-                >
-                  <option value="">Selecione o solicitante...</option>
-                  {filteredColaboradores.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={solicitanteBusca}
+                    onChange={(e) => {
+                      setSolicitanteBusca(e.target.value);
+                      setSolicitanteId('');
+                      setSolicitanteDropdownOpen(true);
+                    }}
+                    onFocus={() => setSolicitanteDropdownOpen(true)}
+                    onBlur={() => setTimeout(() => setSolicitanteDropdownOpen(false), 180)}
+                    placeholder="Digite ou selecione o solicitante..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white uppercase"
+                    autoComplete="off"
+                  />
+                  {solicitanteDropdownOpen && (
+                    <ul className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto">
+                      {filteredColaboradores
+                        .filter((c) =>
+                          !solicitanteBusca ||
+                          c.nome.toLowerCase().includes(solicitanteBusca.toLowerCase())
+                        )
+                        .map((c) => (
+                          <li
+                            key={c.id}
+                            onMouseDown={() => {
+                              setSolicitanteId(c.id);
+                              setSolicitanteBusca(c.nome);
+                              setSolicitanteDropdownOpen(false);
+                              const sol = colaboradores.find((x) => x.id === c.id);
+                              if (sol?.area_empresa_id) setAreaEmpresaId(sol.area_empresa_id);
+                            }}
+                            className="px-3 py-2 text-sm uppercase cursor-pointer hover:bg-amber-50 hover:text-[#1B2A4A] transition-colors"
+                          >
+                            {c.nome}
+                          </li>
+                        ))}
+                      {filteredColaboradores.filter((c) =>
+                        !solicitanteBusca ||
+                        c.nome.toLowerCase().includes(solicitanteBusca.toLowerCase())
+                      ).length === 0 && (
+                        <li className="px-3 py-2 text-sm text-gray-400 italic">Nenhum resultado</li>
+                      )}
+                    </ul>
+                  )}
+                </div>
                 <button
                   type="button"
                   title="Cadastrar novo solicitante"
