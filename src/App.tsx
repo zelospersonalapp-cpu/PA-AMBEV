@@ -6,7 +6,6 @@ import { Dashboard } from './pages/Dashboard';
 import { Agenda } from './pages/Agenda';
 import { Ptas } from './pages/Ptas';
 import { Avarias } from './pages/Avarias';
-import { Recorrencias } from './pages/Recorrencias';
 import { Cadastros } from './pages/Cadastros';
 import { Desconformidades } from './pages/Desconformidades';
 
@@ -20,7 +19,6 @@ export default function App() {
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/ptas" element={<Ptas />} />
             <Route path="/avarias" element={<Avarias />} />
-            <Route path="/recorrencias" element={<Recorrencias />} />
             <Route path="/cadastros" element={<Cadastros />} />
             <Route path="/desconformidades" element={<Desconformidades />} />
             <Route path="*" element={<Navigate to="/" replace />} />

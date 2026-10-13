@@ -364,15 +364,22 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
         // Gerar repetições se selecionado
         if (repeticao !== 'nenhuma') {
-          const intervaloDias = repeticao === 'diaria' ? 1 : repeticao === 'semanal' ? 7 : repeticao === 'quinzenal' ? 14 : 30;
+          const intervaloDias = repeticao === 'diaria' ? 1 : repeticao === 'semanal' ? 7 : 30;
           const maxRep = repeticao === 'diaria' ? 30 : repeticao === 'mensal' ? 12 : 26;
-          const duracaoDias = Math.max(1, Math.round((new Date(dataFim).getTime() - new Date(dataInicio).getTime()) / 86400000));
+          // Parse datas como UTC puro para evitar desvio de fuso horário
+          const parseUTC = (s: string) => {
+            const [y, m, d] = s.split('-').map(Number);
+            return new Date(Date.UTC(y, m - 1, d));
+          };
+          const baseIni = parseUTC(dataInicio);
+          const baseFim = parseUTC(dataFim);
+          const duracaoDias = Math.max(0, Math.round((baseFim.getTime() - baseIni.getTime()) / 86400000));
           const extras: any[] = [];
           for (let i = 1; i <= maxRep; i++) {
-            const ini = new Date(dataInicio);
-            ini.setDate(ini.getDate() + intervaloDias * i);
+            const ini = new Date(baseIni);
+            ini.setUTCDate(ini.getUTCDate() + intervaloDias * i);
             const fim = new Date(ini);
-            fim.setDate(fim.getDate() + duracaoDias);
+            fim.setUTCDate(fim.getUTCDate() + duracaoDias);
             extras.push({
               ...payload,
               status: 'agendado',
@@ -1148,12 +1155,11 @@ Qualquer dúvida, é só chamar o Facilities. Bom trabalho! 👷`;
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
               🔁 Repetir Agendamento
             </label>
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-4 gap-1.5">
               {([
                 { val: 'nenhuma', label: 'Não repetir' },
                 { val: 'diaria', label: 'Diário' },
                 { val: 'semanal', label: 'Semanal' },
-                { val: 'quinzenal', label: 'Quinzenal' },
                 { val: 'mensal', label: 'Mensal' },
               ] as const).map((opt) => (
                 <button

@@ -5,7 +5,6 @@ import {
   Calendar,
   Truck,
   AlertOctagon,
-  Repeat,
   Award,
   Database,
   TrendingDown,
@@ -34,7 +33,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
     { name: 'PTAs (Plataformas)', href: '/ptas', icon: Truck },
     { name: 'Avarias & Manutenção', href: '/avarias', icon: AlertOctagon },
     { name: 'Análise de Conduta', href: '/desconformidades', icon: TrendingDown },
-    { name: 'Recorrências', href: '/recorrencias', icon: Repeat },
     { name: 'Cadastros Auxiliares', href: '/cadastros', icon: Database },
   ];
 
