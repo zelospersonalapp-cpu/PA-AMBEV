@@ -55,7 +55,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
 
               <div className="flex items-center gap-2.5">
                 {/* Logo imagem */}
-                <img src="/logo-pta.png" alt="PTA" className="w-11 h-11 object-contain" />
+                <img src="/logo-pta.png" alt="PTA" className="w-14 h-14 object-contain" />
                 <div>
                   <h1 className="text-base sm:text-lg font-bold text-white leading-tight flex items-center gap-2">
                     AmBev — Gestão de PTAs
