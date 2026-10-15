@@ -54,10 +54,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
               </button>
 
               <div className="flex items-center gap-2.5">
-                {/* Logo com fundo #243656 */}
-                <div className="w-9 h-9 rounded-md bg-[#243656] flex items-center justify-center font-extrabold text-white text-sm tracking-tight shadow-xs border border-white/10">
-                  PTA
-                </div>
+                {/* Logo imagem */}
+                <img src="/logo-pta.png" alt="PTA" className="w-11 h-11 object-contain" />
                 <div>
                   <h1 className="text-base sm:text-lg font-bold text-white leading-tight flex items-center gap-2">
                     AmBev — Gestão de PTAs
@@ -156,9 +154,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
               {/* Cabeçalho do sidebar mobile: #152238 */}
               <div className="p-4 border-b border-[#152238] flex items-center justify-between bg-[#152238]">
                 <div className="font-bold text-sm text-white flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-[#243656] flex items-center justify-center font-bold text-white text-xs border border-white/10">
-                    PTA
-                  </div>
+                  <img src="/logo-pta.png" alt="PTA" className="w-7 h-7 object-contain" />
                   <span>Menu Principal</span>
                 </div>
                 <button
