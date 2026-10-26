@@ -62,8 +62,8 @@ export const RelatorioUso: React.FC = () => {
   const [rateio, setRateio] = useState<RateioArea[]>([]);
   const [valoresDiretos, setValoresDiretos] = useState<Record<string, string>>({}); // area_id -> valor string
 
-  // UGs únicas para dropdown de local
-  const ugsUnicas = Array.from(new Set(locais.map(l => l.ug))).filter(Boolean).sort();
+  // Locais ordenados para dropdown (ug + setor_linha)
+  const locaisOrdenados = [...locais].sort((a, b) => a.ug.localeCompare(b.ug));
 
   // Solicitantes filtrados pela busca
   const solicitantesFiltrados = solicitantes.filter(s =>
@@ -93,7 +93,7 @@ export const RelatorioUso: React.FC = () => {
     const map: Record<string, { nome: string; dias: number }> = {};
     dados.forEach(a => {
       const id = a.area_empresa_id || '__sem_area__';
-      const nome = a.area_nome || a.nome_area || (a.area_empresa_id ? a.area_empresa_id : 'Sem área');
+      const nome = (a as any).area_empresa || a.area_nome || a.nome_area || (a.area_empresa_id ? a.area_empresa_id : 'Sem área');
       const dur = a.duracao_dias ?? 1;
       if (!map[id]) map[id] = { nome, dias: 0 };
       map[id].dias += dur;
@@ -148,7 +148,7 @@ export const RelatorioUso: React.FC = () => {
       query = query.eq('area_empresa_id', filtroArea);
     }
     if (filtroPor === 'local' && filtroLocalUg) {
-      query = query.eq('ug', filtroLocalUg);
+      query = query.eq('local_id', filtroLocalUg);
     }
 
     const { data, error } = await query;
@@ -171,90 +171,104 @@ export const RelatorioUso: React.FC = () => {
 
   // ── exportar PDF ─────────────────────────────────────────────────────────
   const exportarPDF = () => {
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
 
-    // tenta carregar logo — se falhar, segue sem
-    const addLogo = () => {
-      try {
-        const img = new Image();
-        img.src = '/logo-pta.png';
-        // jsPDF aceita image element diretamente
-        doc.addImage(img, 'PNG', 10, 8, 22, 22);
-      } catch (_) { /* sem logo */ }
-    };
-    addLogo();
+    const buildPdf = (logoDataUrl: string | null) => {
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    // cabeçalho
-    doc.setFontSize(14);
-    doc.setTextColor(27, 42, 74);
-    doc.text('AmBev Facilities — Relatório de Uso de PTAs', 38, 16);
-    doc.setFontSize(9);
-    doc.setTextColor(80, 80, 80);
-    doc.text(`Período: ${fmt(dataIni)} a ${fmt(dataFim)}   |   Gerado em: ${fmt(today())}`, 38, 22);
-    doc.text(`Total de registros: ${dados.length}   |   Total de dias-uso: ${totalDias}`, 38, 27);
+      // logo
+      if (logoDataUrl) {
+        try { doc.addImage(logoDataUrl, 'PNG', 10, 8, 22, 22); } catch (_) { /* sem logo */ }
+      }
 
-    // tabela uso
-    doc.setFontSize(11);
-    doc.setTextColor(27, 42, 74);
-    doc.text('Detalhes de Uso', 10, 38);
+      // cabeçalho
+      doc.setFontSize(14);
+      doc.setTextColor(27, 42, 74);
+      doc.text('AmBev Facilities — Relatório de Uso de PTAs', 38, 16);
+      doc.setFontSize(9);
+      doc.setTextColor(80, 80, 80);
+      doc.text(`Período: ${fmt(dataIni)} a ${fmt(dataFim)}   |   Gerado em: ${fmt(today())}`, 38, 22);
+      doc.text(`Total de registros: ${dados.length}   |   Total de dias-uso: ${totalDias}`, 38, 27);
 
-    autoTable(doc, {
-      startY: 42,
-      head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local (UG)', 'Atividade', 'Dias', 'Status']],
-      body: dados.map(a => [
-        fmt(a.data_inicio),
-        fmt(a.data_fim),
-        a.patrimonio || a.pta_patrimonio || '',
-        a.solicitante_nome || a.nome_solicitante || '',
-        a.area_nome || a.nome_area || '',
-        a.ug || '',
-        a.tipo_atividade || '',
-        String(a.duracao_dias ?? 1),
-        a.status || '',
-      ]),
-      styles: { fontSize: 7.5, cellPadding: 1.5 },
-      headStyles: { fillColor: [27, 42, 74], textColor: 255, fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [245, 247, 250] },
-      margin: { left: 10, right: 10 },
-    });
-
-    // tabela rateio
-    if (rateio.length > 0 && valorNum > 0) {
-      const finalY = (doc as any).lastAutoTable.finalY + 8;
+      // tabela uso
       doc.setFontSize(11);
       doc.setTextColor(27, 42, 74);
-      doc.text(`Rateio de Custos — Aluguel total: ${fmtCurrency(valorNum)}`, 10, finalY);
+      doc.text('Detalhes de Uso', 10, 38);
 
       autoTable(doc, {
-        startY: finalY + 4,
-        head: [['Área / Empresa', 'Dias de Uso', '% Uso', 'Ajuste %', '% Final', 'Valor a Pagar']],
-        body: rateio.map(r => {
-          const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
-          return [
-            r.area_nome,
-            String(r.dias),
-            r.pct_uso.toFixed(1) + '%',
-            (r.pct_ajuste >= 0 ? '+' : '') + r.pct_ajuste.toFixed(1) + '%',
-            pctFinal.toFixed(1) + '%',
-            fmtCurrency(r.valor),
-          ];
-        }),
-        foot: [['TOTAL', String(totalDias), '—', '—', '—', fmtCurrency(totalRateio)]],
-        styles: { fontSize: 8 },
+        startY: 42,
+        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local (UG)', 'Atividade', 'Dias', 'Status']],
+        body: dados.map(a => [
+          fmt(a.data_inicio),
+          fmt(a.data_fim),
+          a.patrimonio || a.pta_patrimonio || '',
+          a.solicitante_nome || a.nome_solicitante || '',
+          (a as any).area_empresa || a.area_nome || a.nome_area || '',
+          a.ug || '',
+          a.tipo_atividade || '',
+          String(a.duracao_dias ?? 1),
+          a.status || '',
+        ]),
+        styles: { fontSize: 7.5, cellPadding: 1.5 },
         headStyles: { fillColor: [27, 42, 74], textColor: 255, fontStyle: 'bold' },
-        footStyles: { fillColor: [240, 245, 255], textColor: [27, 42, 74], fontStyle: 'bold' },
         alternateRowStyles: { fillColor: [245, 247, 250] },
         margin: { left: 10, right: 10 },
       });
-    }
 
-    // rodapé
-    doc.setFontSize(7);
-    doc.setTextColor(150);
-    doc.text('AmBev Facilities — PPM — Controle Inteligente de Plataformas Elevatórias', 10, doc.internal.pageSize.height - 6);
+      // tabela rateio
+      if (rateio.length > 0 && valorNum > 0) {
+        const finalY = (doc as any).lastAutoTable.finalY + 8;
+        doc.setFontSize(11);
+        doc.setTextColor(27, 42, 74);
+        doc.text(`Rateio de Custos — Aluguel total: ${fmtCurrency(valorNum)}`, 10, finalY);
 
-    doc.save(`relatorio-uso-ptas-${dataIni}-a-${dataFim}.pdf`);
+        autoTable(doc, {
+          startY: finalY + 4,
+          head: [['Área / Empresa', 'Dias de Uso', '% Uso', 'Ajuste %', '% Final', 'Valor a Pagar']],
+          body: rateio.map(r => {
+            const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
+            return [
+              r.area_nome,
+              String(r.dias),
+              r.pct_uso.toFixed(1) + '%',
+              (r.pct_ajuste >= 0 ? '+' : '') + r.pct_ajuste.toFixed(1) + '%',
+              pctFinal.toFixed(1) + '%',
+              fmtCurrency(r.valor),
+            ];
+          }),
+          foot: [['TOTAL', String(totalDias), '—', '—', '—', fmtCurrency(totalRateio)]],
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [27, 42, 74], textColor: 255, fontStyle: 'bold' },
+          footStyles: { fillColor: [240, 245, 255], textColor: [27, 42, 74], fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [245, 247, 250] },
+          margin: { left: 10, right: 10 },
+        });
+      }
+
+      // rodapé
+      doc.setFontSize(7);
+      doc.setTextColor(150);
+      doc.text('AmBev Facilities — PPM — Controle Inteligente de Plataformas Elevatórias', 10, doc.internal.pageSize.height - 6);
+
+      doc.save(`relatorio-uso-ptas-${dataIni}-a-${dataFim}.pdf`);
+    };
+
+    // Tentar carregar logo via canvas; gerar PDF com ou sem ela
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        buildPdf(canvas.toDataURL('image/png'));
+      } else {
+        buildPdf(null);
+      }
+    };
+    img.onerror = () => buildPdf(null);
+    img.src = '/logo-pta.png';
   };
 
   // ── exportar Excel ───────────────────────────────────────────────────────
@@ -266,7 +280,7 @@ export const RelatorioUso: React.FC = () => {
       'Data Fim': fmt(a.data_fim),
       'PTA (Patrimônio)': a.patrimonio || a.pta_patrimonio || '',
       'Solicitante': a.solicitante_nome || a.nome_solicitante || '',
-      'Área / Empresa': a.area_nome || a.nome_area || '',
+      'Área / Empresa': (a as any).area_empresa || a.area_nome || a.nome_area || '',
       'Local (UG)': a.ug || '',
       'Atividade': a.tipo_atividade || '',
       'Dias': a.duracao_dias ?? 1,
@@ -460,7 +474,7 @@ export const RelatorioUso: React.FC = () => {
           {/* valor do filtro */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">
-              {filtroPor === 'area' ? 'Área' : filtroPor === 'solicitante' ? 'Solicitante' : 'Local de Instalação (UG)'}
+              {filtroPor === 'area' ? 'Área' : filtroPor === 'solicitante' ? 'Solicitante' : 'Local de Instalação'}
               <span className="font-normal text-gray-400 ml-1">(deixe vazio para todos)</span>
             </label>
             {filtroPor === 'area' ? (
@@ -487,7 +501,8 @@ export const RelatorioUso: React.FC = () => {
                   onFocus={() => setSolicitanteDropdownOpen(true)}
                   onBlur={() => setTimeout(() => setSolicitanteDropdownOpen(false), 150)}
                   placeholder="Digite ou selecione o solicitante..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
+                  autoComplete="off"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 uppercase"
                 />
                 {filtroSolicitanteBusca && filtroSolicitanteId && (
                   <button
@@ -523,8 +538,10 @@ export const RelatorioUso: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
               >
                 <option value="">Todos os locais</option>
-                {ugsUnicas.map(ug => (
-                  <option key={ug} value={ug}>{ug}</option>
+                {locaisOrdenados.map(l => (
+                  <option key={l.id} value={l.id}>
+                    {l.ug}{l.setor_linha ? ` · ${l.setor_linha}` : ''}
+                  </option>
                 ))}
               </select>
             )}
@@ -602,7 +619,7 @@ export const RelatorioUso: React.FC = () => {
                         <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_fim)}</td>
                         <td className="px-3 py-2 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
                         <td className="px-3 py-2 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
-                        <td className="px-3 py-2 uppercase">{a.area_nome || a.nome_area || '—'}</td>
+                        <td className="px-3 py-2 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
                         <td className="px-3 py-2 font-mono">{a.ug || '—'}</td>
                         <td className="px-3 py-2">{a.tipo_atividade || '—'}</td>
                         <td className="px-3 py-2 text-center font-bold">{a.duracao_dias ?? 1}</td>
