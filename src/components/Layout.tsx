@@ -13,6 +13,7 @@ import {
   PlusCircle,
   Building2,
   CheckCircle2,
+  FileBarChart2,
 } from 'lucide-react';
 import { AgendamentoModal } from './AgendamentoModal';
 
@@ -34,6 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
     { name: 'Avarias & Manutenção', href: '/avarias', icon: AlertOctagon },
     { name: 'Análise de Conduta', href: '/desconformidades', icon: TrendingDown },
     { name: 'Cadastros Auxiliares', href: '/cadastros', icon: Database },
+    { name: 'Relatório de Uso', href: '/relatorio-uso', icon: FileBarChart2 },
   ];
 
   return (

@@ -8,6 +8,7 @@ import { Ptas } from './pages/Ptas';
 import { Avarias } from './pages/Avarias';
 import { Cadastros } from './pages/Cadastros';
 import { Desconformidades } from './pages/Desconformidades';
+import { RelatorioUso } from './pages/RelatorioUso';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/avarias" element={<Avarias />} />
             <Route path="/cadastros" element={<Cadastros />} />
             <Route path="/desconformidades" element={<Desconformidades />} />
+            <Route path="/relatorio-uso" element={<RelatorioUso />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
