@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import type { VAgenda, AreaEmpresa } from '../types';
+import type { VAgenda, AreaEmpresa, Colaborador, Local } from '../types';
 import { FileBarChart2, Download, Mail, RefreshCw, Filter, ChevronDown, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -42,13 +42,17 @@ export const RelatorioUso: React.FC = () => {
   const [dataIni, setDataIni] = useState(firstOfMonth());
   const [dataFim, setDataFim] = useState(today());
   const [filtroPor, setFiltroPor] = useState<'solicitante' | 'area' | 'local'>('area');
-  const [filtroSolicitante, setFiltroSolicitante] = useState('');
+  const [filtroSolicitanteId, setFiltroSolicitanteId] = useState('');
+  const [filtroSolicitanteBusca, setFiltroSolicitanteBusca] = useState('');
+  const [solicitanteDropdownOpen, setSolicitanteDropdownOpen] = useState(false);
   const [filtroArea, setFiltroArea] = useState('');
-  const [filtroLocal, setFiltroLocal] = useState('');
+  const [filtroLocalUg, setFiltroLocalUg] = useState('');
 
   // dados
   const [agendamentos, setAgendamentos] = useState<VAgenda[]>([]);
   const [areas, setAreas] = useState<AreaEmpresa[]>([]);
+  const [solicitantes, setSolicitantes] = useState<Colaborador[]>([]);
+  const [locais, setLocais] = useState<Local[]>([]);
   const [loading, setLoading] = useState(false);
   const [gerou, setGerou] = useState(false);
 
@@ -58,13 +62,23 @@ export const RelatorioUso: React.FC = () => {
   const [rateio, setRateio] = useState<RateioArea[]>([]);
   const [valoresDiretos, setValoresDiretos] = useState<Record<string, string>>({}); // area_id -> valor string
 
-  // unique values for filter dropdowns
-  const solicitantesUnicos = Array.from(new Set(agendamentos.map(a => a.solicitante_nome || a.nome_solicitante || ''))).filter(Boolean).sort();
-  const locaisUnicos = Array.from(new Set(agendamentos.map(a => a.ug || ''))).filter(Boolean).sort();
+  // UGs únicas para dropdown de local
+  const ugsUnicas = Array.from(new Set(locais.map(l => l.ug))).filter(Boolean).sort();
+
+  // Solicitantes filtrados pela busca
+  const solicitantesFiltrados = solicitantes.filter(s =>
+    s.nome.toLowerCase().includes(filtroSolicitanteBusca.toLowerCase())
+  );
 
   useEffect(() => {
-    supabase.from('areas_empresas').select('*').then(({ data }) => {
-      if (data) setAreas(data as AreaEmpresa[]);
+    Promise.all([
+      supabase.from('areas_empresas').select('*').order('nome', { ascending: true }),
+      supabase.from('colaboradores').select('*').eq('papel', 'solicitante').eq('ativo', true).order('nome', { ascending: true }),
+      supabase.from('locais').select('*').eq('ativo', true).order('ug', { ascending: true }),
+    ]).then(([areasRes, solRes, locaisRes]) => {
+      if (areasRes.data) setAreas(areasRes.data as AreaEmpresa[]);
+      if (solRes.data) setSolicitantes(solRes.data as Colaborador[]);
+      if (locaisRes.data) setLocais(locaisRes.data as Local[]);
     });
   }, []);
 
@@ -78,8 +92,8 @@ export const RelatorioUso: React.FC = () => {
     // agrupar por área
     const map: Record<string, { nome: string; dias: number }> = {};
     dados.forEach(a => {
-      const id = a.area_empresa_id;
-      const nome = a.area_nome || a.nome_area || 'Sem área';
+      const id = a.area_empresa_id || '__sem_area__';
+      const nome = a.area_nome || a.nome_area || (a.area_empresa_id ? a.area_empresa_id : 'Sem área');
       const dur = a.duracao_dias ?? 1;
       if (!map[id]) map[id] = { nome, dias: 0 };
       map[id].dias += dur;
@@ -127,14 +141,14 @@ export const RelatorioUso: React.FC = () => {
       .lte('data_inicio', dataFim)
       .order('data_inicio', { ascending: true });
 
-    if (filtroPor === 'solicitante' && filtroSolicitante) {
-      query = query.ilike('solicitante_nome', `%${filtroSolicitante}%`);
+    if (filtroPor === 'solicitante' && filtroSolicitanteId) {
+      query = query.eq('solicitante_id', filtroSolicitanteId);
     }
     if (filtroPor === 'area' && filtroArea) {
       query = query.eq('area_empresa_id', filtroArea);
     }
-    if (filtroPor === 'local' && filtroLocal) {
-      query = query.ilike('ug', `%${filtroLocal}%`);
+    if (filtroPor === 'local' && filtroLocalUg) {
+      query = query.eq('ug', filtroLocalUg);
     }
 
     const { data, error } = await query;
@@ -440,13 +454,13 @@ export const RelatorioUso: React.FC = () => {
             >
               <option value="area">Área / Empresa</option>
               <option value="solicitante">Solicitante</option>
-              <option value="local">Local (UG)</option>
+              <option value="local">Local de Instalação</option>
             </select>
           </div>
           {/* valor do filtro */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">
-              {filtroPor === 'area' ? 'Área' : filtroPor === 'solicitante' ? 'Solicitante' : 'Local (UG)'}
+              {filtroPor === 'area' ? 'Área' : filtroPor === 'solicitante' ? 'Solicitante' : 'Local de Instalação (UG)'}
               <span className="font-normal text-gray-400 ml-1">(deixe vazio para todos)</span>
             </label>
             {filtroPor === 'area' ? (
@@ -461,21 +475,58 @@ export const RelatorioUso: React.FC = () => {
                 ))}
               </select>
             ) : filtroPor === 'solicitante' ? (
-              <input
-                type="text"
-                value={filtroSolicitante}
-                onChange={e => setFiltroSolicitante(e.target.value)}
-                placeholder="Nome do solicitante..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={filtroSolicitanteBusca}
+                  onChange={e => {
+                    setFiltroSolicitanteBusca(e.target.value);
+                    setFiltroSolicitanteId('');
+                    setSolicitanteDropdownOpen(true);
+                  }}
+                  onFocus={() => setSolicitanteDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setSolicitanteDropdownOpen(false), 150)}
+                  placeholder="Digite ou selecione o solicitante..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
+                />
+                {filtroSolicitanteBusca && filtroSolicitanteId && (
+                  <button
+                    type="button"
+                    onClick={() => { setFiltroSolicitanteBusca(''); setFiltroSolicitanteId(''); }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  ><X className="w-3.5 h-3.5" /></button>
+                )}
+                {solicitanteDropdownOpen && solicitantesFiltrados.length > 0 && (
+                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div
+                      className="px-3 py-2 text-xs text-gray-400 cursor-pointer hover:bg-gray-50"
+                      onMouseDown={() => { setFiltroSolicitanteBusca(''); setFiltroSolicitanteId(''); setSolicitanteDropdownOpen(false); }}
+                    >Todos os solicitantes</div>
+                    {solicitantesFiltrados.map(s => (
+                      <div
+                        key={s.id}
+                        onMouseDown={() => {
+                          setFiltroSolicitanteId(s.id);
+                          setFiltroSolicitanteBusca(s.nome);
+                          setSolicitanteDropdownOpen(false);
+                        }}
+                        className={`px-3 py-2 text-sm uppercase cursor-pointer hover:bg-amber-50 hover:text-[#1B2A4A] transition-colors ${filtroSolicitanteId === s.id ? 'bg-amber-50 font-bold text-[#1B2A4A]' : ''}`}
+                      >{s.nome}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : (
-              <input
-                type="text"
-                value={filtroLocal}
-                onChange={e => setFiltroLocal(e.target.value)}
-                placeholder="Código da UG..."
+              <select
+                value={filtroLocalUg}
+                onChange={e => setFiltroLocalUg(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
-              />
+              >
+                <option value="">Todos os locais</option>
+                {ugsUnicas.map(ug => (
+                  <option key={ug} value={ug}>{ug}</option>
+                ))}
+              </select>
             )}
           </div>
         </div>
