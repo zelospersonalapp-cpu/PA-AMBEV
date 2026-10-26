@@ -698,13 +698,25 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 bg-white"
             >
-              <option value="">Selecione a UG...</option>
+              <option value="">Selecione o local...</option>
               {locais.map((loc) => (
                 <option key={loc.id} value={loc.id}>
-                  {loc.ug}{loc.descricao && loc.descricao !== loc.ug ? ` — ${loc.descricao}` : ""}{loc.setor_linha ? ` · ${loc.setor_linha}` : ""}
+                  {loc.ug}{loc.setor_linha ? ` · ${loc.setor_linha}` : ""}
                 </option>
               ))}
             </select>
+            {/* Centro cst OBZ — preenchido automaticamente ao selecionar local */}
+            {localId && (() => {
+              const match = locais.find((l) => l.id === localId);
+              return match?.centro_cst_obz ? (
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Centro cst OBZ:</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-amber-100 text-amber-800 border border-amber-300 select-all">
+                    {match.centro_cst_obz}
+                  </span>
+                </div>
+              ) : null;
+            })()}
           </div>
 
           {/* Dates & Period */}

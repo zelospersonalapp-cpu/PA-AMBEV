@@ -197,7 +197,7 @@ export const RelatorioUso: React.FC = () => {
 
       autoTable(doc, {
         startY: 42,
-        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local (UG)', 'Atividade', 'Dias', 'Status']],
+        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local (UG)', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status']],
         body: dados.map(a => [
           fmt(a.data_inicio),
           fmt(a.data_fim),
@@ -205,6 +205,7 @@ export const RelatorioUso: React.FC = () => {
           a.solicitante_nome || a.nome_solicitante || '',
           (a as any).area_empresa || a.area_nome || a.nome_area || '',
           a.ug || '',
+          a.centro_cst_obz || '',
           a.tipo_atividade || '',
           String(a.duracao_dias ?? 1),
           a.status || '',
@@ -282,6 +283,7 @@ export const RelatorioUso: React.FC = () => {
       'Solicitante': a.solicitante_nome || a.nome_solicitante || '',
       'Área / Empresa': (a as any).area_empresa || a.area_nome || a.nome_area || '',
       'Local (UG)': a.ug || '',
+      'Centro cst OBZ': a.centro_cst_obz || '',
       'Atividade': a.tipo_atividade || '',
       'Dias': a.duracao_dias ?? 1,
       'Status': a.status || '',
@@ -304,7 +306,7 @@ export const RelatorioUso: React.FC = () => {
     const ws2 = XLSX.utils.json_to_sheet(linhasRateio);
 
     // larguras
-    ws1['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 20 }, { wch: 6 }, { wch: 12 }];
+    ws1['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 6 }, { wch: 12 }];
     ws2['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
 
     XLSX.utils.book_append_sheet(wb, ws1, 'Uso de PTAs');
@@ -600,6 +602,7 @@ export const RelatorioUso: React.FC = () => {
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Solicitante</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Área / Empresa</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Local (UG)</th>
+                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Centro cst OBZ</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Atividade</th>
                     <th className="px-3 py-2.5 text-center font-semibold">Dias</th>
                     <th className="px-3 py-2.5 text-left font-semibold">Status</th>
@@ -608,7 +611,7 @@ export const RelatorioUso: React.FC = () => {
                 <tbody>
                   {dados.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="px-4 py-8 text-center text-gray-400">
+                      <td colSpan={10} className="px-4 py-8 text-center text-gray-400">
                         Nenhum registro encontrado no período.
                       </td>
                     </tr>
@@ -621,6 +624,7 @@ export const RelatorioUso: React.FC = () => {
                         <td className="px-3 py-2 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
                         <td className="px-3 py-2 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
                         <td className="px-3 py-2 font-mono">{a.ug || '—'}</td>
+                        <td className="px-3 py-2 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
                         <td className="px-3 py-2">{a.tipo_atividade || '—'}</td>
                         <td className="px-3 py-2 text-center font-bold">{a.duracao_dias ?? 1}</td>
                         <td className="px-3 py-2">

@@ -23,6 +23,7 @@ export interface Local {
   setor_linha: string;
   ponto_ref?: string | null;
   descricao?: string | null;
+  centro_cst_obz?: string | null;
   ativo: boolean;
   created_at?: string;
 }
@@ -126,6 +127,7 @@ export interface VAgenda {
   setor_linha?: string;
   ponto_ref?: string;
   local_descricao?: string;
+  centro_cst_obz?: string | null;
   data_inicio: string;
   data_fim: string;
   duracao_dias?: number;
