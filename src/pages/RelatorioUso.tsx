@@ -63,7 +63,7 @@ export const RelatorioUso: React.FC = () => {
   const locaisUnicos = Array.from(new Set(agendamentos.map(a => a.ug || ''))).filter(Boolean).sort();
 
   useEffect(() => {
-    supabase.from('areas_empresa').select('*').then(({ data }) => {
+    supabase.from('areas_empresas').select('*').then(({ data }) => {
       if (data) setAreas(data as AreaEmpresa[]);
     });
   }, []);
