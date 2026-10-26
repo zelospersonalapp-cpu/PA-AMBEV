@@ -542,7 +542,7 @@ export const RelatorioUso: React.FC = () => {
                 <option value="">Todos os locais</option>
                 {locaisOrdenados.map(l => (
                   <option key={l.id} value={l.id}>
-                    {l.ug}{l.setor_linha ? ` · ${l.setor_linha}` : ''}
+                    {l.ug}{l.setor_linha ? ` · ${l.setor_linha}` : ''}{l.centro_cst_obz ? ` — ${l.centro_cst_obz}` : ''}
                   </option>
                 ))}
               </select>
