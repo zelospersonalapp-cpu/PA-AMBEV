@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { VAgenda, AreaEmpresa, Colaborador, Local } from '../types';
-import { FileBarChart2, Download, Mail, RefreshCw, Filter, ChevronDown, X, ArrowDownCircle, ArrowUpCircle, CheckSquare } from 'lucide-react';
+import { FileBarChart2, Download, Mail, RefreshCw, Filter, ChevronDown, X, ArrowDownCircle, ArrowUpCircle, CheckSquare, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -74,6 +74,15 @@ export const RelatorioUso: React.FC = () => {
   const [selecionados, setSelecionados] = useState<Set<string>>(new Set());
   // itens movidos para rateio manual (ids)
   const [itensManuaisRateio, setItensManuaisRateio] = useState<string[]>([]);
+
+  // toast
+  const [toast, setToast] = useState<{ tipo: 'erro' | 'sucesso' | 'aviso'; titulo: string; msg?: string } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = (tipo: 'erro' | 'sucesso' | 'aviso', titulo: string, msg?: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ tipo, titulo, msg });
+    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  };
 
   // rateio
   const [modoRateio, setModoRateio] = useState<'proporcional' | 'direto'>('proporcional');
@@ -215,7 +224,7 @@ export const RelatorioUso: React.FC = () => {
     const cancelados = agendamentos.filter(a => selecionados.has(a.id) && a.status === 'cancelado');
     if (cancelados.length > 0) {
       const nomes = cancelados.map(a => a.patrimonio || a.pta_patrimonio || a.id).join(', ');
-      alert(`Agendamento cancelado não entra no rateio.\n\nItem(s) bloqueado(s): ${nomes}`);
+      showToast('aviso', 'Agendamento cancelado não entra no rateio', `Item(s) bloqueado(s): ${nomes}`);
       return;
     }
     setItensManuaisRateio(prev => {
@@ -503,15 +512,35 @@ Sistema de Gestão de PTAs — PPM Facilities`;
       onConflict: 'area_empresa_id,periodo_ini,periodo_fim',
     });
     if (error) {
-      alert('Não foi possível salvar o rateio no banco. Verifique a tabela "rateio_custo_ptas".');
+      showToast('erro', 'Erro ao salvar rateio', 'Não foi possível salvar no banco. Verifique a tabela "rateio_custo_ptas".');
     } else {
-      alert('Rateio salvo com sucesso!');
+      showToast('sucesso', 'Rateio salvo com sucesso!');
     }
   };
 
   // ─── render ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-5">
+      {/* toast personalizado */}
+      {toast && (
+        <div className={`fixed top-5 right-5 z-50 flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl border max-w-sm w-full transition-all animate-fade-in
+          ${toast.tipo === 'sucesso' ? 'bg-green-50 border-green-300 text-green-800' :
+            toast.tipo === 'erro'   ? 'bg-red-50 border-red-300 text-red-800' :
+                                      'bg-amber-50 border-amber-300 text-amber-800'}`}>
+          <div className="mt-0.5 shrink-0">
+            {toast.tipo === 'sucesso' && <CheckCircle2 className="w-5 h-5 text-green-600" />}
+            {toast.tipo === 'erro'    && <XCircle className="w-5 h-5 text-red-600" />}
+            {toast.tipo === 'aviso'   && <AlertTriangle className="w-5 h-5 text-amber-500" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm leading-snug">{toast.titulo}</p>
+            {toast.msg && <p className="text-xs mt-0.5 opacity-80">{toast.msg}</p>}
+          </div>
+          <button onClick={() => setToast(null)} className="shrink-0 hover:opacity-60 transition-opacity ml-1">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
       {/* cabeçalho */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
