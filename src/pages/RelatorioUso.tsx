@@ -212,6 +212,12 @@ export const RelatorioUso: React.FC = () => {
 
   const moverParaRateio = () => {
     if (selecionados.size === 0) return;
+    const cancelados = agendamentos.filter(a => selecionados.has(a.id) && a.status === 'cancelado');
+    if (cancelados.length > 0) {
+      const nomes = cancelados.map(a => a.patrimonio || a.pta_patrimonio || a.id).join(', ');
+      alert(`Agendamento cancelado não entra no rateio.\n\nItem(s) bloqueado(s): ${nomes}`);
+      return;
+    }
     setItensManuaisRateio(prev => {
       const novo = [...prev];
       selecionados.forEach(id => { if (!novo.includes(id)) novo.push(id); });
