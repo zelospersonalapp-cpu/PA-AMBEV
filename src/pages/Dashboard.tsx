@@ -321,10 +321,10 @@ export const Dashboard: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Linha 2: Local de Utilização */}
+                        {/* Linha 2: Local de Instalação */}
                         <div className="text-xs text-gray-600 mt-0.5 flex items-center gap-1.5">
                           <span className="font-semibold">
-                            {item.local_descricao || item.ug || '—'}
+                            {(item as any).ponto_ref || item.local_descricao || item.ug || '—'}
                             {item.setor_linha ? ` · ${item.setor_linha}` : ''}
                           </span>
                         </div>

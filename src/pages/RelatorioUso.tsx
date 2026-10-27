@@ -267,14 +267,14 @@ export const RelatorioUso: React.FC = () => {
 
       autoTable(doc, {
         startY: 44,
-        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local (UG)', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status']],
+        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local de Instalação', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status']],
         body: todosAgendamentos.map(a => [
           fmt(a.data_inicio),
           fmt(a.data_fim),
           a.patrimonio || a.pta_patrimonio || '',
           a.solicitante_nome || a.nome_solicitante || '',
           (a as any).area_empresa || a.area_nome || a.nome_area || '',
-          a.ug || '',
+          a.ponto_ref || a.local_descricao || a.ug || '',
           a.centro_cst_obz || '',
           a.tipo_atividade || '',
           String(a.duracao_dias ?? 1),
@@ -365,7 +365,7 @@ export const RelatorioUso: React.FC = () => {
       'PTA (Patrimônio)': a.patrimonio || a.pta_patrimonio || '',
       'Solicitante': a.solicitante_nome || a.nome_solicitante || '',
       'Área / Empresa': (a as any).area_empresa || a.area_nome || a.nome_area || '',
-      'Local (UG)': a.ug || '',
+      'Local de Instalação': a.ponto_ref || a.local_descricao || a.ug || '',
       'Centro cst OBZ': a.centro_cst_obz || '',
       'Atividade': a.tipo_atividade || '',
       'Dias': a.duracao_dias ?? 1,
@@ -659,7 +659,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                 <option value="">Todos os locais</option>
                 {locaisOrdenados.map(l => (
                   <option key={l.id} value={l.id}>
-                    {l.ug}{l.setor_linha ? ` · ${l.setor_linha}` : ''}{l.centro_cst_obz ? ` — ${l.centro_cst_obz}` : ''}
+                    {l.ug}{l.setor_linha ? ` · ${l.setor_linha}` : ''}{(l as any).ponto_ref ? ` — ${(l as any).ponto_ref}` : ''}
                   </option>
                 ))}
               </select>
@@ -756,7 +756,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">PTA</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Solicitante</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Área / Empresa</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Local (UG)</th>
+                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Local de Instalação</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Centro cst OBZ</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Atividade</th>
                     <th className="px-3 py-2.5 text-center font-semibold">Dias</th>
@@ -794,7 +794,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                           <td className="px-3 py-2 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
                           <td className="px-3 py-2 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
                           <td className="px-3 py-2 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
-                          <td className="px-3 py-2 font-mono">{a.ug || '—'}</td>
+                          <td className="px-3 py-2">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
                           <td className="px-3 py-2 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
                           <td className="px-3 py-2">{a.tipo_atividade || '—'}</td>
                           <td className="px-3 py-2 text-center font-bold">{a.duracao_dias ?? 1}</td>
@@ -839,7 +839,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                       <th className="px-3 py-2 text-left font-semibold">PTA</th>
                       <th className="px-3 py-2 text-left font-semibold">Solicitante</th>
                       <th className="px-3 py-2 text-left font-semibold">Área / Empresa</th>
-                      <th className="px-3 py-2 text-left font-semibold">Local (UG)</th>
+                      <th className="px-3 py-2 text-left font-semibold">Local de Instalação</th>
                       <th className="px-3 py-2 text-left font-semibold">Centro cst OBZ</th>
                       <th className="px-3 py-2 text-left font-semibold">Atividade</th>
                       <th className="px-3 py-2 text-center font-semibold">Dias</th>
@@ -863,7 +863,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                         <td className="px-3 py-2 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
                         <td className="px-3 py-2 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
                         <td className="px-3 py-2 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
-                        <td className="px-3 py-2 font-mono">{a.ug || '—'}</td>
+                        <td className="px-3 py-2">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
                         <td className="px-3 py-2 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
                         <td className="px-3 py-2">{a.tipo_atividade || '—'}</td>
                         <td className="px-3 py-2 text-center font-bold">{a.duracao_dias ?? 1}</td>

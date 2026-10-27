@@ -321,7 +321,7 @@ export const Agenda: React.FC = () => {
 
           {/* Local UG */}
           <div>
-            <label className="block text-gray-500 mb-1 font-medium">Unidade / Local (UG)</label>
+            <label className="block text-gray-500 mb-1 font-medium">Local de Instalação (UG)</label>
             <select
               value={filterUg}
               onChange={(e) => setFilterUg(e.target.value)}
@@ -479,7 +479,7 @@ export const Agenda: React.FC = () => {
                           {/* Linha 1: Local + badge prioritário */}
                           <div className="flex items-center justify-between gap-1 mb-0.5">
                             <span className="font-bold text-gray-900 truncate text-[11px]">
-                              {item.local_descricao || item.ug || '—'}
+                              {item.ponto_ref || item.local_descricao || item.ug || '—'}
                               {item.setor_linha ? ` · ${item.setor_linha}` : ''}
                             </span>
                             {isPrioritario && (
@@ -611,7 +611,7 @@ export const Agenda: React.FC = () => {
                     <th className="py-3 px-4">Período</th>
                     <th className="py-3 px-4">Atividade</th>
                     <th className="py-3 px-4">Área / Empresa</th>
-                    <th className="py-3 px-4">Local (UG)</th>
+                    <th className="py-3 px-4">Local de Instalação</th>
                     <th className="py-3 px-4">Solicitante</th>
                     <th className="py-3 px-4 text-right">Ação</th>
                   </tr>
@@ -656,7 +656,7 @@ export const Agenda: React.FC = () => {
                           {item.area_nome || item.nome_area || '-'}
                         </td>
                         <td className="py-3 px-4 text-gray-600">
-                          UG: {item.ug || 'Principal'} {item.setor_linha ? `• ${item.setor_linha}` : ''}
+                          {item.ug || '—'}{item.setor_linha ? ` • ${item.setor_linha}` : ''}{item.ponto_ref ? ` — ${item.ponto_ref}` : ''}
                         </td>
                         <td className="py-3 px-4 text-gray-600">
                           {item.solicitante_nome || item.nome_solicitante || '-'}

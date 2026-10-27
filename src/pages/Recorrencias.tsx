@@ -293,7 +293,7 @@ export const Recorrencias: React.FC = () => {
                   <th className="py-3 px-4">Atividade</th>
                   <th className="py-3 px-4">Área / Empresa</th>
                   <th className="py-3 px-4">PTA Vinculada</th>
-                  <th className="py-3 px-4">Local (UG)</th>
+                  <th className="py-3 px-4">Local de Instalação</th>
                   <th className="py-3 px-4">Vigência</th>
                   <th className="py-3 px-4 text-right">Ações</th>
                 </tr>
@@ -338,7 +338,7 @@ export const Recorrencias: React.FC = () => {
                         )}
                       </td>
                       <td className="py-3 px-4 text-gray-600">
-                        {loc ? `${loc.ug} • ${loc.setor_linha}` : '-'}
+                        {loc ? `${loc.ug}${loc.setor_linha ? ` • ${loc.setor_linha}` : ''}${(loc as any).ponto_ref ? ` — ${(loc as any).ponto_ref}` : ''}` : '-'}
                       </td>
                       <td className="py-3 px-4 text-gray-500 text-[11px] whitespace-nowrap">
                         {formatDateBR(item.vigencia_inicio)} até {formatDateBR(item.vigencia_fim)}
@@ -522,7 +522,7 @@ export const Recorrencias: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                    Local de Uso (UG / Setor) *
+                    Local de Instalação *
                   </label>
                   <select
                     value={localId}
@@ -533,7 +533,7 @@ export const Recorrencias: React.FC = () => {
                     <option value="">Selecione o local...</option>
                     {locais.map((l) => (
                       <option key={l.id} value={l.id}>
-                        {l.ug} — {l.setor_linha}
+                        {l.ug}{l.setor_linha ? ` — ${l.setor_linha}` : ''}{(l as any).ponto_ref ? ` · ${(l as any).ponto_ref}` : ''}
                       </option>
                     ))}
                   </select>

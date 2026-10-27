@@ -320,7 +320,7 @@ export const Cadastros: React.FC = () => {
             {activeTab === 'areas'
               ? 'Nova Empresa'
               : activeTab === 'locais'
-              ? 'Novo Local de Utilização'
+              ? 'Novo Local de Instalação'
               : 'Novo Colaborador'}
           </span>
         </button>
@@ -355,7 +355,7 @@ export const Cadastros: React.FC = () => {
           }`}
         >
           <MapPin className="w-4 h-4" />
-          <span>Locais de Utilização ({locais.length})</span>
+          <span>Locais de Instalação ({locais.length})</span>
         </button>
 
         <button
@@ -470,7 +470,6 @@ export const Cadastros: React.FC = () => {
             <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
               <tr>
                 <th className="py-3 px-4">UG</th>
-                <th className="py-3 px-4">LOCAL DE UTILIZAÇÃO</th>
                 <th className="py-3 px-4">Setor / Linha</th>
                 <th className="py-3 px-4">Local de Instalação</th>
                 <th className="py-3 px-4">Status</th>
@@ -487,7 +486,6 @@ export const Cadastros: React.FC = () => {
                 .map((loc) => (
                   <tr key={loc.id} className="hover:bg-gray-50">
                     <td className="py-3 px-4 font-bold text-gray-900 text-[11px]">{loc.ug}</td>
-                    <td className="py-3 px-4 text-gray-800">{loc.descricao || '-'}</td>
                     <td className="py-3 px-4 text-gray-600">{loc.setor_linha || '-'}</td>
                     <td className="py-3 px-4 text-gray-500 italic">{(loc as any).ponto_ref || '-'}</td>
                     <td className="py-3 px-4">
@@ -692,8 +690,8 @@ export const Cadastros: React.FC = () => {
                     : 'Nova Empresa'
                   : activeTab === 'locais'
                   ? editingLocal
-                    ? 'Editar Local de Utilização'
-                    : 'Novo Local de Utilização'
+                    ? 'Editar Local de Instalação'
+                    : 'Novo Local de Instalação'
                   : editingColab
                   ? 'Editar Colaborador'
                   : 'Novo Colaborador'}
@@ -781,15 +779,16 @@ export const Cadastros: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Local de Utilização *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Local de Instalação *</label>
                   <input
                     type="text"
                     required
                     value={localDescricao}
                     onChange={(e) => setLocalDescricao(e.target.value)}
-                    placeholder="Ex: Área de Envase, Sala de Compressores..."
+                    placeholder="Ex: Próximo ao Compressor 3, Corredor B, Sala de Compressores..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Aparece no checklist e no Relatório de Uso</p>
                 </div>
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">Setor / Linha <span className="text-gray-400 font-normal">(opcional)</span></label>
@@ -800,17 +799,6 @@ export const Cadastros: React.FC = () => {
                     placeholder="Ex: Linha 501, Caldeiras..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Local de Instalação (Ponto de Referência) <span className="text-gray-400 font-normal">(opcional)</span></label>
-                  <input
-                    type="text"
-                    value={localPontoRef}
-                    onChange={(e) => setLocalPontoRef(e.target.value)}
-                    placeholder="Ex: Próximo ao Compressor 3, Corredor B..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
-                  />
-                  <p className="text-[10px] text-gray-400 mt-0.5">Aparece no checklist do Relatório de Uso</p>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer pt-2">
                   <input
