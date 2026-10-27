@@ -107,7 +107,7 @@ export const RelatorioUso: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    calcularRateio(dadosTabela.concat(dadosRateioManual), rateio);
+    calcularRateio(dadosRateioManual, rateio);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agendamentos, valorAluguel, itensManuaisRateio]);
 
