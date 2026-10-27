@@ -46,8 +46,8 @@ const aplicarMascaraMonetaria = (raw: string): string => {
   return (num / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-// ─── logo base64 (Facilities CRJ) ────────────────────────────────────────────
-// Carregado do arquivo público /logo-pta.png via canvas no momento da exportação
+// ─── logo Facilities CRJ para PDF ────────────────────────────────────────────
+// Carregado de /logo-facilities-crj.png (fundo branco, ícone preto) no exportarPDF
 
 // ─── componente ──────────────────────────────────────────────────────────────
 export const RelatorioUso: React.FC = () => {
@@ -351,7 +351,7 @@ export const RelatorioUso: React.FC = () => {
       }
     };
     img.onerror = () => buildPdf(null);
-    img.src = '/logo-pta.png';
+    img.src = '/logo-facilities-crj.png';
   };
 
   // ── exportar Excel ───────────────────────────────────────────────────────
