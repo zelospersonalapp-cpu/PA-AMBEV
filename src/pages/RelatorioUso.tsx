@@ -517,28 +517,6 @@ Sistema de Gestão de PTAs — PPM Facilities`;
             <p className="text-xs text-gray-500">Uso de PTAs, rateio de custos e exportação</p>
           </div>
         </div>
-        {gerou && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={exportarPDF}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" /> PDF
-            </button>
-            <button
-              onClick={exportarExcel}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-600 hover:bg-green-700 text-white text-xs font-bold shadow transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" /> Excel
-            </button>
-            <button
-              onClick={compartilharEmail}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0078D4] hover:bg-[#006CBE] text-white text-xs font-bold shadow transition-colors"
-            >
-              <Mail className="w-3.5 h-3.5" /> E-mail
-            </button>
-          </div>
-        )}
       </div>
 
       {/* painel de filtros */}
@@ -1083,6 +1061,27 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                   </tfoot>
                 )}
               </table>
+            </div>
+            {/* Botões de exportação abaixo do rateio */}
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2 justify-end">
+              <button
+                onClick={exportarPDF}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" /> PDF
+              </button>
+              <button
+                onClick={exportarExcel}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white text-xs font-bold shadow transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" /> Excel
+              </button>
+              <button
+                onClick={compartilharEmail}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#0078D4] hover:bg-[#006CBE] text-white text-xs font-bold shadow transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5" /> E-mail
+              </button>
             </div>
           </div>
         </>
