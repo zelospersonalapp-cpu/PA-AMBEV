@@ -239,7 +239,7 @@ export const Cadastros: React.FC = () => {
 
   const handleSaveLocal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!(localUg || '').trim() || !(localDescricao || '').trim()) return;
+    if (!(localSetorLinha || '').trim() || !(localUg || '').trim()) return;
     setSaving(true);
     try {
       const payload = {
@@ -768,12 +768,12 @@ export const Cadastros: React.FC = () => {
             {activeTab === 'locais' && (
               <form onSubmit={handleSaveLocal} className="p-6 space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">UG *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Local *</label>
                   <input
                     type="text"
                     required
-                    value={localUg}
-                    onChange={(e) => setLocalUg(e.target.value)}
+                    value={localSetorLinha}
+                    onChange={(e) => setLocalSetorLinha(e.target.value)}
                     placeholder="Ex: Brassagem, Filtração, Utilidades..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium uppercase"
                   />
@@ -783,20 +783,20 @@ export const Cadastros: React.FC = () => {
                   <input
                     type="text"
                     required
-                    value={localDescricao}
-                    onChange={(e) => setLocalDescricao(e.target.value)}
-                    placeholder="Ex: Próximo ao Compressor 3, Corredor B, Sala de Compressores..."
+                    value={localUg}
+                    onChange={(e) => setLocalUg(e.target.value)}
+                    placeholder="Ex: CERVEJARIA, ENVASE, UTILIDADES..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
                   <p className="text-[10px] text-gray-400 mt-0.5">Aparece no checklist e no Relatório de Uso</p>
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Setor / Linha <span className="text-gray-400 font-normal">(opcional)</span></label>
+                  <label className="block font-semibold text-gray-700 mb-1">UG <span className="text-gray-400 font-normal">(opcional)</span></label>
                   <input
                     type="text"
-                    value={localSetorLinha}
-                    onChange={(e) => setLocalSetorLinha(e.target.value)}
-                    placeholder="Ex: Linha 501, Caldeiras..."
+                    value={localDescricao}
+                    onChange={(e) => setLocalDescricao(e.target.value)}
+                    placeholder="..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
                 </div>
