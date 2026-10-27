@@ -248,6 +248,15 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
     }
   }, [isOpen, editingAgendamento, initialDate, initialPtaId]);
 
+  // Se o solicitanteBusca ficou vazio mas solicitante_id existe, resolve o nome
+  // quando os colaboradores terminarem de carregar
+  useEffect(() => {
+    if (solicitanteId && !solicitanteBusca && colaboradores.length > 0) {
+      const colab = colaboradores.find((c) => c.id === solicitanteId);
+      if (colab) setSolicitanteBusca(colab.nome);
+    }
+  }, [colaboradores, solicitanteId, solicitanteBusca]);
+
   // When localId changes or editingAgendamento is loaded, sync UG selector
   useEffect(() => {
     if (localId && locais.length > 0) {
