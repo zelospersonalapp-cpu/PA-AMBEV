@@ -81,7 +81,7 @@ export const RelatorioUso: React.FC = () => {
   const showToast = (tipo: 'erro' | 'sucesso' | 'aviso', titulo: string, msg?: string) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast({ tipo, titulo, msg });
-    toastTimer.current = setTimeout(() => setToast(null), 5000);
+    toastTimer.current = setTimeout(() => setToast(null), 7000);
   };
 
   // rateio
