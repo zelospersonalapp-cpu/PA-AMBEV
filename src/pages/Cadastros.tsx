@@ -246,7 +246,7 @@ export const Cadastros: React.FC = () => {
         ug: (localUg || '').trim().toUpperCase(),
         descricao: (localDescricao || '').trim().toUpperCase() || null,
         setor_linha: (localSetorLinha || '').trim().toUpperCase() || null,
-        ponto_ref: null,
+        ponto_ref: (localPontoRef || '').trim().toUpperCase() || null,
         ativo: localAtivo,
       };
       if (editingLocal) {
@@ -472,6 +472,7 @@ export const Cadastros: React.FC = () => {
                 <th className="py-3 px-4">UG</th>
                 <th className="py-3 px-4">LOCAL DE UTILIZAÇÃO</th>
                 <th className="py-3 px-4">Setor / Linha</th>
+                <th className="py-3 px-4">Local de Instalação</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Ações</th>
               </tr>
@@ -488,6 +489,7 @@ export const Cadastros: React.FC = () => {
                     <td className="py-3 px-4 font-bold text-gray-900 text-[11px]">{loc.ug}</td>
                     <td className="py-3 px-4 text-gray-800">{loc.descricao || '-'}</td>
                     <td className="py-3 px-4 text-gray-600">{loc.setor_linha || '-'}</td>
+                    <td className="py-3 px-4 text-gray-500 italic">{(loc as any).ponto_ref || '-'}</td>
                     <td className="py-3 px-4">
                       {loc.ativo ? (
                         <span className="text-emerald-700 font-bold">Ativo</span>
@@ -798,6 +800,17 @@ export const Cadastros: React.FC = () => {
                     placeholder="Ex: Linha 501, Caldeiras..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Local de Instalação (Ponto de Referência) <span className="text-gray-400 font-normal">(opcional)</span></label>
+                  <input
+                    type="text"
+                    value={localPontoRef}
+                    onChange={(e) => setLocalPontoRef(e.target.value)}
+                    placeholder="Ex: Próximo ao Compressor 3, Corredor B..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Aparece no checklist do Relatório de Uso</p>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer pt-2">
                   <input

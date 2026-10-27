@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { VAgenda, AreaEmpresa, Colaborador, Local } from '../types';
-import { FileBarChart2, Download, Mail, RefreshCw, Filter, ChevronDown, X } from 'lucide-react';
+import { FileBarChart2, Download, Mail, RefreshCw, Filter, ChevronDown, X, ArrowDownCircle, ArrowUpCircle, CheckSquare } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -11,9 +11,11 @@ interface RateioArea {
   area_id: string;
   area_nome: string;
   dias: number;
-  pct_uso: number;   // calculado automaticamente pelo uso
-  pct_ajuste: number; // ajuste manual digitado pelo usuário
-  valor: number;     // calculado pelo sistema
+  pct_uso: number;
+  pct_ajuste: number;
+  valor: number;
+  // ids dos agendamentos que compõem este rateio
+  agendamento_ids: string[];
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -36,6 +38,17 @@ const firstOfMonth = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
 };
 
+// máscara monetária: converte "25500" → "25.500,00"
+const aplicarMascaraMonetaria = (raw: string): string => {
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+  const num = parseInt(digits, 10);
+  return (num / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+// ─── logo base64 (Facilities CRJ) ────────────────────────────────────────────
+// Carregado do arquivo público /logo-pta.png via canvas no momento da exportação
+
 // ─── componente ──────────────────────────────────────────────────────────────
 export const RelatorioUso: React.FC = () => {
   // filtros
@@ -47,6 +60,7 @@ export const RelatorioUso: React.FC = () => {
   const [solicitanteDropdownOpen, setSolicitanteDropdownOpen] = useState(false);
   const [filtroArea, setFiltroArea] = useState('');
   const [filtroLocalUg, setFiltroLocalUg] = useState('');
+  const filtrouAlgumCampo = filtroArea !== '' || filtroLocalUg !== '' || filtroSolicitanteId !== '';
 
   // dados
   const [agendamentos, setAgendamentos] = useState<VAgenda[]>([]);
@@ -56,19 +70,29 @@ export const RelatorioUso: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [gerou, setGerou] = useState(false);
 
+  // seleção de linhas
+  const [selecionados, setSelecionados] = useState<Set<string>>(new Set());
+  // itens movidos para rateio manual (ids)
+  const [itensManuaisRateio, setItensManuaisRateio] = useState<string[]>([]);
+
   // rateio
   const [modoRateio, setModoRateio] = useState<'proporcional' | 'direto'>('proporcional');
   const [valorAluguel, setValorAluguel] = useState('');
   const [rateio, setRateio] = useState<RateioArea[]>([]);
-  const [valoresDiretos, setValoresDiretos] = useState<Record<string, string>>({}); // area_id -> valor string
+  const [valoresDiretos, setValoresDiretos] = useState<Record<string, string>>({});
 
-  // Locais ordenados para dropdown (ug + setor_linha)
+  // Locais ordenados para dropdown
   const locaisOrdenados = [...locais].sort((a, b) => a.ug.localeCompare(b.ug));
 
-  // Solicitantes filtrados pela busca
+  // Solicitantes filtrados
   const solicitantesFiltrados = solicitantes.filter(s =>
     s.nome.toLowerCase().includes(filtroSolicitanteBusca.toLowerCase())
   );
+
+  // dados visíveis na tabela = todos os agendamentos EXCETO os que foram para rateio manual
+  const dadosTabela = agendamentos.filter(a => !itensManuaisRateio.includes(a.id));
+  // dados no painel de rateio manual
+  const dadosRateioManual = agendamentos.filter(a => itensManuaisRateio.includes(a.id));
 
   useEffect(() => {
     Promise.all([
@@ -82,28 +106,26 @@ export const RelatorioUso: React.FC = () => {
     });
   }, []);
 
-  // recalcular rateio sempre que agendamentos ou valor mudar
   useEffect(() => {
-    calcularRateio(agendamentos, rateio);
+    calcularRateio(dadosTabela.concat(dadosRateioManual), rateio);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agendamentos, valorAluguel]);
+  }, [agendamentos, valorAluguel, itensManuaisRateio]);
 
   const calcularRateio = (dados: VAgenda[], rateioAtual: RateioArea[]) => {
-    // agrupar por área
-    const map: Record<string, { nome: string; dias: number }> = {};
+    const map: Record<string, { nome: string; dias: number; ids: string[] }> = {};
     dados.forEach(a => {
       const id = a.area_empresa_id || '__sem_area__';
       const nome = (a as any).area_empresa || a.area_nome || a.nome_area || (a.area_empresa_id ? a.area_empresa_id : 'Sem área');
       const dur = a.duracao_dias ?? 1;
-      if (!map[id]) map[id] = { nome, dias: 0 };
+      if (!map[id]) map[id] = { nome, dias: 0, ids: [] };
       map[id].dias += dur;
+      map[id].ids.push(a.id);
     });
     const totalDias = Object.values(map).reduce((s, v) => s + v.dias, 0);
     const valor = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
 
     const novo: RateioArea[] = Object.entries(map).map(([id, v]) => {
       const pctUso = totalDias > 0 ? (v.dias / totalDias) * 100 : 0;
-      // preservar ajuste manual se já existia
       const anterior = rateioAtual.find(r => r.area_id === id);
       const pctAjuste = anterior ? anterior.pct_ajuste : 0;
       const pctFinal = Math.max(0, pctUso + pctAjuste);
@@ -114,10 +136,9 @@ export const RelatorioUso: React.FC = () => {
         pct_uso: pctUso,
         pct_ajuste: pctAjuste,
         valor: valor * (pctFinal / 100),
+        agendamento_ids: v.ids,
       };
     });
-
-    // normalizar: redistribuir para que a soma fique 100%
     setRateio(novo);
   };
 
@@ -131,9 +152,21 @@ export const RelatorioUso: React.FC = () => {
     setRateio(novo);
   };
 
+  const limparFiltros = () => {
+    setDataIni(firstOfMonth());
+    setDataFim(today());
+    setFiltroPor('area');
+    setFiltroArea('');
+    setFiltroLocalUg('');
+    setFiltroSolicitanteId('');
+    setFiltroSolicitanteBusca('');
+  };
+
   const gerarRelatorio = async () => {
     setLoading(true);
     setGerou(false);
+    setSelecionados(new Set());
+    setItensManuaisRateio([]);
     let query = supabase
       .from('v_agenda')
       .select('*')
@@ -160,45 +193,82 @@ export const RelatorioUso: React.FC = () => {
     setLoading(false);
   };
 
-  // ── dados filtrados para tabela ──────────────────────────────────────────
-  const dados = agendamentos;
+  // ── seleção ──────────────────────────────────────────────────────────────
+  const toggleSelecionado = (id: string) => {
+    setSelecionados(prev => {
+      const s = new Set(prev);
+      if (s.has(id)) s.delete(id); else s.add(id);
+      return s;
+    });
+  };
 
-  // ── total dias no período ────────────────────────────────────────────────
-  const totalDias = dados.reduce((s, a) => s + (a.duracao_dias ?? 1), 0);
+  const toggleSelecionarTodos = () => {
+    if (selecionados.size === dadosTabela.length && dadosTabela.length > 0) {
+      setSelecionados(new Set());
+    } else {
+      setSelecionados(new Set(dadosTabela.map(a => a.id)));
+    }
+  };
 
-  // ── soma rateio ──────────────────────────────────────────────────────────
+  const moverParaRateio = () => {
+    if (selecionados.size === 0) return;
+    setItensManuaisRateio(prev => {
+      const novo = [...prev];
+      selecionados.forEach(id => { if (!novo.includes(id)) novo.push(id); });
+      return novo;
+    });
+    setSelecionados(new Set());
+  };
+
+  const devolverParaLista = (id: string) => {
+    setItensManuaisRateio(prev => prev.filter(i => i !== id));
+  };
+
+  // ── totais ───────────────────────────────────────────────────────────────
+  const totalDias = dadosTabela.reduce((s, a) => s + (a.duracao_dias ?? 1), 0) +
+    dadosRateioManual.reduce((s, a) => s + (a.duracao_dias ?? 1), 0);
   const totalRateio = rateio.reduce((s, r) => s + r.valor, 0);
 
   // ── exportar PDF ─────────────────────────────────────────────────────────
   const exportarPDF = () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
+    const todosAgendamentos = agendamentos;
 
     const buildPdf = (logoDataUrl: string | null) => {
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const W = doc.internal.pageSize.width;
 
-      // logo
+      // ── cabeçalho com fundo escuro ──────────────────────────────────────
+      doc.setFillColor(27, 42, 74);
+      doc.rect(0, 0, W, 32, 'F');
+
+      // logo (fundo escuro, logo branca)
       if (logoDataUrl) {
-        try { doc.addImage(logoDataUrl, 'PNG', 10, 8, 22, 22); } catch (_) { /* sem logo */ }
+        try { doc.addImage(logoDataUrl, 'PNG', 8, 4, 24, 24); } catch (_) { /* sem logo */ }
       }
 
-      // cabeçalho
-      doc.setFontSize(14);
-      doc.setTextColor(27, 42, 74);
-      doc.text('AmBev Facilities — Relatório de Uso de PTAs', 38, 16);
-      doc.setFontSize(9);
-      doc.setTextColor(80, 80, 80);
-      doc.text(`Período: ${fmt(dataIni)} a ${fmt(dataFim)}   |   Gerado em: ${fmt(today())}`, 38, 22);
-      doc.text(`Total de registros: ${dados.length}   |   Total de dias-uso: ${totalDias}`, 38, 27);
+      // texto do cabeçalho
+      doc.setFontSize(15);
+      doc.setTextColor(245, 216, 0); // amarelo AmBev
+      doc.setFont('helvetica', 'bold');
+      doc.text('AmBev Facilities — Relatório de Uso de PTAs', 38, 13);
 
-      // tabela uso
-      doc.setFontSize(11);
+      doc.setFontSize(8.5);
+      doc.setTextColor(200, 210, 230);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Período: ${fmt(dataIni)} a ${fmt(dataFim)}   |   Gerado em: ${fmt(today())}`, 38, 20);
+      doc.text(`Total de registros: ${todosAgendamentos.length}   |   Total de dias-uso: ${totalDias}${valorNum > 0 ? `   |   Aluguel total: ${fmtCurrency(valorNum)}` : ''}`, 38, 26);
+
+      // ── tabela de uso ───────────────────────────────────────────────────
+      doc.setFontSize(10);
       doc.setTextColor(27, 42, 74);
-      doc.text('Detalhes de Uso', 10, 38);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Detalhes de Uso', 10, 40);
 
       autoTable(doc, {
-        startY: 42,
+        startY: 44,
         head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local (UG)', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status']],
-        body: dados.map(a => [
+        body: todosAgendamentos.map(a => [
           fmt(a.data_inicio),
           fmt(a.data_fim),
           a.patrimonio || a.pta_patrimonio || '',
@@ -210,24 +280,31 @@ export const RelatorioUso: React.FC = () => {
           String(a.duracao_dias ?? 1),
           a.status || '',
         ]),
-        styles: { fontSize: 7.5, cellPadding: 1.5 },
-        headStyles: { fillColor: [27, 42, 74], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 7, cellPadding: 1.5 },
+        headStyles: { fillColor: [27, 42, 74], textColor: [245, 216, 0], fontStyle: 'bold' },
         alternateRowStyles: { fillColor: [245, 247, 250] },
         margin: { left: 10, right: 10 },
       });
 
-      // tabela rateio
+      // ── tabela rateio ───────────────────────────────────────────────────
       if (rateio.length > 0 && valorNum > 0) {
-        const finalY = (doc as any).lastAutoTable.finalY + 8;
-        doc.setFontSize(11);
+        const finalY = (doc as any).lastAutoTable.finalY + 10;
+        doc.setFontSize(10);
         doc.setTextColor(27, 42, 74);
+        doc.setFont('helvetica', 'bold');
         doc.text(`Rateio de Custos — Aluguel total: ${fmtCurrency(valorNum)}`, 10, finalY);
 
         autoTable(doc, {
           startY: finalY + 4,
-          head: [['Área / Empresa', 'Dias de Uso', '% Uso', 'Ajuste %', '% Final', 'Valor a Pagar']],
+          head: [['Área / Empresa', 'Dias de Uso', '% Uso', 'Ajuste %', '% Final', 'Valor a Pagar', 'Centro de Custo (OBZ)']],
           body: rateio.map(r => {
             const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
+            // pegar OBZ dos agendamentos desta área
+            const obzSet = new Set(
+              todosAgendamentos
+                .filter(a => r.agendamento_ids.includes(a.id) && a.centro_cst_obz)
+                .map(a => a.centro_cst_obz!)
+            );
             return [
               r.area_nome,
               String(r.dias),
@@ -235,26 +312,31 @@ export const RelatorioUso: React.FC = () => {
               (r.pct_ajuste >= 0 ? '+' : '') + r.pct_ajuste.toFixed(1) + '%',
               pctFinal.toFixed(1) + '%',
               fmtCurrency(r.valor),
+              [...obzSet].join(', ') || '—',
             ];
           }),
-          foot: [['TOTAL', String(totalDias), '—', '—', '—', fmtCurrency(totalRateio)]],
+          foot: [['TOTAL', String(totalDias), '—', '—', '—', fmtCurrency(totalRateio), '']],
           styles: { fontSize: 8 },
-          headStyles: { fillColor: [27, 42, 74], textColor: 255, fontStyle: 'bold' },
+          headStyles: { fillColor: [27, 42, 74], textColor: [245, 216, 0], fontStyle: 'bold' },
           footStyles: { fillColor: [240, 245, 255], textColor: [27, 42, 74], fontStyle: 'bold' },
           alternateRowStyles: { fillColor: [245, 247, 250] },
           margin: { left: 10, right: 10 },
         });
       }
 
-      // rodapé
+      // ── rodapé ──────────────────────────────────────────────────────────
+      const pageH = doc.internal.pageSize.height;
+      doc.setFillColor(27, 42, 74);
+      doc.rect(0, pageH - 10, W, 10, 'F');
       doc.setFontSize(7);
-      doc.setTextColor(150);
-      doc.text('AmBev Facilities — PPM — Controle Inteligente de Plataformas Elevatórias', 10, doc.internal.pageSize.height - 6);
+      doc.setTextColor(200, 210, 230);
+      doc.setFont('helvetica', 'normal');
+      doc.text('AmBev Facilities — PPM — Controle Inteligente de Plataformas Elevatórias', 10, pageH - 3.5);
+      doc.text(`Gerado em ${fmt(today())}`, W - 10, pageH - 3.5, { align: 'right' });
 
       doc.save(`relatorio-uso-ptas-${dataIni}-a-${dataFim}.pdf`);
     };
 
-    // Tentar carregar logo via canvas; gerar PDF com ou sem ela
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -275,8 +357,9 @@ export const RelatorioUso: React.FC = () => {
   // ── exportar Excel ───────────────────────────────────────────────────────
   const exportarExcel = () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
+    const todosAgendamentos = agendamentos;
 
-    const linhasUso = dados.map(a => ({
+    const linhasUso = todosAgendamentos.map(a => ({
       'Data Início': fmt(a.data_inicio),
       'Data Fim': fmt(a.data_fim),
       'PTA (Patrimônio)': a.patrimonio || a.pta_patrimonio || '',
@@ -305,17 +388,15 @@ export const RelatorioUso: React.FC = () => {
     const ws1 = XLSX.utils.json_to_sheet(linhasUso);
     const ws2 = XLSX.utils.json_to_sheet(linhasRateio);
 
-    // larguras
     ws1['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 6 }, { wch: 12 }];
     ws2['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
 
     XLSX.utils.book_append_sheet(wb, ws1, 'Uso de PTAs');
     XLSX.utils.book_append_sheet(wb, ws2, 'Rateio de Custos');
 
-    // aba resumo
     const resumo = [
       { Info: 'Período', Valor: `${fmt(dataIni)} a ${fmt(dataFim)}` },
-      { Info: 'Total de registros', Valor: dados.length },
+      { Info: 'Total de registros', Valor: todosAgendamentos.length },
       { Info: 'Total de dias-uso', Valor: totalDias },
       { Info: 'Valor total do aluguel', Valor: valorNum },
       { Info: 'Total rateado', Valor: parseFloat(totalRateio.toFixed(2)) },
@@ -327,35 +408,62 @@ export const RelatorioUso: React.FC = () => {
     XLSX.writeFile(wb, `relatorio-uso-ptas-${dataIni}-a-${dataFim}.xlsx`);
   };
 
-  // ── compartilhar por e-mail (Outlook Web) ────────────────────────────────
+  // ── compartilhar por e-mail corporativo ──────────────────────────────────
   const compartilharEmail = () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
-    const linhasRateio = rateio
+    const periodoStr = `${fmt(dataIni)} a ${fmt(dataFim)}`;
+
+    const linhasRateioTexto = rateio
       .map(r => {
         const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
-        return `- ${r.area_nome}: ${r.dias} dias (${pctFinal.toFixed(1)}%) → ${fmtCurrency(r.valor)}`;
+        return `    • ${r.area_nome}: ${r.dias} dias (${pctFinal.toFixed(1)}%) → ${fmtCurrency(r.valor)}`;
       })
-      .join('%0D%0A');
+      .join('\n');
 
-    const subject = encodeURIComponent(`[Facilities] Relatório de Uso de PTAs — ${fmt(dataIni)} a ${fmt(dataFim)}`);
-    const body = encodeURIComponent(
-      `Prezados,\n\nSegue o relatório de uso das Plataformas Elevatórias (PTAs) referente ao período de ${fmt(dataIni)} a ${fmt(dataFim)}.\n\n` +
-      `Total de registros: ${dados.length}\n` +
-      `Total de dias-uso: ${totalDias}\n` +
-      `Valor total do aluguel: ${valorNum > 0 ? fmtCurrency(valorNum) : 'Não informado'}\n\n` +
-      `RATEIO POR ÁREA:\n${rateio.map(r => {
-        const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
-        return `- ${r.area_nome}: ${r.dias} dias (${pctFinal.toFixed(1)}%) → ${fmtCurrency(r.valor)}`;
-      }).join('\n')}\n\n` +
-      `Relatório completo gerado pelo Sistema de Gestão de PTAs — AmBev Facilities.\n\nAtenciosamente,\nCentro de Inteligência Facilities`
-    ).replace(/%0A/g, '%0D%0A');
+    const subject = `[Facilities CRJ] Relatório de Uso de PTAs — ${periodoStr}`;
 
-    // Outlook Web
-    const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?subject=${subject}&body=${body}`;
+    const body =
+`Prezados,
+
+Encaminhamos o Relatório de Uso das Plataformas Elevatórias (PTAs) referente ao período de ${periodoStr}, gerado pelo Sistema de Gestão de PTAs — Centro de Inteligência Facilities CRJ.
+
+─────────────────────────────────────────
+SUMÁRIO DO PERÍODO
+─────────────────────────────────────────
+  • Período de referência: ${periodoStr}
+  • Total de registros: ${agendamentos.length}
+  • Total de dias-uso: ${totalDias}
+${valorNum > 0 ? `  • Valor total do aluguel: ${fmtCurrency(valorNum)}` : ''}
+
+─────────────────────────────────────────
+ALOCAÇÃO DE CUSTOS POR CENTRO DE CUSTO
+─────────────────────────────────────────
+Conforme apuração do período, os valores a serem alocados nos respectivos centros de custo são:
+
+${linhasRateioTexto}
+
+${valorNum > 0 ? `  TOTAL RATEADO: ${fmtCurrency(totalRateio)}` : ''}
+
+─────────────────────────────────────────
+
+Solicitamos que os valores acima sejam lançados nos centros de custo (OBZ) de cada área conforme indicado.
+
+Em caso de dúvidas ou necessidade de ajustes no rateio, favor entrar em contato com a equipe de Facilities.
+
+Atenciosamente,
+
+Centro de Inteligência Facilities — CRJ
+AmBev | Plataformas Elevatórias (PTAs)
+Sistema de Gestão de PTAs — PPM Facilities`;
+
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(body).replace(/%0A/g, '%0D%0A');
+
+    const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?subject=${encodedSubject}&body=${encodedBody}`;
     window.open(outlookUrl, '_blank');
   };
 
-  // ── salvar rateio no banco ───────────────────────────────────────────────
+  // ── salvar rateio ────────────────────────────────────────────────────────
   const salvarRateio = async () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
 
@@ -389,8 +497,7 @@ export const RelatorioUso: React.FC = () => {
       onConflict: 'area_empresa_id,periodo_ini,periodo_fim',
     });
     if (error) {
-      // tabela pode não existir ainda — avisa sem travar
-      alert('Não foi possível salvar o rateio no banco. A tabela "rateio_custo_ptas" precisa ser criada. Use a exportação PDF/Excel.');
+      alert('Não foi possível salvar o rateio no banco. Verifique a tabela "rateio_custo_ptas".');
     } else {
       alert('Rateio salvo com sucesso!');
     }
@@ -436,9 +543,19 @@ export const RelatorioUso: React.FC = () => {
 
       {/* painel de filtros */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-[#1B2A4A]" />
-          <span className="text-sm font-bold text-[#1B2A4A]">Filtros do Relatório</span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-[#1B2A4A]" />
+            <span className="text-sm font-bold text-[#1B2A4A]">Filtros do Relatório</span>
+          </div>
+          {filtrouAlgumCampo && (
+            <button
+              onClick={limparFiltros}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-gray-300 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-red-600 hover:border-red-300 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" /> Limpar Filtros
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* período */}
@@ -502,7 +619,7 @@ export const RelatorioUso: React.FC = () => {
                   }}
                   onFocus={() => setSolicitanteDropdownOpen(true)}
                   onBlur={() => setTimeout(() => setSolicitanteDropdownOpen(false), 150)}
-                  placeholder="Digite ou selecione o solicitante..."
+                  placeholder="Digite ou selecione..."
                   autoComplete="off"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 uppercase"
                 />
@@ -549,15 +666,27 @@ export const RelatorioUso: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="flex items-center justify-end mt-3">
-          <button
-            onClick={gerarRelatorio}
-            disabled={loading}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#1B2A4A] hover:bg-[#243656] text-white text-sm font-bold shadow transition-colors disabled:opacity-60"
-          >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Filter className="w-4 h-4" />}
-            {loading ? 'Carregando...' : 'Gerar Relatório'}
-          </button>
+        <div className="flex items-center justify-between mt-3">
+          {/* botão limpar sempre visível abaixo quando não está no topo */}
+          <div />
+          <div className="flex items-center gap-2">
+            {(dataIni !== firstOfMonth() || dataFim !== today()) && (
+              <button
+                onClick={limparFiltros}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-semibold text-gray-500 hover:text-red-600 hover:border-red-300 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" /> Limpar
+              </button>
+            )}
+            <button
+              onClick={gerarRelatorio}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#1B2A4A] hover:bg-[#243656] text-white text-sm font-bold shadow transition-colors disabled:opacity-60"
+            >
+              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Filter className="w-4 h-4" />}
+              {loading ? 'Carregando...' : 'Gerar Relatório'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -568,7 +697,7 @@ export const RelatorioUso: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 text-center">
               <p className="text-xs text-gray-500 font-medium mb-1">Registros</p>
-              <p className="text-2xl font-extrabold text-[#1B2A4A]">{dados.length}</p>
+              <p className="text-2xl font-extrabold text-[#1B2A4A]">{agendamentos.length}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 text-center">
               <p className="text-xs text-gray-500 font-medium mb-1">Dias-uso Total</p>
@@ -586,16 +715,42 @@ export const RelatorioUso: React.FC = () => {
             </div>
           </div>
 
-          {/* tabela de uso */}
+          {/* tabela de uso com checkboxes */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#1B2A4A]">Detalhes de Uso no Período</h3>
-              <span className="text-xs text-gray-500">{dados.length} registro(s)</span>
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-3">
+                <h3 className="text-sm font-bold text-[#1B2A4A]">Detalhes de Uso no Período</h3>
+                <span className="text-xs text-gray-500">{dadosTabela.length} registro(s)</span>
+                {dadosRateioManual.length > 0 && (
+                  <span className="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
+                    {dadosRateioManual.length} no rateio
+                  </span>
+                )}
+              </div>
+              {selecionados.size > 0 && (
+                <button
+                  onClick={moverParaRateio}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow transition-colors"
+                >
+                  <ArrowDownCircle className="w-3.5 h-3.5" />
+                  Mover {selecionados.size} para Rateio ↓
+                </button>
+              )}
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-[#1B2A4A] text-white">
+                    <th className="px-3 py-2.5 text-center w-8">
+                      <input
+                        type="checkbox"
+                        checked={dadosTabela.length > 0 && selecionados.size === dadosTabela.length}
+                        ref={el => { if (el) el.indeterminate = selecionados.size > 0 && selecionados.size < dadosTabela.length; }}
+                        onChange={toggleSelecionarTodos}
+                        className="w-3.5 h-3.5 rounded accent-amber-400 cursor-pointer"
+                        title="Selecionar todos"
+                      />
+                    </th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Data Início</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Data Fim</th>
                     <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">PTA</th>
@@ -609,15 +764,100 @@ export const RelatorioUso: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dados.length === 0 ? (
+                  {dadosTabela.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="px-4 py-8 text-center text-gray-400">
-                        Nenhum registro encontrado no período.
+                      <td colSpan={11} className="px-4 py-8 text-center text-gray-400">
+                        {dadosRateioManual.length > 0
+                          ? 'Todos os registros foram movidos para o Rateio abaixo.'
+                          : 'Nenhum registro encontrado no período.'}
                       </td>
                     </tr>
                   ) : (
-                    dados.map((a, i) => (
-                      <tr key={a.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    dadosTabela.map((a, i) => {
+                      const sel = selecionados.has(a.id);
+                      return (
+                        <tr
+                          key={a.id}
+                          className={`cursor-pointer transition-colors ${sel ? 'bg-amber-50 border-l-4 border-l-amber-400' : i % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-amber-50/30'}`}
+                          onClick={() => toggleSelecionado(a.id)}
+                        >
+                          <td className="px-3 py-2 text-center" onClick={e => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={sel}
+                              onChange={() => toggleSelecionado(a.id)}
+                              className="w-3.5 h-3.5 rounded accent-amber-400 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_inicio)}</td>
+                          <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_fim)}</td>
+                          <td className="px-3 py-2 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
+                          <td className="px-3 py-2 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
+                          <td className="px-3 py-2 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
+                          <td className="px-3 py-2 font-mono">{a.ug || '—'}</td>
+                          <td className="px-3 py-2 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
+                          <td className="px-3 py-2">{a.tipo_atividade || '—'}</td>
+                          <td className="px-3 py-2 text-center font-bold">{a.duracao_dias ?? 1}</td>
+                          <td className="px-3 py-2">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                              a.status === 'concluido' ? 'bg-green-100 text-green-700' :
+                              a.status === 'cancelado' ? 'bg-red-100 text-red-600' :
+                              a.status === 'em_uso' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {a.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* painel de itens no rateio manual */}
+          {dadosRateioManual.length > 0 && (
+            <div className="bg-amber-50 rounded-xl border border-amber-200 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b border-amber-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ArrowDownCircle className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-bold text-amber-800">
+                    Itens selecionados para Rateio ({dadosRateioManual.length})
+                  </span>
+                </div>
+                <span className="text-xs text-amber-600">Clique em ↑ para devolver à lista</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-amber-100 text-amber-900">
+                      <th className="px-3 py-2 text-center w-8">↑</th>
+                      <th className="px-3 py-2 text-left font-semibold">Data Início</th>
+                      <th className="px-3 py-2 text-left font-semibold">Data Fim</th>
+                      <th className="px-3 py-2 text-left font-semibold">PTA</th>
+                      <th className="px-3 py-2 text-left font-semibold">Solicitante</th>
+                      <th className="px-3 py-2 text-left font-semibold">Área / Empresa</th>
+                      <th className="px-3 py-2 text-left font-semibold">Local (UG)</th>
+                      <th className="px-3 py-2 text-left font-semibold">Centro cst OBZ</th>
+                      <th className="px-3 py-2 text-left font-semibold">Atividade</th>
+                      <th className="px-3 py-2 text-center font-semibold">Dias</th>
+                      <th className="px-3 py-2 text-left font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dadosRateioManual.map((a, i) => (
+                      <tr key={a.id} className={i % 2 === 0 ? 'bg-amber-50' : 'bg-amber-100/40'}>
+                        <td className="px-3 py-2 text-center">
+                          <button
+                            onClick={() => devolverParaLista(a.id)}
+                            title="Devolver para a lista"
+                            className="w-6 h-6 rounded-full bg-white border border-amber-300 hover:bg-amber-200 flex items-center justify-center text-amber-700 font-bold transition-colors mx-auto"
+                          >
+                            <ArrowUpCircle className="w-4 h-4" />
+                          </button>
+                        </td>
                         <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_inicio)}</td>
                         <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_fim)}</td>
                         <td className="px-3 py-2 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
@@ -638,19 +878,18 @@ export const RelatorioUso: React.FC = () => {
                           </span>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* rateio */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                 <h3 className="text-sm font-bold text-[#1B2A4A]">Rateio de Custos por Área</h3>
-                {/* toggle modo */}
                 <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 w-fit">
                   <button
                     onClick={() => setModoRateio('proporcional')}
@@ -673,16 +912,23 @@ export const RelatorioUso: React.FC = () => {
                     <label className="block text-xs font-semibold text-gray-600 mb-1">
                       Valor Total do Aluguel (R$)
                     </label>
-                    <input
-                      type="text"
-                      value={valorAluguel}
-                      onChange={e => setValorAluguel(e.target.value)}
-                      placeholder="Ex: 20000,00"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 font-mono"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-mono">R$</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={valorAluguel}
+                        onChange={e => {
+                          const masked = aplicarMascaraMonetaria(e.target.value);
+                          setValorAluguel(masked);
+                        }}
+                        placeholder="0,00"
+                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 font-mono"
+                      />
+                    </div>
                   </div>
                   <button
-                    onClick={() => calcularRateio(dados, rateio)}
+                    onClick={() => calcularRateio(agendamentos, rateio)}
                     className="px-4 py-2 rounded-lg bg-[#1B2A4A] hover:bg-[#243656] text-white text-xs font-bold transition-colors"
                   >
                     Recalcular
@@ -785,7 +1031,6 @@ export const RelatorioUso: React.FC = () => {
                       );
                     })
                   ) : (
-                    // modo direto
                     rateio.map((r, i) => {
                       const valorDireto = parseFloat((valoresDiretos[r.area_id] || '').replace(/\./g, '').replace(',', '.')) || 0;
                       return (
@@ -797,8 +1042,12 @@ export const RelatorioUso: React.FC = () => {
                               <span className="text-gray-400 text-xs">R$</span>
                               <input
                                 type="text"
+                                inputMode="numeric"
                                 value={valoresDiretos[r.area_id] || ''}
-                                onChange={e => setValoresDiretos(prev => ({ ...prev, [r.area_id]: e.target.value }))}
+                                onChange={e => {
+                                  const masked = aplicarMascaraMonetaria(e.target.value);
+                                  setValoresDiretos(prev => ({ ...prev, [r.area_id]: masked }));
+                                }}
                                 placeholder="0,00"
                                 className="w-28 text-right px-2 py-1 border border-gray-300 rounded text-xs font-mono focus:ring-1 focus:ring-amber-400 font-bold text-green-700"
                               />
