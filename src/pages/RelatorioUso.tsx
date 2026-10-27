@@ -738,29 +738,29 @@ Sistema de Gestão de PTAs — PPM Facilities`;
               )}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-[11px]">
                 <thead>
                   <tr className="bg-[#1B2A4A] text-white">
-                    <th className="px-3 py-2.5 text-center w-8">
+                    <th className="px-2 py-2 text-center w-7">
                       <input
                         type="checkbox"
                         checked={dadosTabela.length > 0 && selecionados.size === dadosTabela.length}
                         ref={el => { if (el) el.indeterminate = selecionados.size > 0 && selecionados.size < dadosTabela.length; }}
                         onChange={toggleSelecionarTodos}
-                        className="w-3.5 h-3.5 rounded accent-amber-400 cursor-pointer"
+                        className="w-3 h-3 rounded accent-amber-400 cursor-pointer"
                         title="Selecionar todos"
                       />
                     </th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Data Início</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Data Fim</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">PTA</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Solicitante</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Área / Empresa</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Local de Instalação</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Centro cst OBZ</th>
-                    <th className="px-3 py-2.5 text-left font-semibold whitespace-nowrap">Atividade</th>
-                    <th className="px-3 py-2.5 text-center font-semibold">Dias</th>
-                    <th className="px-3 py-2.5 text-left font-semibold">Status</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Início</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Fim</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">PTA</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Solicitante</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Área</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Local de Instalação</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">OBZ</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Atividade</th>
+                    <th className="px-2 py-2 text-center font-semibold">Dias</th>
+                    <th className="px-2 py-2 text-left font-semibold">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -781,25 +781,25 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                           className={`cursor-pointer transition-colors ${sel ? 'bg-amber-50 border-l-4 border-l-amber-400' : i % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-amber-50/30'}`}
                           onClick={() => toggleSelecionado(a.id)}
                         >
-                          <td className="px-3 py-2 text-center" onClick={e => e.stopPropagation()}>
+                          <td className="px-2 py-1.5 text-center" onClick={e => e.stopPropagation()}>
                             <input
                               type="checkbox"
                               checked={sel}
                               onChange={() => toggleSelecionado(a.id)}
-                              className="w-3.5 h-3.5 rounded accent-amber-400 cursor-pointer"
+                              className="w-3 h-3 rounded accent-amber-400 cursor-pointer"
                             />
                           </td>
-                          <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_inicio)}</td>
-                          <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_fim)}</td>
-                          <td className="px-3 py-2 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
-                          <td className="px-3 py-2 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
-                          <td className="px-3 py-2 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
-                          <td className="px-3 py-2">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
-                          <td className="px-3 py-2 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
-                          <td className="px-3 py-2">{a.tipo_atividade || '—'}</td>
-                          <td className="px-3 py-2 text-center font-bold">{a.duracao_dias ?? 1}</td>
-                          <td className="px-3 py-2">
-                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                          <td className="px-2 py-1.5 whitespace-nowrap">{fmt(a.data_inicio)}</td>
+                          <td className="px-2 py-1.5 whitespace-nowrap">{fmt(a.data_fim)}</td>
+                          <td className="px-2 py-1.5 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
+                          <td className="px-2 py-1.5 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
+                          <td className="px-2 py-1.5 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
+                          <td className="px-2 py-1.5">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
+                          <td className="px-2 py-1.5 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
+                          <td className="px-2 py-1.5">{a.tipo_atividade || '—'}</td>
+                          <td className="px-2 py-1.5 text-center font-bold">{a.duracao_dias ?? 1}</td>
+                          <td className="px-2 py-1.5">
+                            <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ${
                               a.status === 'concluido' ? 'bg-green-100 text-green-700' :
                               a.status === 'cancelado' ? 'bg-red-100 text-red-600' :
                               a.status === 'em_uso' ? 'bg-blue-100 text-blue-700' :
@@ -830,45 +830,45 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                 <span className="text-xs text-amber-600">Clique em ↑ para devolver à lista</span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-[11px]">
                   <thead>
                     <tr className="bg-amber-100 text-amber-900">
-                      <th className="px-3 py-2 text-center w-8">↑</th>
-                      <th className="px-3 py-2 text-left font-semibold">Data Início</th>
-                      <th className="px-3 py-2 text-left font-semibold">Data Fim</th>
-                      <th className="px-3 py-2 text-left font-semibold">PTA</th>
-                      <th className="px-3 py-2 text-left font-semibold">Solicitante</th>
-                      <th className="px-3 py-2 text-left font-semibold">Área / Empresa</th>
-                      <th className="px-3 py-2 text-left font-semibold">Local de Instalação</th>
-                      <th className="px-3 py-2 text-left font-semibold">Centro cst OBZ</th>
-                      <th className="px-3 py-2 text-left font-semibold">Atividade</th>
-                      <th className="px-3 py-2 text-center font-semibold">Dias</th>
-                      <th className="px-3 py-2 text-left font-semibold">Status</th>
+                      <th className="px-2 py-2 text-center w-7">↑</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Início</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Fim</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">PTA</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Solicitante</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Área</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Local de Instalação</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">OBZ</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Atividade</th>
+                      <th className="px-2 py-2 text-center font-semibold">Dias</th>
+                      <th className="px-2 py-2 text-left font-semibold">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {dadosRateioManual.map((a, i) => (
                       <tr key={a.id} className={i % 2 === 0 ? 'bg-amber-50' : 'bg-amber-100/40'}>
-                        <td className="px-3 py-2 text-center">
+                        <td className="px-2 py-1.5 text-center">
                           <button
                             onClick={() => devolverParaLista(a.id)}
                             title="Devolver para a lista"
-                            className="w-6 h-6 rounded-full bg-white border border-amber-300 hover:bg-amber-200 flex items-center justify-center text-amber-700 font-bold transition-colors mx-auto"
+                            className="w-5 h-5 rounded-full bg-white border border-amber-300 hover:bg-amber-200 flex items-center justify-center text-amber-700 font-bold transition-colors mx-auto"
                           >
-                            <ArrowUpCircle className="w-4 h-4" />
+                            <ArrowUpCircle className="w-3.5 h-3.5" />
                           </button>
                         </td>
-                        <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_inicio)}</td>
-                        <td className="px-3 py-2 whitespace-nowrap">{fmt(a.data_fim)}</td>
-                        <td className="px-3 py-2 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
-                        <td className="px-3 py-2 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
-                        <td className="px-3 py-2 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
-                        <td className="px-3 py-2">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
-                        <td className="px-3 py-2 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
-                        <td className="px-3 py-2">{a.tipo_atividade || '—'}</td>
-                        <td className="px-3 py-2 text-center font-bold">{a.duracao_dias ?? 1}</td>
-                        <td className="px-3 py-2">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                        <td className="px-2 py-1.5 whitespace-nowrap">{fmt(a.data_inicio)}</td>
+                        <td className="px-2 py-1.5 whitespace-nowrap">{fmt(a.data_fim)}</td>
+                        <td className="px-2 py-1.5 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
+                        <td className="px-2 py-1.5 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
+                        <td className="px-2 py-1.5 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
+                        <td className="px-2 py-1.5">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
+                        <td className="px-2 py-1.5 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
+                        <td className="px-2 py-1.5">{a.tipo_atividade || '—'}</td>
+                        <td className="px-2 py-1.5 text-center font-bold">{a.duracao_dias ?? 1}</td>
+                        <td className="px-2 py-1.5">
+                          <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ${
                             a.status === 'concluido' ? 'bg-green-100 text-green-700' :
                             a.status === 'cancelado' ? 'bg-red-100 text-red-600' :
                             a.status === 'em_uso' ? 'bg-blue-100 text-blue-700' :
