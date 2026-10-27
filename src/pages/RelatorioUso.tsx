@@ -249,7 +249,7 @@ export const RelatorioUso: React.FC = () => {
 
       // texto do cabeçalho
       doc.setFontSize(15);
-      doc.setTextColor(245, 216, 0); // amarelo AmBev
+      doc.setTextColor(255, 255, 255); // branco
       doc.setFont('helvetica', 'bold');
       doc.text('AmBev Facilities — Relatório de Uso de PTAs', 38, 13);
 
@@ -281,7 +281,7 @@ export const RelatorioUso: React.FC = () => {
           a.status || '',
         ]),
         styles: { fontSize: 7, cellPadding: 1.5 },
-        headStyles: { fillColor: [27, 42, 74], textColor: [245, 216, 0], fontStyle: 'bold' },
+        headStyles: { fillColor: [27, 42, 74], textColor: [255, 255, 255], fontStyle: 'bold' },
         alternateRowStyles: { fillColor: [245, 247, 250] },
         margin: { left: 10, right: 10 },
       });
@@ -317,7 +317,7 @@ export const RelatorioUso: React.FC = () => {
           }),
           foot: [['TOTAL', String(totalDias), '—', '—', '—', fmtCurrency(totalRateio), '']],
           styles: { fontSize: 8 },
-          headStyles: { fillColor: [27, 42, 74], textColor: [245, 216, 0], fontStyle: 'bold' },
+          headStyles: { fillColor: [27, 42, 74], textColor: [255, 255, 255], fontStyle: 'bold' },
           footStyles: { fillColor: [240, 245, 255], textColor: [27, 42, 74], fontStyle: 'bold' },
           alternateRowStyles: { fillColor: [245, 247, 250] },
           margin: { left: 10, right: 10 },
