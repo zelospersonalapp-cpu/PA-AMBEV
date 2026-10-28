@@ -540,8 +540,9 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               value={ptaId}
               onChange={(e) => {
                 const sel = ptas.find((p) => p.id === e.target.value);
-                if (sel && (sel.status === 'em_manutencao' || sel.status === 'avariada' || sel.status === 'inativa')) {
-                  setPtaBloqueadaNome(`${sel.patrimonio} (${sel.status === 'em_manutencao' ? 'Em manutenção' : sel.status === 'avariada' ? 'Avariada' : 'Inativa'})`);
+                if (sel && (sel.status === 'em_manutencao' || sel.status === 'avariada' || sel.status === 'indisponivel' || sel.status === 'inativa')) {
+                  const labelStatus = sel.status === 'em_manutencao' ? 'Em manutenção' : sel.status === 'avariada' ? 'Avariada' : sel.status === 'indisponivel' ? 'Indisponível' : 'Inativa';
+                  setPtaBloqueadaNome(`${sel.patrimonio} (${labelStatus})`);
                   setPtaBloqueadaPopup(true);
                   return;
                 }
@@ -558,12 +559,13 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                       p.status === 'disponivel' ? '#16a34a' :       /* verde */
                       p.status === 'em_manutencao' ? '#dc2626' :    /* vermelho */
                       p.status === 'avariada' ? '#dc2626' :         /* vermelho */
+                      p.status === 'indisponivel' ? '#dc2626' :     /* vermelho */
                       p.status === 'em_uso' ? '#2563eb' :           /* azul — pode agendar para outra data */
                       '#9CA3AF',                                     /* cinza */
-                    fontWeight: (p.status === 'disponivel' || p.status === 'em_manutencao' || p.status === 'avariada') ? '600' : 'normal',
+                    fontWeight: (p.status === 'disponivel' || p.status === 'em_manutencao' || p.status === 'avariada' || p.status === 'indisponivel') ? '600' : 'normal',
                   }}
                 >
-                  {p.patrimonio} — {p.tipo === 'articulada' ? 'ARTICULADA' : 'TESOURINHA'} ({p.modelo}) | {p.status === 'disponivel' ? '✓ Disponível' : p.status === 'em_manutencao' ? '🔧 Em manutenção' : p.status === 'avariada' ? '⚠️ Avariada' : '✓ Disponível'}
+                  {p.patrimonio} — {p.tipo === 'articulada' ? 'ARTICULADA' : 'TESOURINHA'} ({p.modelo}) | {p.status === 'disponivel' ? '✓ Disponível' : p.status === 'em_manutencao' ? '🔧 Em manutenção' : p.status === 'avariada' ? '⚠️ Avariada' : p.status === 'indisponivel' ? '🚫 Indisponível' : p.status === 'em_uso' ? '🔵 Em Uso' : p.status === 'inativa' ? '⬛ Inativa' : '✓ Disponível'}
                 </option>
               ))}
             </select>

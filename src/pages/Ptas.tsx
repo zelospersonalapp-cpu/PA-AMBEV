@@ -263,6 +263,7 @@ export const Ptas: React.FC = () => {
             <option value="em_uso">Em Uso</option>
             <option value="em_manutencao">Em Manutenção</option>
             <option value="avariada">Avariada</option>
+            <option value="indisponivel">Indisponível</option>
             <option value="inativa">Inativa</option>
           </select>
         </div>
@@ -534,6 +535,7 @@ export const Ptas: React.FC = () => {
                     <option value="em_uso">Em Uso</option>
                     <option value="em_manutencao">Em Manutenção</option>
                     <option value="avariada">Avariada</option>
+                    <option value="indisponivel">Indisponível</option>
                     <option value="inativa">Inativa</option>
                   </select>
                 </div>
