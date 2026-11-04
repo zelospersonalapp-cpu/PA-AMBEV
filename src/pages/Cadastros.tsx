@@ -111,7 +111,7 @@ export const Cadastros: React.FC = () => {
       setLocalUg('');
       setLocalSetorLinha('');
       setLocalPontoRef('');
-      setLocalDescricao('');
+      setLocalDescricao(''); // não mais usado no form, mantido por compatibilidade
       setLocalAtivo(true);
     } else if (activeTab === 'solicitantes') {
       setEditingSolicitante(null);
@@ -145,7 +145,7 @@ export const Cadastros: React.FC = () => {
     setLocalUg(item.ug || '');
     setLocalSetorLinha(item.setor_linha || '');
     setLocalPontoRef(item.ponto_ref || '');
-    setLocalDescricao(item.descricao || item.ug || '');
+    setLocalDescricao(item.ponto_ref || '');
     setLocalAtivo(item.ativo);
     setModalOpen(true);
   };
@@ -242,11 +242,14 @@ export const Cadastros: React.FC = () => {
     if (!(localSetorLinha || '').trim() || !(localUg || '').trim()) return;
     setSaving(true);
     try {
+      const ugVal = (localUg || '').trim().toUpperCase();
+      const setorVal = (localSetorLinha || '').trim().toUpperCase() || null;
+      const pontRef = (localPontoRef || '').trim().toUpperCase() || null;
       const payload = {
-        ug: (localUg || '').trim().toUpperCase(),
-        descricao: (localDescricao || '').trim().toUpperCase() || null,
-        setor_linha: (localSetorLinha || '').trim().toUpperCase() || null,
-        ponto_ref: (localPontoRef || '').trim().toUpperCase() || null,
+        ug: ugVal,
+        descricao: ugVal,
+        setor_linha: setorVal,
+        ponto_ref: pontRef,
         ativo: localAtivo,
       };
       if (editingLocal) {
@@ -508,9 +511,9 @@ export const Cadastros: React.FC = () => {
                           onClick={() => {
                             setEditingLocal(null);
                             setLocalUg(loc.ug || '');
-                            setLocalDescricao(loc.descricao || loc.ug || '');
                             setLocalSetorLinha(loc.setor_linha || '');
-                            setLocalPontoRef('');
+                            setLocalPontoRef(loc.ponto_ref || '');
+                            setLocalDescricao(loc.ponto_ref || '');
                             setLocalAtivo(true);
                             setModalOpen(true);
                           }}
@@ -799,8 +802,8 @@ export const Cadastros: React.FC = () => {
                   <label className="block font-semibold text-gray-700 mb-1">Ponto de Referência <span className="text-gray-400 font-normal">(opcional)</span></label>
                   <input
                     type="text"
-                    value={localDescricao}
-                    onChange={(e) => setLocalDescricao(e.target.value)}
+                    value={localPontoRef}
+                    onChange={(e) => setLocalPontoRef(e.target.value)}
                     placeholder="Ex: próximo à caldeira 3..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
