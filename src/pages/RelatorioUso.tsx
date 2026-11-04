@@ -330,7 +330,7 @@ export const RelatorioUso: React.FC = () => {
           a.patrimonio || a.pta_patrimonio || '',
           a.solicitante_nome || a.nome_solicitante || '',
           (a as any).area_empresa || a.area_nome || a.nome_area || '',
-          a.ponto_ref || a.local_descricao || a.ug || '',
+          [a.ug, a.setor_linha].filter(Boolean).join(' · ') || a.ponto_ref || a.local_descricao || '',
           a.centro_cst_obz || '',
           a.tipo_atividade || '',
           String(a.duracao_dias ?? 1),
@@ -427,7 +427,7 @@ export const RelatorioUso: React.FC = () => {
       'PTA (Patrimônio)': a.patrimonio || a.pta_patrimonio || '',
       'Solicitante': a.solicitante_nome || a.nome_solicitante || '',
       'Área / Empresa': (a as any).area_empresa || a.area_nome || a.nome_area || '',
-      'Local de Instalação': a.ponto_ref || a.local_descricao || a.ug || '',
+      'Local de Instalação': [a.ug, a.setor_linha].filter(Boolean).join(' · ') || a.ponto_ref || a.local_descricao || '',
       'Centro cst OBZ': a.centro_cst_obz || '',
       'Atividade': a.tipo_atividade || '',
       'Dias': a.duracao_dias ?? 1,
@@ -806,7 +806,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                           <td className="px-2 py-1.5 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
                           <td className="px-2 py-1.5 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
                           <td className="px-2 py-1.5 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
-                          <td className="px-2 py-1.5">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
+                          <td className="px-2 py-1.5">{[a.ug, a.setor_linha].filter(Boolean).join(' · ') || a.ponto_ref || a.local_descricao || '—'}</td>
                           <td className="px-2 py-1.5 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
                           <td className="px-2 py-1.5">{a.tipo_atividade || '—'}</td>
                           <td className="px-2 py-1.5 text-center font-bold">{a.duracao_dias ?? 1}</td>
@@ -886,7 +886,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                         <td className="px-2 py-1.5 font-mono whitespace-nowrap">{a.patrimonio || a.pta_patrimonio || '—'}</td>
                         <td className="px-2 py-1.5 uppercase">{a.solicitante_nome || a.nome_solicitante || '—'}</td>
                         <td className="px-2 py-1.5 uppercase">{(a as any).area_empresa || a.area_nome || a.nome_area || '—'}</td>
-                        <td className="px-2 py-1.5">{a.ponto_ref || a.local_descricao || a.ug || '—'}</td>
+                        <td className="px-2 py-1.5">{[a.ug, a.setor_linha].filter(Boolean).join(' · ') || a.ponto_ref || a.local_descricao || '—'}</td>
                         <td className="px-2 py-1.5 font-mono text-amber-700">{a.centro_cst_obz || '—'}</td>
                         <td className="px-2 py-1.5">{a.tipo_atividade || '—'}</td>
                         <td className="px-2 py-1.5 text-center font-bold">{a.duracao_dias ?? 1}</td>
