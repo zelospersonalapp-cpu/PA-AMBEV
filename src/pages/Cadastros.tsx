@@ -54,7 +54,7 @@ export const Cadastros: React.FC = () => {
   const [localUg, setLocalUg] = useState('');
   const [localSetorLinha, setLocalSetorLinha] = useState('');
   const [localPontoRef, setLocalPontoRef] = useState('');
-  const [localDescricao, setLocalDescricao] = useState('');
+  const [localCentroCst, setLocalCentroCst] = useState('');
   const [localAtivo, setLocalAtivo] = useState(true);
 
   // Colaborador Form
@@ -113,7 +113,7 @@ export const Cadastros: React.FC = () => {
       setLocalUg('');
       setLocalSetorLinha('');
       setLocalPontoRef('');
-      setLocalDescricao(''); // não mais usado no form, mantido por compatibilidade
+      setLocalCentroCst('');
       setLocalAtivo(true);
     } else if (activeTab === 'solicitantes') {
       setEditingSolicitante(null);
@@ -148,7 +148,7 @@ export const Cadastros: React.FC = () => {
     setLocalUg(item.ug || '');
     setLocalSetorLinha(item.setor_linha || '');
     setLocalPontoRef(item.ponto_ref || '');
-    setLocalDescricao(item.ponto_ref || '');
+    setLocalCentroCst(item.centro_cst_obz || '');
     setLocalAtivo(item.ativo);
     setModalOpen(true);
   };
@@ -249,11 +249,13 @@ export const Cadastros: React.FC = () => {
       const ugVal = (localUg || '').trim().toUpperCase();
       const setorVal = (localSetorLinha || '').trim().toUpperCase() || null;
       const pontRef = (localPontoRef || '').trim().toUpperCase() || null;
+      const centroCstVal = (localCentroCst || '').trim() || null;
       const payload = {
         ug: ugVal,
         descricao: ugVal,
         setor_linha: setorVal,
         ponto_ref: pontRef,
+        centro_cst_obz: centroCstVal,
         ativo: localAtivo,
       };
       if (editingLocal) {
@@ -481,6 +483,7 @@ export const Cadastros: React.FC = () => {
                 <th className="py-3 px-4">Local de Instalação (UG)</th>
                 <th className="py-3 px-4">Setor / Linha</th>
                 <th className="py-3 px-4">Exibição Completa</th>
+                <th className="py-3 px-4">OBZ</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Ações</th>
               </tr>
@@ -497,6 +500,7 @@ export const Cadastros: React.FC = () => {
                     <td className="py-3 px-4 font-bold text-gray-900 text-[11px]">{loc.ug}</td>
                     <td className="py-3 px-4 text-gray-600">{loc.setor_linha || '-'}</td>
                     <td className="py-3 px-4 text-gray-500 italic">{[loc.ug, loc.setor_linha].filter(Boolean).join(' · ')}</td>
+                    <td className="py-3 px-4 font-mono text-xs text-amber-700">{loc.centro_cst_obz || '-'}</td>
                     <td className="py-3 px-4">
                       {loc.ativo ? (
                         <span className="text-emerald-700 font-bold">Ativo</span>
@@ -519,8 +523,8 @@ export const Cadastros: React.FC = () => {
                             setLocalUg(loc.ug || '');
                             setLocalSetorLinha(loc.setor_linha || '');
                             setLocalPontoRef(loc.ponto_ref || '');
-                            setLocalDescricao(loc.ponto_ref || '');
-                            setLocalAtivo(true);
+                            setLocalCentroCst(loc.centro_cst_obz || '');
+                            setLocalAtivo(loc.ativo);
                             setModalOpen(true);
                           }}
                           className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
@@ -814,6 +818,17 @@ export const Cadastros: React.FC = () => {
                   <p className="text-[10px] text-gray-400 mt-0.5">
                     Exibição completa: <span className="font-medium text-gray-500">{localUg ? `${localUg} · ${localSetorLinha || '...'}` : 'UG · Setor'}</span>
                   </p>
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Centro de Custo (OBZ)</label>
+                  <input
+                    type="text"
+                    value={localCentroCst}
+                    onChange={(e) => setLocalCentroCst(e.target.value)}
+                    placeholder="Ex: 1234-5, BRZ-RJ-01..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Aparece na coluna OBZ do Relatório de Uso</p>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer pt-2">
                   <input
