@@ -64,11 +64,17 @@ export function getPtaStatusConfig(status: PtaStatus) {
         dot: 'bg-rose-500',
       };
     case 'inativa':
-    default:
       return {
         label: 'Inativa',
         bg: 'bg-slate-100 text-slate-700 border-slate-300',
         dot: 'bg-slate-400',
+      };
+    case 'indisponivel':
+    default:
+      return {
+        label: 'Indisponível',
+        bg: 'bg-orange-50 text-orange-700 border-orange-300',
+        dot: 'bg-orange-500',
       };
   }
 }
