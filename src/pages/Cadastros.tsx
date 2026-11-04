@@ -724,7 +724,6 @@ export const Cadastros: React.FC = () => {
               <tr>
                 <th className="py-3 px-4">Empresa</th>
                 <th className="py-3 px-4">Tipo</th>
-                <th className="py-3 px-4">Centro de Lucro</th>
                 <th className="py-3 px-4">Contato / Informações</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Ações</th>
@@ -747,7 +746,6 @@ export const Cadastros: React.FC = () => {
                         {area.tipo === 'area_interna' ? 'Área Interna (AmBev)' : 'Empresa Terceira'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-600 font-mono text-xs">{area.centro_lucro || '-'}</td>
                     <td className="py-3 px-4 text-gray-700">{area.contato || '-'}</td>
                     <td className="py-3 px-4">
                       {area.ativo ? (
