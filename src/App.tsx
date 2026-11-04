@@ -9,6 +9,7 @@ import { Avarias } from './pages/Avarias';
 import { Cadastros } from './pages/Cadastros';
 import { Desconformidades } from './pages/Desconformidades';
 import { RelatorioUso } from './pages/RelatorioUso';
+import { Configuracoes } from './pages/Configuracoes';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="/cadastros" element={<Cadastros />} />
             <Route path="/desconformidades" element={<Desconformidades />} />
             <Route path="/relatorio-uso" element={<RelatorioUso />} />
+            <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

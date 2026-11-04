@@ -14,8 +14,10 @@ import {
   Building2,
   CheckCircle2,
   FileBarChart2,
+  Settings,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePendenciaLock } from '../lib/usePendenciaLock';
 import { AgendamentoModal } from './AgendamentoModal';
 import { PendenciasModal } from './PendenciasModal';
 import { DetalhesAgendamentoDrawer } from './DetalhesAgendamentoDrawer';
@@ -43,8 +45,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
   const [pendenciaAgendamentoId, setPendenciaAgendamentoId] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { enabled: pendenciaLockEnabled } = usePendenciaLock();
 
   const handleNovoAgendamentoClick = async () => {
+    // Se o bloqueio estiver desligado, abre direto
+    if (!pendenciaLockEnabled) {
+      if (onOpenNovoAgendamento) { onOpenNovoAgendamento(); }
+      else { setNovoModalOpen(true); }
+      return;
+    }
+
     // Verifica pendências antes de abrir o modal de novo agendamento
     const today = getTodayISO();
     const { data } = await supabase
@@ -55,15 +65,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
       .limit(1);
 
     if (data && data.length > 0) {
-      // Há pendências — mostrar modal de bloqueio
       setPendenciasModalOpen(true);
     } else {
-      // Sem pendências — prosseguir normalmente
-      if (onOpenNovoAgendamento) {
-        onOpenNovoAgendamento();
-      } else {
-        setNovoModalOpen(true);
-      }
+      if (onOpenNovoAgendamento) { onOpenNovoAgendamento(); }
+      else { setNovoModalOpen(true); }
     }
   };
 
@@ -75,6 +80,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
     { name: 'Análise de Conduta', href: '/desconformidades', icon: TrendingDown },
     { name: 'Cadastros Auxiliares', href: '/cadastros', icon: Database },
     { name: 'Relatório de Uso', href: '/relatorio-uso', icon: FileBarChart2 },
+  ];
+
+  const navBottom = [
+    { name: 'Configurações', href: '/configuracoes', icon: Settings },
   ];
 
   return (
@@ -166,7 +175,29 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
               })}
             </nav>
 
-            <div className="mt-6 pt-4 border-t border-[#152238] px-3">
+            {/* Itens de rodapé do sidebar (Configurações) */}
+            <nav className="space-y-1.5 mt-3 pt-3 border-t border-[#152238]">
+              {navBottom.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname.startsWith(item.href);
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.href}
+                    className={`group flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors border-l-[3px] ${
+                      isActive
+                        ? 'bg-[#243656] text-white font-bold border-l-[#60A5FA] shadow-xs'
+                        : 'border-l-transparent text-[#CBD5E1] hover:bg-[#1E3461] hover:text-[#E2E8F0]'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-white' : 'text-[#94A3B8] group-hover:text-[#E2E8F0]'}`} />
+                    <span>{item.name}</span>
+                  </NavLink>
+                );
+              })}
+            </nav>
+
+            <div className="mt-4 pt-4 border-t border-[#152238] px-3">
               <div className="flex items-center gap-2 text-xs font-bold text-white">
                 <Building2 className="w-4 h-4 text-[#94A3B8]" />
                 <span>Cervejaria AmBev</span>
@@ -230,6 +261,29 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
                     </NavLink>
                   );
                 })}
+
+                {/* Configurações no mobile */}
+                <div className="pt-3 mt-2 border-t border-[#152238] space-y-1.5">
+                  {navBottom.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname.startsWith(item.href);
+                    return (
+                      <NavLink
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border-l-[3px] ${
+                          isActive
+                            ? 'bg-[#243656] text-white font-bold border-l-[#60A5FA]'
+                            : 'border-l-transparent text-[#CBD5E1] hover:bg-[#1E3461] hover:text-[#E2E8F0]'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-white' : 'text-[#94A3B8] group-hover:text-[#E2E8F0]'}`} />
+                        <span>{item.name}</span>
+                      </NavLink>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

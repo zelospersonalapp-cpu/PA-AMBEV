@@ -15,6 +15,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePendenciaLock } from '../lib/usePendenciaLock';
 import type { VAgenda, PTA, AreaEmpresa, Local, Agendamento } from '../types';
 import { formatDateBR, getAgendamentoStatusConfig, getDayOfWeekName } from '../lib/formatters';
 import { DetalhesAgendamentoDrawer } from '../components/DetalhesAgendamentoDrawer';
@@ -56,22 +57,29 @@ export const Agenda: React.FC = () => {
   const [pendenciaDrawerOpen, setPendenciaDrawerOpen] = useState(false);
   const [pendenciaAgendamentoId, setPendenciaAgendamentoId] = useState<string | null>(null);
   const [pendenciasDateForNew, setPendenciasDateForNew] = useState<string | undefined>(undefined);
+  const { enabled: pendenciaLockEnabled } = usePendenciaLock();
 
   const handleNovoAgendamentoClick = async (date?: string) => {
+    // Se bloqueio desligado, abre direto
+    if (!pendenciaLockEnabled) {
+      setEditingAgendamento(null);
+      setSelectedDateForNew(date);
+      setNovoModalOpen(true);
+      return;
+    }
+
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const todayISO = `${yyyy}-${mm}-${dd}`;
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('v_agenda')
-      .select('id, status, data_fim')
+      .select('id')
       .lt('data_fim', todayISO)
       .not('status', 'in', `(concluido,cancelado)`)
       .limit(1);
-
-    console.log('[pendencia-check]', { todayISO, data, error });
 
     const temPendencia = Array.isArray(data) && data.length > 0;
 
