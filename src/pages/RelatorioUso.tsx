@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { VAgenda, AreaEmpresa, Colaborador, Local } from '../types';
-import { FileBarChart2, Download, Mail, RefreshCw, Filter, ChevronDown, X, ArrowDownCircle, ArrowUpCircle, CheckSquare, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { FileBarChart2, Download, Mail, RefreshCw, Filter, ChevronDown, X, ArrowDownCircle, ArrowUpCircle, CheckSquare, AlertTriangle, CheckCircle2, XCircle, History } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -89,6 +89,43 @@ export const RelatorioUso: React.FC = () => {
   const [valorAluguel, setValorAluguel] = useState('');
   const [rateio, setRateio] = useState<RateioArea[]>([]);
   const [valoresDiretos, setValoresDiretos] = useState<Record<string, string>>({});
+
+  // histórico de rateios salvos
+  const [historicoRateios, setHistoricoRateios] = useState<any[]>([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
+
+  useEffect(() => {
+    carregarHistorico();
+  }, []);
+
+  const carregarHistorico = async () => {
+    setLoadingHistorico(true);
+    const { data } = await supabase
+      .from('rateio_custo_ptas')
+      .select('*, area_empresa:areas_empresas(nome)')
+      .order('periodo_ini', { ascending: false })
+      .order('criado_em', { ascending: false })
+      .limit(50);
+    if (data) {
+      // agrupa por periodo_ini + periodo_fim
+      const grupos: Record<string, any[]> = {};
+      data.forEach(r => {
+        const key = `${r.periodo_ini}|${r.periodo_fim}`;
+        if (!grupos[key]) grupos[key] = [];
+        grupos[key].push(r);
+      });
+      setHistoricoRateios(Object.entries(grupos).map(([key, itens]) => ({
+        key,
+        periodo_ini: itens[0].periodo_ini,
+        periodo_fim: itens[0].periodo_fim,
+        criado_em: itens[0].criado_em,
+        valor_aluguel: itens[0].valor_aluguel,
+        total_rateado: itens.reduce((s, i) => s + (i.valor_rateado || 0), 0),
+        itens,
+      })));
+    }
+    setLoadingHistorico(false);
+  };
 
   // Locais ordenados para dropdown
   const locaisOrdenados = [...locais].sort((a, b) => a.ug.localeCompare(b.ug));
@@ -515,6 +552,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
       showToast('erro', 'Erro ao salvar rateio', 'Não foi possível salvar no banco. Verifique a tabela "rateio_custo_ptas".');
     } else {
       showToast('sucesso', 'Rateio salvo com sucesso!');
+      carregarHistorico();
     }
   };
 
@@ -1129,6 +1167,86 @@ Sistema de Gestão de PTAs — PPM Facilities`;
           <p className="text-xs text-gray-400 mt-1">O sistema buscará os agendamentos do período e calculará o rateio automaticamente.</p>
         </div>
       )}
+
+      {/* Histórico de Rateios Salvos */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-[#1B2A4A]" />
+            <span className="font-bold text-sm text-[#1B2A4A] uppercase tracking-wide">Histórico de Rateios Salvos</span>
+          </div>
+          <button onClick={carregarHistorico} className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1">
+            <RefreshCw className="w-3 h-3" /> Atualizar
+          </button>
+        </div>
+
+        {loadingHistorico ? (
+          <div className="p-8 text-center text-sm text-gray-400">Carregando...</div>
+        ) : historicoRateios.length === 0 ? (
+          <div className="p-8 text-center text-sm text-gray-400 italic">Nenhum rateio salvo ainda.</div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {historicoRateios.map(grupo => (
+              <details key={grupo.key} className="group">
+                <summary className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 list-none">
+                  <div className="flex items-center gap-3">
+                    <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
+                    <div>
+                      <span className="font-semibold text-sm text-gray-800">
+                        {fmt(grupo.periodo_ini)} até {fmt(grupo.periodo_fim)}
+                      </span>
+                      <span className="ml-2 text-xs text-gray-400">
+                        {grupo.itens.length} área(s)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {grupo.valor_aluguel && (
+                      <span className="text-xs text-gray-500">
+                        Aluguel: <strong>{fmtCurrency(grupo.valor_aluguel)}</strong>
+                      </span>
+                    )}
+                    <span className="text-sm font-bold text-green-700">{fmtCurrency(grupo.total_rateado)}</span>
+                  </div>
+                </summary>
+                <div className="px-4 pb-3">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b border-gray-100">
+                        <th className="py-1.5 pr-3">Área / Empresa</th>
+                        <th className="py-1.5 pr-3 text-center">Dias</th>
+                        <th className="py-1.5 pr-3 text-center">% Uso</th>
+                        <th className="py-1.5 pr-3 text-center">% Final</th>
+                        <th className="py-1.5 text-right">Valor Rateado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {grupo.itens.map((item: any) => (
+                        <tr key={item.id} className="border-b border-gray-50 last:border-0">
+                          <td className="py-1.5 pr-3 font-semibold text-gray-800">
+                            {item.area_empresa?.nome || item.area_empresa_id}
+                          </td>
+                          <td className="py-1.5 pr-3 text-center text-gray-600">{item.dias_uso}</td>
+                          <td className="py-1.5 pr-3 text-center text-gray-600">
+                            {item.pct_uso != null ? `${(item.pct_uso * 100).toFixed(1)}%` : '—'}
+                          </td>
+                          <td className="py-1.5 pr-3 text-center text-gray-600">
+                            {item.pct_final != null ? `${(item.pct_final * 100).toFixed(1)}%` : '—'}
+                          </td>
+                          <td className="py-1.5 text-right font-bold text-green-700">
+                            {fmtCurrency(item.valor_rateado)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="text-[10px] text-gray-400 mt-2">Salvo em: {new Date(grupo.criado_em).toLocaleString('pt-BR')}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
