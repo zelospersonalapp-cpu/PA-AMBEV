@@ -421,6 +421,14 @@ export const RelatorioUso: React.FC = () => {
       ? agendamentos.filter(a => idsNoRateio.has(a.id))
       : agendamentos;
 
+    // Mapa: agendamento_id → valor a pagar da empresa no rateio
+    const valorPorAgendamento = new Map<string, number>();
+    rateio.forEach(r => {
+      r.agendamento_ids.forEach(id => {
+        valorPorAgendamento.set(id, parseFloat(r.valor.toFixed(2)));
+      });
+    });
+
     const linhasUso = todosAgendamentos.map(a => ({
       'Data Início': fmt(a.data_inicio),
       'Data Fim': fmt(a.data_fim),
@@ -435,62 +443,12 @@ export const RelatorioUso: React.FC = () => {
       'Agendado por': (a as any).agendado_nome || (a as any).agendador_nome || nomeColab((a as any).agendado_por),
       'Liberado por': a.liberador_nome || nomeColab(a.liberado_por),
       'Retirado por': a.retirador_nome || nomeColab(a.retirado_por),
+      'Valor a Pagar (R$)': valorPorAgendamento.get(a.id) ?? '',
     }));
 
-    const linhasRateio = rateio.map(r => {
-      const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
-      // Pegar OBZ dos agendamentos desta área (igual ao PDF)
-      const obzSet = new Set(
-        todosAgendamentos
-          .filter(a => r.agendamento_ids.includes(a.id) && a.centro_cst_obz)
-          .map(a => a.centro_cst_obz!)
-      );
-      return {
-        'Empresa': r.area_nome,
-        'Dias de Uso': r.dias,
-        '% Uso (automático)': parseFloat(r.pct_uso.toFixed(2)),
-        'Ajuste %': r.pct_ajuste,
-        '% Final': parseFloat(pctFinal.toFixed(2)),
-        'Valor a Pagar (R$)': parseFloat(r.valor.toFixed(2)),
-        'Centro de Custo (OBZ)': [...obzSet].join(', ') || '',
-      };
-    });
-
     const wb = XLSX.utils.book_new();
-
-    // ── Aba única com tudo junto (igual ao PDF) ──────────────────────────────
-    const ws = XLSX.utils.aoa_to_sheet([]);
-
-    // Título / cabeçalho
-    XLSX.utils.sheet_add_aoa(ws, [
-      [`AmBev Facilities — Relatório de Uso de PTAs`],
-      [`Período: ${fmt(dataIni)} a ${fmt(dataFim)}   |   Gerado em: ${fmt(today())}`],
-      [`Total de registros: ${todosAgendamentos.length}${valorNum > 0 ? `   |   Aluguel total: R$ ${valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : ''}`],
-      [],
-    ], { origin: 'A1' });
-
-    // Tabela de uso
-    XLSX.utils.sheet_add_aoa(ws, [['Detalhes de Uso']], { origin: -1 });
-    XLSX.utils.sheet_add_json(ws, linhasUso, { origin: -1, skipHeader: false });
-
-    // Espaço entre as tabelas
-    const linhaRateioStart = 4 + 1 + 1 + linhasUso.length + 2; // cabeçalho(4) + título(1) + header(1) + linhas + espaço(2)
-    XLSX.utils.sheet_add_aoa(ws, [[], [`Rateio de Custos — Aluguel total: R$ ${valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`]], { origin: `A${4 + 1 + 1 + linhasUso.length + 1}` });
-    XLSX.utils.sheet_add_json(ws, linhasRateio, { origin: `A${linhaRateioStart}`, skipHeader: false });
-
-    // Linha de total do rateio
-    const linhaTotal = linhaRateioStart + 1 + linhasRateio.length;
-    XLSX.utils.sheet_add_aoa(ws, [[
-      'TOTAL',
-      rateio.reduce((s, r) => s + r.dias, 0),
-      '',
-      '',
-      '',
-      parseFloat(totalRateio.toFixed(2)),
-      '',
-    ]], { origin: `A${linhaTotal}` });
-
-    ws['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 22 }, { wch: 18 }, { wch: 20 }, { wch: 6 }, { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
+    const ws = XLSX.utils.json_to_sheet(linhasUso);
+    ws['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 16 }, { wch: 22 }, { wch: 22 }, { wch: 24 }, { wch: 16 }, { wch: 20 }, { wch: 6 }, { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 16 }];
     XLSX.utils.book_append_sheet(wb, ws, 'Relatório');
 
     XLSX.writeFile(wb, `relatorio-uso-ptas-${dataIni}-a-${dataFim}.xlsx`);
