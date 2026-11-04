@@ -67,6 +67,7 @@ export const RelatorioUso: React.FC = () => {
   const [areas, setAreas] = useState<AreaEmpresa[]>([]);
   const [solicitantes, setSolicitantes] = useState<Colaborador[]>([]);
   const [locais, setLocais] = useState<Local[]>([]);
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [loading, setLoading] = useState(false);
   const [gerou, setGerou] = useState(false);
 
@@ -145,10 +146,12 @@ export const RelatorioUso: React.FC = () => {
       supabase.from('areas_empresas').select('*').order('nome', { ascending: true }),
       supabase.from('colaboradores').select('*').eq('papel', 'solicitante').eq('ativo', true).order('nome', { ascending: true }),
       supabase.from('locais').select('*').eq('ativo', true).order('ug', { ascending: true }),
-    ]).then(([areasRes, solRes, locaisRes]) => {
+      supabase.from('colaboradores').select('*').eq('ativo', true).order('nome', { ascending: true }),
+    ]).then(([areasRes, solRes, locaisRes, colabRes]) => {
       if (areasRes.data) setAreas(areasRes.data as AreaEmpresa[]);
       if (solRes.data) setSolicitantes(solRes.data as Colaborador[]);
       if (locaisRes.data) setLocais(locaisRes.data as Local[]);
+      if (colabRes.data) setColaboradores(colabRes.data as Colaborador[]);
     });
   }, []);
 
@@ -281,6 +284,10 @@ export const RelatorioUso: React.FC = () => {
     dadosRateioManual.reduce((s, a) => s + (a.duracao_dias ?? 1), 0);
   const totalRateio = rateio.reduce((s, r) => s + r.valor, 0);
 
+  // resolve nome de colaborador por UUID (para campos que a view ainda não resolve)
+  const nomeColab = (uuid: string | null | undefined) =>
+    uuid ? (colaboradores.find(c => c.id === uuid)?.nome || '') : '';
+
   // ── exportar PDF ─────────────────────────────────────────────────────────
   const exportarPDF = () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
@@ -325,7 +332,7 @@ export const RelatorioUso: React.FC = () => {
 
       autoTable(doc, {
         startY: 44,
-        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local de Instalação', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status']],
+        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local de Instalação', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status', 'Agendado por', 'Liberado por', 'Retirado por']],
         body: todosAgendamentos.map(a => [
           fmt(a.data_inicio),
           fmt(a.data_fim),
@@ -337,6 +344,9 @@ export const RelatorioUso: React.FC = () => {
           a.tipo_atividade || '',
           String(a.duracao_dias ?? 1),
           a.status || '',
+          (a as any).agendado_nome || (a as any).agendador_nome || nomeColab((a as any).agendado_por),
+          a.liberador_nome || nomeColab(a.liberado_por),
+          a.retirador_nome || nomeColab(a.retirado_por),
         ]),
         styles: { fontSize: 7, cellPadding: 1.5 },
         headStyles: { fillColor: [27, 42, 74], textColor: [255, 255, 255], fontStyle: 'bold' },
@@ -431,6 +441,9 @@ export const RelatorioUso: React.FC = () => {
       'Atividade': a.tipo_atividade || '',
       'Dias': a.duracao_dias ?? 1,
       'Status': a.status || '',
+      'Agendado por': (a as any).agendado_nome || (a as any).agendador_nome || nomeColab((a as any).agendado_por),
+      'Liberado por': a.liberador_nome || nomeColab(a.liberado_por),
+      'Retirado por': a.retirador_nome || nomeColab(a.retirado_por),
     }));
 
     const linhasRateio = rateio.map(r => {
@@ -449,7 +462,7 @@ export const RelatorioUso: React.FC = () => {
     const ws1 = XLSX.utils.json_to_sheet(linhasUso);
     const ws2 = XLSX.utils.json_to_sheet(linhasRateio);
 
-    ws1['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 6 }, { wch: 12 }];
+    ws1['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 6 }, { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
     ws2['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
 
     XLSX.utils.book_append_sheet(wb, ws1, 'Uso de PTAs');
