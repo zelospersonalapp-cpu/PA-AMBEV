@@ -587,24 +587,22 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                           {vAgendaItem?.solicitante || vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || '—'}
                         </div>
                       </div>
-                      {agendamento.liberado_por && (
+                      {agendamento.agendado_por && (
                         <div>
                           <div className="text-[10px] text-gray-400 uppercase tracking-wide">Quem Agendou</div>
                           <div className="font-semibold text-gray-900 flex items-center gap-1">
                             <User className="w-3 h-3 text-gray-400 shrink-0" />
-                            {colaboradores.find(c => c.id === agendamento.liberado_por)?.nome
-                              || vAgendaItem?.liberador_nome
-                              || '—'}
+                            {colaboradores.find(c => c.id === agendamento.agendado_por)?.nome || '—'}
                           </div>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Liberador e Retirador */}
+                  {/* Liberador e Retirador — só aparece após a operação de liberar */}
                   {(agendamento.liberado_por || agendamento.retirado_por) && (
                     <div className="p-3.5 grid grid-cols-2 gap-2 text-xs">
-                      {agendamento.liberado_por && (
+                      {agendamento.liberado_por && agendamento.liberado_em && (
                         <div>
                           <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Liberador Facilities</div>
                           <span className="font-semibold text-gray-900">

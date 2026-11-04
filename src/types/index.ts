@@ -92,6 +92,7 @@ export interface Agendamento {
   origem: OrigemAgendamento;
   recorrencia_id?: string | null;
   status: StatusAgendamento;
+  agendado_por?: string | null;
   liberado_por?: string | null;
   liberado_em?: string | null;
   retirado_por?: string | null;

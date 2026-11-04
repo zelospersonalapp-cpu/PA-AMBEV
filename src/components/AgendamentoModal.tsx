@@ -214,7 +214,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
     if (editingAgendamento) {
       setPtaId(editingAgendamento.pta_id);
-      setLiberadorId(editingAgendamento.liberado_por || '');
+      setLiberadorId((editingAgendamento as any).agendado_por || editingAgendamento.liberado_por || '');
       setSolicitanteId(editingAgendamento.solicitante_id);
       setSolicitanteBusca((editingAgendamento as any).solicitante || (editingAgendamento as any).nome_solicitante || '');
       setAreaEmpresaId(editingAgendamento.area_empresa_id || '');
@@ -327,7 +327,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
         pta_id: ptaId,
         solicitante_id: solicitanteId,
         area_empresa_id: areaEmpresaId || null,
-        liberado_por: liberadorId || null,
+        agendado_por: liberadorId || null,
         local_id: localId,
         data_inicio: dataInicio,
         data_fim: dataFim,
