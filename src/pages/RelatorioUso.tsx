@@ -323,7 +323,7 @@ export const RelatorioUso: React.FC = () => {
 
       autoTable(doc, {
         startY: 44,
-        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Área / Empresa', 'Local de Instalação', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status', 'Agendado por', 'Liberado por', 'Retirado por']],
+        head: [['Data Início', 'Data Fim', 'PTA', 'Solicitante', 'Empresa', 'Local de Instalação', 'Centro cst OBZ', 'Atividade', 'Dias', 'Status', 'Agendado por', 'Liberado por', 'Retirado por']],
         body: todosAgendamentos.map(a => [
           fmt(a.data_inicio),
           fmt(a.data_fim),
@@ -355,7 +355,7 @@ export const RelatorioUso: React.FC = () => {
 
         autoTable(doc, {
           startY: finalY + 4,
-          head: [['Área / Empresa', 'Dias de Uso', '% Uso', 'Ajuste %', '% Final', 'Valor a Pagar', 'Centro de Custo (OBZ)']],
+          head: [['Empresa', 'Dias de Uso', '% Uso', 'Ajuste %', '% Final', 'Valor a Pagar', 'Centro de Custo (OBZ)']],
           body: rateio.map(r => {
             const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
             // pegar OBZ dos agendamentos desta área
@@ -426,7 +426,7 @@ export const RelatorioUso: React.FC = () => {
       'Data Fim': fmt(a.data_fim),
       'PTA (Patrimônio)': a.patrimonio || a.pta_patrimonio || '',
       'Solicitante': a.solicitante_nome || a.nome_solicitante || '',
-      'Área / Empresa': (a as any).area_empresa || a.area_nome || a.nome_area || '',
+      'Empresa': (a as any).area_empresa || a.area_nome || a.nome_area || '',
       'Local de Instalação': [a.ug, a.setor_linha].filter(Boolean).join(' · ') || a.ponto_ref || a.local_descricao || '',
       'Centro cst OBZ': a.centro_cst_obz || '',
       'Atividade': a.tipo_atividade || '',
@@ -440,7 +440,7 @@ export const RelatorioUso: React.FC = () => {
     const linhasRateio = rateio.map(r => {
       const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
       return {
-        'Área / Empresa': r.area_nome,
+        'Empresa': r.area_nome,
         'Dias de Uso': r.dias,
         '% Uso (automático)': parseFloat(r.pct_uso.toFixed(2)),
         'Ajuste %': r.pct_ajuste,
@@ -767,7 +767,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                     <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Fim</th>
                     <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">PTA</th>
                     <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Solicitante</th>
-                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Área</th>
+                    <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Empresa</th>
                     <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Local de Instalação</th>
                     <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">OBZ</th>
                     <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Atividade</th>
@@ -861,7 +861,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                       <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Fim</th>
                       <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">PTA</th>
                       <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Solicitante</th>
-                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Área</th>
+                      <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Empresa</th>
                       <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Local de Instalação</th>
                       <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">OBZ</th>
                       <th className="px-2 py-2 text-left font-semibold whitespace-nowrap">Atividade</th>
@@ -986,7 +986,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-[#1B2A4A] text-white">
-                    <th className="px-3 py-2.5 text-left font-semibold">Área / Empresa</th>
+                    <th className="px-3 py-2.5 text-left font-semibold">Empresa</th>
                     <th className="px-3 py-2.5 text-center font-semibold">Dias de Uso</th>
                     {modoRateio === 'proporcional' ? (
                       <>
@@ -1185,7 +1185,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="text-left text-gray-500 border-b border-gray-100">
-                        <th className="py-1.5 pr-3">Área / Empresa</th>
+                        <th className="py-1.5 pr-3">Empresa</th>
                         <th className="py-1.5 pr-3 text-center">Dias</th>
                         <th className="py-1.5 pr-3 text-center">% Uso</th>
                         <th className="py-1.5 pr-3 text-center">% Final</th>

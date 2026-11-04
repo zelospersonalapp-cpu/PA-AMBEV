@@ -469,9 +469,9 @@ export const Cadastros: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
               <tr>
-                <th className="py-3 px-4">Local</th>
-                <th className="py-3 px-4">Local de Instalação</th>
-                <th className="py-3 px-4">UG</th>
+                <th className="py-3 px-4">Local de Instalação (UG)</th>
+                <th className="py-3 px-4">Setor / Linha</th>
+                <th className="py-3 px-4">Exibição Completa</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Ações</th>
               </tr>
@@ -485,9 +485,9 @@ export const Cadastros: React.FC = () => {
                 )
                 .map((loc) => (
                   <tr key={loc.id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4 font-bold text-gray-900 text-[11px]">{loc.setor_linha || '-'}</td>
-                    <td className="py-3 px-4 text-gray-600">{loc.ug}</td>
-                    <td className="py-3 px-4 text-gray-500 italic">-</td>
+                    <td className="py-3 px-4 font-bold text-gray-900 text-[11px]">{loc.ug}</td>
+                    <td className="py-3 px-4 text-gray-600">{loc.setor_linha || '-'}</td>
+                    <td className="py-3 px-4 text-gray-500 italic">{[loc.ug, loc.setor_linha].filter(Boolean).join(' · ')}</td>
                     <td className="py-3 px-4">
                       {loc.ativo ? (
                         <span className="text-emerald-700 font-bold">Ativo</span>
@@ -692,6 +692,10 @@ export const Cadastros: React.FC = () => {
                   ? editingLocal
                     ? 'Editar Local de Instalação'
                     : 'Novo Local de Instalação'
+                  : activeTab === 'solicitantes'
+                  ? editingSolicitante
+                    ? 'Editar Solicitante'
+                    : 'Novo Solicitante'
                   : editingColab
                   ? 'Editar Colaborador'
                   : 'Novo Colaborador'}
@@ -768,18 +772,7 @@ export const Cadastros: React.FC = () => {
             {activeTab === 'locais' && (
               <form onSubmit={handleSaveLocal} className="p-6 space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Local *</label>
-                  <input
-                    type="text"
-                    required
-                    value={localSetorLinha}
-                    onChange={(e) => setLocalSetorLinha(e.target.value)}
-                    placeholder="Ex: Brassagem, Filtração, Utilidades..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium uppercase"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Local de Instalação *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Local de Instalação (UG) *</label>
                   <input
                     type="text"
                     required
@@ -788,15 +781,27 @@ export const Cadastros: React.FC = () => {
                     placeholder="Ex: CERVEJARIA, ENVASE, UTILIDADES..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
-                  <p className="text-[10px] text-gray-400 mt-0.5">Aparece no checklist e no Relatório de Uso</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Unidade Gerencial — aparece no Relatório de Uso</p>
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">UG <span className="text-gray-400 font-normal">(opcional)</span></label>
+                  <label className="block font-semibold text-gray-700 mb-1">Setor / Linha *</label>
+                  <input
+                    type="text"
+                    required
+                    value={localSetorLinha}
+                    onChange={(e) => setLocalSetorLinha(e.target.value)}
+                    placeholder="Ex: BRASSAGEM, FILTRAÇÃO, PRESSÃO..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium uppercase"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Exibição: UG · Setor (ex: CERVEJARIA · BRASSAGEM)</p>
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Ponto de Referência <span className="text-gray-400 font-normal">(opcional)</span></label>
                   <input
                     type="text"
                     value={localDescricao}
                     onChange={(e) => setLocalDescricao(e.target.value)}
-                    placeholder="..."
+                    placeholder="Ex: próximo à caldeira 3..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
                 </div>
