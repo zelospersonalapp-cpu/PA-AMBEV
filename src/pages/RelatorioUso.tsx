@@ -284,7 +284,13 @@ export const RelatorioUso: React.FC = () => {
   // ── exportar PDF ─────────────────────────────────────────────────────────
   const exportarPDF = () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
-    const todosAgendamentos = agendamentos;
+
+    // IDs que compõem o rateio (somente itens movidos para o rateio manual)
+    const idsNoRateio = new Set(rateio.flatMap(r => r.agendamento_ids));
+    // Se há rateio configurado, mostrar apenas os agendamentos do rateio; caso contrário todos
+    const todosAgendamentos = idsNoRateio.size > 0
+      ? agendamentos.filter(a => idsNoRateio.has(a.id))
+      : agendamentos;
 
     const buildPdf = (logoDataUrl: string | null) => {
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -409,7 +415,10 @@ export const RelatorioUso: React.FC = () => {
   // ── exportar Excel ───────────────────────────────────────────────────────
   const exportarExcel = () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
-    const todosAgendamentos = agendamentos;
+    const idsNoRateio = new Set(rateio.flatMap(r => r.agendamento_ids));
+    const todosAgendamentos = idsNoRateio.size > 0
+      ? agendamentos.filter(a => idsNoRateio.has(a.id))
+      : agendamentos;
 
     const linhasUso = todosAgendamentos.map(a => ({
       'Data Início': fmt(a.data_inicio),
