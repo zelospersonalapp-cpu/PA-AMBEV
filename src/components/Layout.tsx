@@ -227,7 +227,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
       <footer className="bg-white border-t border-gray-200 py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>AmBev Facilities © Gestão Integrada de Plataformas Elevatórias (PTAs)</span>
-          <span className="font-mono text-[11px] text-gray-400">Versão 1.0.0 • Supabase Direct</span>
         </div>
       </footer>
     </div>
