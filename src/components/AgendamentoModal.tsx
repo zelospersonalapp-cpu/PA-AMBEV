@@ -87,8 +87,7 @@ const ConflitoBusca: React.FC<{
         <div>
           <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Local de Utilização</p>
           <p className="font-semibold text-gray-900">
-            {agendamento.local_descricao || agendamento.ug || '—'}
-            {agendamento.setor_linha ? ` · ${agendamento.setor_linha}` : ''}
+            {[agendamento.ug, agendamento.setor_linha].filter(Boolean).join(' · ') || agendamento.local_descricao || '—'}
           </p>
         </div>
         <div>
@@ -483,7 +482,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-0.5">Local (UG)</span>
-                    <span className="font-semibold text-gray-900">{conflictAgendamento.ug || conflictAgendamento.local_completo || '—'}</span>
+                    <span className="font-semibold text-gray-900">{[conflictAgendamento.ug, conflictAgendamento.setor_linha].filter(Boolean).join(' · ') || conflictAgendamento.local_completo || '—'}</span>
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 border-t border-gray-100 pt-3">

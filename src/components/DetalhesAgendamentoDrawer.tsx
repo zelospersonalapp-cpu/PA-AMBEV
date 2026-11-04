@@ -564,7 +564,7 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                     <div>
                       <div className="text-xs text-gray-500">Local na Cervejaria</div>
                       <div className="font-semibold text-gray-900">
-                        {vAgendaItem?.local_descricao || vAgendaItem?.ug || 'Não informado'}{vAgendaItem?.setor_linha ? ` — ${vAgendaItem.setor_linha}` : ''}
+                        {[vAgendaItem?.ug, vAgendaItem?.setor_linha].filter(Boolean).join(' · ') || vAgendaItem?.local_descricao || 'Não informado'}
                       </div>
 
                     </div>
@@ -763,8 +763,8 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
         const solContato = solObj?.contato || '';
         const dtRet = formatDateBR(agendamento.data_inicio);
         const dtEnt = formatDateBR(agendamento.data_fim);
-        const local = vAgendaItem?.local_descricao || vAgendaItem?.ug || 'local combinado';
-        const setor = vAgendaItem?.setor_linha ? ` — ${vAgendaItem.setor_linha}` : '';
+        const local = [vAgendaItem?.ug, vAgendaItem?.setor_linha].filter(Boolean).join(' · ') || vAgendaItem?.local_descricao || 'local combinado';
+        const setor = '';
         const atividade = agendamento.tipo_atividade || 'atividade programada';
         const diasRestantes = Math.ceil((new Date(agendamento.data_inicio + 'T00:00:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000);
         const quando = diasRestantes === 0 ? 'HOJE' : diasRestantes === 1 ? 'AMANHÃ' : `em ${diasRestantes} dias (${dtRet})`;
