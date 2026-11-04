@@ -161,8 +161,9 @@ export const Cadastros: React.FC = () => {
     setPtaAlturaMax(pta.altura_max_m);
     setPtaCapacidade(pta.capacidade_kg);
     setPtaNumSerie(pta.num_serie || '');
-    setPtaNivelBateria(pta.nivel_bateria);
-    setPtaStatus(pta.status);
+    setPtaNivelBateria(pta.nivel_bateria ?? 100);
+    const validStatuses: PtaStatus[] = ['disponivel', 'em_uso', 'em_manutencao', 'avariada', 'inativa'];
+    setPtaStatus(validStatuses.includes(pta.status) ? pta.status : 'disponivel');
     setPtaObservacoes(pta.observacoes || '');
     setPtaModalOpen(true);
   };
