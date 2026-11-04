@@ -51,7 +51,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
       .from('v_agenda')
       .select('id')
       .lt('data_fim', today)
-      .not('status', 'in', '("concluido","cancelado")')
+      .not('status', 'in', `(concluido,cancelado)`)
       .limit(1);
 
     if (data && data.length > 0) {

@@ -50,7 +50,7 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
       .from('v_agenda')
       .select('*')
       .lt('data_fim', today)
-      .not('status', 'in', '("concluido","cancelado")')
+      .not('status', 'in', `(concluido,cancelado)`)
       .order('data_fim', { ascending: true });
 
     if (!error && data) {

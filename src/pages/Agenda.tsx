@@ -13,7 +13,6 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  RefreshCw,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { VAgenda, PTA, AreaEmpresa, Local, Agendamento } from '../types';
@@ -65,14 +64,18 @@ export const Agenda: React.FC = () => {
     const dd = String(today.getDate()).padStart(2, '0');
     const todayISO = `${yyyy}-${mm}-${dd}`;
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('v_agenda')
-      .select('id')
+      .select('id, status, data_fim')
       .lt('data_fim', todayISO)
-      .not('status', 'in', '("concluido","cancelado")')
+      .not('status', 'in', `(concluido,cancelado)`)
       .limit(1);
 
-    if (data && data.length > 0) {
+    console.log('[pendencia-check]', { todayISO, data, error });
+
+    const temPendencia = Array.isArray(data) && data.length > 0;
+
+    if (temPendencia) {
       setPendenciasDateForNew(date);
       setPendenciasModalOpen(true);
     } else {
@@ -265,13 +268,6 @@ export const Agenda: React.FC = () => {
           >
             <PlusCircle className="w-4 h-4 text-white" />
             <span>+ Novo Agendamento</span>
-          </button>
-          <button
-            onClick={loadAgenda}
-            title="Atualizar Agenda"
-            className="p-2 text-gray-500 hover:text-black rounded-lg border border-gray-300 hover:bg-gray-100"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
