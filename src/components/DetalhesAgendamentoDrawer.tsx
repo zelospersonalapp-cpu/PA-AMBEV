@@ -109,12 +109,11 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
 
       if (checkData) setChecklists(checkData);
 
-      // 5. Fetch Colaboradores
+      // 5. Fetch Colaboradores (todos os papéis para resolver UUIDs nos campos de nome)
       const { data: colabs } = await supabase
         .from('colaboradores')
         .select('*')
         .eq('ativo', true)
-        .eq('papel', 'liberador')
         .order('nome', { ascending: true });
       if (colabs) setColaboradores(colabs);
     } catch (err: any) {
@@ -588,6 +587,17 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                           {vAgendaItem?.solicitante || vAgendaItem?.solicitante_nome || vAgendaItem?.nome_solicitante || '—'}
                         </div>
                       </div>
+                      {agendamento.liberado_por && (
+                        <div>
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wide">Quem Agendou</div>
+                          <div className="font-semibold text-gray-900 flex items-center gap-1">
+                            <User className="w-3 h-3 text-gray-400 shrink-0" />
+                            {colaboradores.find(c => c.id === agendamento.liberado_por)?.nome
+                              || vAgendaItem?.liberador_nome
+                              || '—'}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -596,9 +606,11 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                     <div className="p-3.5 grid grid-cols-2 gap-2 text-xs">
                       {agendamento.liberado_por && (
                         <div>
-                          <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Liberador</div>
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Liberador Facilities</div>
                           <span className="font-semibold text-gray-900">
-                            {vAgendaItem?.liberado_por || vAgendaItem?.liberador_nome || 'Facilities'}
+                            {colaboradores.find(c => c.id === agendamento.liberado_por)?.nome
+                              || vAgendaItem?.liberador_nome
+                              || 'Facilities'}
                           </span>
                           <span className="text-[10px] text-gray-400 block">
                             {formatDateTimeBR(agendamento.liberado_em)}
@@ -607,9 +619,11 @@ export const DetalhesAgendamentoDrawer: React.FC<DetalhesAgendamentoDrawerProps>
                       )}
                       {agendamento.retirado_por && (
                         <div>
-                          <span className="text-gray-500 block">Retirado por:</span>
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Retirado por</div>
                           <span className="font-semibold text-gray-900">
-                            {vAgendaItem?.retirado_por || vAgendaItem?.retirador_nome || 'Operador'}
+                            {colaboradores.find(c => c.id === agendamento.retirado_por)?.nome
+                              || vAgendaItem?.retirador_nome
+                              || 'Operador'}
                           </span>
                           <span className="text-[10px] text-gray-400 block">
                             {formatDateTimeBR(agendamento.retirado_em)}
