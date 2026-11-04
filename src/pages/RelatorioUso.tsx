@@ -54,14 +54,10 @@ export const RelatorioUso: React.FC = () => {
   // filtros
   const [dataIni, setDataIni] = useState(firstOfMonth());
   const [dataFim, setDataFim] = useState(today());
-  const [filtroPor, setFiltroPor] = useState<'solicitante' | 'area' | 'local'>('area');
-  const [filtroSolicitanteId, setFiltroSolicitanteId] = useState('');
-  const [filtroSolicitanteBusca, setFiltroSolicitanteBusca] = useState('');
-  const [solicitanteDropdownOpen, setSolicitanteDropdownOpen] = useState(false);
   const [filtroArea, setFiltroArea] = useState('');
   const [filtroLocalUg, setFiltroLocalUg] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<string>('');
-  const filtrouAlgumCampo = filtroArea !== '' || filtroLocalUg !== '' || filtroSolicitanteId !== '' || filtroStatus !== '';
+  const filtrouAlgumCampo = filtroArea !== '' || filtroLocalUg !== '' || filtroStatus !== '';
 
   // dados
   const [agendamentos, setAgendamentos] = useState<VAgenda[]>([]);
@@ -132,10 +128,6 @@ export const RelatorioUso: React.FC = () => {
   // Locais ordenados para dropdown
   const locaisOrdenados = [...locais].sort((a, b) => a.ug.localeCompare(b.ug));
 
-  // Solicitantes filtrados
-  const solicitantesFiltrados = solicitantes.filter(s =>
-    s.nome.toLowerCase().includes(filtroSolicitanteBusca.toLowerCase())
-  );
 
   // dados visíveis na tabela = todos os agendamentos EXCETO os que foram para rateio manual
   const dadosTabela = agendamentos.filter(a => !itensManuaisRateio.includes(a.id));
@@ -205,11 +197,8 @@ export const RelatorioUso: React.FC = () => {
   const limparFiltros = () => {
     setDataIni(firstOfMonth());
     setDataFim(today());
-    setFiltroPor('area');
     setFiltroArea('');
     setFiltroLocalUg('');
-    setFiltroSolicitanteId('');
-    setFiltroSolicitanteBusca('');
     setFiltroStatus('');
   };
 
@@ -225,13 +214,10 @@ export const RelatorioUso: React.FC = () => {
       .lte('data_inicio', dataFim)
       .order('data_inicio', { ascending: true });
 
-    if (filtroPor === 'solicitante' && filtroSolicitanteId) {
-      query = query.eq('solicitante_id', filtroSolicitanteId);
-    }
-    if (filtroPor === 'area' && filtroArea) {
+    if (filtroArea) {
       query = query.eq('area_empresa_id', filtroArea);
     }
-    if (filtroPor === 'local' && filtroLocalUg) {
+    if (filtroLocalUg) {
       query = query.eq('local_id', filtroLocalUg);
     }
     if (filtroStatus) {
@@ -670,93 +656,35 @@ Sistema de Gestão de PTAs — PPM Facilities`;
               <option value="cancelado">Cancelado</option>
             </select>
           </div>
-          {/* filtrar por */}
+          {/* empresa */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Filtrar por</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Empresa</label>
             <select
-              value={filtroPor}
-              onChange={e => setFiltroPor(e.target.value as any)}
+              value={filtroArea}
+              onChange={e => setFiltroArea(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
             >
-              <option value="area">Empresa</option>
-              <option value="solicitante">Solicitante</option>
-              <option value="local">Local de Instalação</option>
+              <option value="">Todas as empresas</option>
+              {areas.map(a => (
+                <option key={a.id} value={a.id}>{a.nome}</option>
+              ))}
             </select>
           </div>
-          {/* valor do filtro */}
+          {/* local de instalação */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">
-              {filtroPor === 'area' ? 'Empresa' : filtroPor === 'solicitante' ? 'Solicitante' : 'Local de Instalação'}
-              <span className="font-normal text-gray-400 ml-1">(deixe vazio para todos)</span>
-            </label>
-            {filtroPor === 'area' ? (
-              <select
-                value={filtroArea}
-                onChange={e => setFiltroArea(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
-              >
-                <option value="">Todas as empresas</option>
-                {areas.map(a => (
-                  <option key={a.id} value={a.id}>{a.nome}</option>
-                ))}
-              </select>
-            ) : filtroPor === 'solicitante' ? (
-              <div className="relative">
-                <input
-                  type="text"
-                  value={filtroSolicitanteBusca}
-                  onChange={e => {
-                    setFiltroSolicitanteBusca(e.target.value);
-                    setFiltroSolicitanteId('');
-                    setSolicitanteDropdownOpen(true);
-                  }}
-                  onFocus={() => setSolicitanteDropdownOpen(true)}
-                  onBlur={() => setTimeout(() => setSolicitanteDropdownOpen(false), 150)}
-                  placeholder="Digite ou selecione..."
-                  autoComplete="off"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400 uppercase"
-                />
-                {filtroSolicitanteBusca && filtroSolicitanteId && (
-                  <button
-                    type="button"
-                    onClick={() => { setFiltroSolicitanteBusca(''); setFiltroSolicitanteId(''); }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  ><X className="w-3.5 h-3.5" /></button>
-                )}
-                {solicitanteDropdownOpen && solicitantesFiltrados.length > 0 && (
-                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    <div
-                      className="px-3 py-2 text-xs text-gray-400 cursor-pointer hover:bg-gray-50"
-                      onMouseDown={() => { setFiltroSolicitanteBusca(''); setFiltroSolicitanteId(''); setSolicitanteDropdownOpen(false); }}
-                    >Todos os solicitantes</div>
-                    {solicitantesFiltrados.map(s => (
-                      <div
-                        key={s.id}
-                        onMouseDown={() => {
-                          setFiltroSolicitanteId(s.id);
-                          setFiltroSolicitanteBusca(s.nome);
-                          setSolicitanteDropdownOpen(false);
-                        }}
-                        className={`px-3 py-2 text-sm uppercase cursor-pointer hover:bg-amber-50 hover:text-[#1B2A4A] transition-colors ${filtroSolicitanteId === s.id ? 'bg-amber-50 font-bold text-[#1B2A4A]' : ''}`}
-                      >{s.nome}</div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <select
-                value={filtroLocalUg}
-                onChange={e => setFiltroLocalUg(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
-              >
-                <option value="">Todos os locais</option>
-                {locaisOrdenados.map(l => (
-                  <option key={l.id} value={l.id}>
-                    {l.ug}{l.setor_linha ? ` · ${l.setor_linha}` : ''}{(l as any).ponto_ref ? ` — ${(l as any).ponto_ref}` : ''}
-                  </option>
-                ))}
-              </select>
-            )}
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Local de Instalação</label>
+            <select
+              value={filtroLocalUg}
+              onChange={e => setFiltroLocalUg(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
+            >
+              <option value="">Todos os locais</option>
+              {locaisOrdenados.map(l => (
+                <option key={l.id} value={l.id}>
+                  {l.ug}{l.setor_linha ? ` · ${l.setor_linha}` : ''}{(l as any).ponto_ref ? ` — ${(l as any).ponto_ref}` : ''}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="flex items-center justify-between mt-3">
