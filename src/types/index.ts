@@ -138,6 +138,8 @@ export interface VAgenda {
   origem: OrigemAgendamento;
   recorrencia_id?: string | null;
   status: StatusAgendamento;
+  agendado_por?: string | null;
+  agendado_nome?: string | null;
   liberado_por?: string | null;
   liberador_nome?: string | null;
   liberado_em?: string | null;
