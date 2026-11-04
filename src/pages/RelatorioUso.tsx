@@ -457,24 +457,41 @@ export const RelatorioUso: React.FC = () => {
     });
 
     const wb = XLSX.utils.book_new();
-    const ws1 = XLSX.utils.json_to_sheet(linhasUso);
-    const ws2 = XLSX.utils.json_to_sheet(linhasRateio);
 
-    ws1['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 6 }, { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
-    ws2['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 16 }, { wch: 20 }];
+    // ── Aba única com tudo junto (igual ao PDF) ──────────────────────────────
+    const ws = XLSX.utils.aoa_to_sheet([]);
 
-    XLSX.utils.book_append_sheet(wb, ws1, 'Uso de PTAs');
-    XLSX.utils.book_append_sheet(wb, ws2, 'Rateio de Custos');
+    // Título / cabeçalho
+    XLSX.utils.sheet_add_aoa(ws, [
+      [`AmBev Facilities — Relatório de Uso de PTAs`],
+      [`Período: ${fmt(dataIni)} a ${fmt(dataFim)}   |   Gerado em: ${fmt(today())}`],
+      [`Total de registros: ${todosAgendamentos.length}${valorNum > 0 ? `   |   Aluguel total: R$ ${valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : ''}`],
+      [],
+    ], { origin: 'A1' });
 
-    const resumo = [
-      { Info: 'Período', Valor: `${fmt(dataIni)} a ${fmt(dataFim)}` },
-      { Info: 'Total de registros', Valor: todosAgendamentos.length },
-      { Info: 'Valor total do aluguel', Valor: valorNum },
-      { Info: 'Total rateado', Valor: parseFloat(totalRateio.toFixed(2)) },
-    ];
-    const ws3 = XLSX.utils.json_to_sheet(resumo);
-    ws3['!cols'] = [{ wch: 24 }, { wch: 20 }];
-    XLSX.utils.book_append_sheet(wb, ws3, 'Resumo');
+    // Tabela de uso
+    XLSX.utils.sheet_add_aoa(ws, [['Detalhes de Uso']], { origin: -1 });
+    XLSX.utils.sheet_add_json(ws, linhasUso, { origin: -1, skipHeader: false });
+
+    // Espaço entre as tabelas
+    const linhaRateioStart = 4 + 1 + 1 + linhasUso.length + 2; // cabeçalho(4) + título(1) + header(1) + linhas + espaço(2)
+    XLSX.utils.sheet_add_aoa(ws, [[], [`Rateio de Custos — Aluguel total: R$ ${valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`]], { origin: `A${4 + 1 + 1 + linhasUso.length + 1}` });
+    XLSX.utils.sheet_add_json(ws, linhasRateio, { origin: `A${linhaRateioStart}`, skipHeader: false });
+
+    // Linha de total do rateio
+    const linhaTotal = linhaRateioStart + 1 + linhasRateio.length;
+    XLSX.utils.sheet_add_aoa(ws, [[
+      'TOTAL',
+      rateio.reduce((s, r) => s + r.dias, 0),
+      '',
+      '',
+      '',
+      parseFloat(totalRateio.toFixed(2)),
+      '',
+    ]], { origin: `A${linhaTotal}` });
+
+    ws['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 22 }, { wch: 18 }, { wch: 20 }, { wch: 6 }, { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'Relatório');
 
     XLSX.writeFile(wb, `relatorio-uso-ptas-${dataIni}-a-${dataFim}.xlsx`);
   };
