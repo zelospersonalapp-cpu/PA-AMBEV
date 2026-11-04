@@ -916,7 +916,7 @@ Aguardamos sua confirmação. Bom trabalho! 💪`;
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1B2A4A]"
                 >
                   <option value="">Selecione o liberador...</option>
-                  {colaboradores.map((c) => (
+                  {colaboradores.filter(c => c.papel === 'liberador').map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.nome}
                     </option>
