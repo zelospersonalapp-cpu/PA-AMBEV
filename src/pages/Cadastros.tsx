@@ -790,7 +790,7 @@ export const Cadastros: React.FC = () => {
                 <th className="py-3 px-4">Local de Instalação (UG)</th>
                 <th className="py-3 px-4">Setor / Linha</th>
                 <th className="py-3 px-4">Exibição Completa</th>
-                <th className="py-3 px-4">OBZ</th>
+                <th className="py-3 px-4">Centro de Custo</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Ações</th>
               </tr>
@@ -1135,7 +1135,7 @@ export const Cadastros: React.FC = () => {
                     placeholder="Ex: 1234-5, BRZ-RJ-01..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
                   />
-                  <p className="text-[10px] text-gray-400 mt-0.5">Aparece na coluna OBZ do Relatório de Uso</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Aparece na coluna Centro de Custo do Relatório de Uso</p>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer pt-2">
                   <input
