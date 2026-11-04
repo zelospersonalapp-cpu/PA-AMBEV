@@ -142,7 +142,9 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
                   return (
                     <div
                       key={p.id}
-                      className="border-2 border-red-200 rounded-xl bg-red-50 overflow-hidden"
+                      className="border-2 border-red-200 rounded-xl bg-red-50 overflow-hidden cursor-pointer hover:border-red-400 hover:shadow-md transition-all"
+                      onClick={() => onOpenAgendamento(p.id)}
+                      title="Clique para abrir o agendamento"
                     >
                       {/* Status badge + patrimônio */}
                       <div className="bg-red-100 px-4 py-2.5 flex items-center justify-between gap-2">
@@ -173,7 +175,7 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
                       </div>
 
                       {/* Botões de ação */}
-                      <div className="px-4 pb-3 flex items-center gap-2">
+                      <div className="px-4 pb-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => onOpenAgendamento(p.id)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors"
