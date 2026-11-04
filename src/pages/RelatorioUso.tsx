@@ -327,7 +327,7 @@ export const RelatorioUso: React.FC = () => {
       doc.setTextColor(200, 210, 230);
       doc.setFont('helvetica', 'normal');
       doc.text(`Período: ${fmt(dataIni)} a ${fmt(dataFim)}   |   Gerado em: ${fmt(today())}`, 38, 20);
-      doc.text(`Total de registros: ${todosAgendamentos.length}   |   Total de dias-uso: ${totalDias}${valorNum > 0 ? `   |   Aluguel total: ${fmtCurrency(valorNum)}` : ''}`, 38, 26);
+      doc.text(`Total de registros: ${todosAgendamentos.length}${valorNum > 0 ? `   |   Aluguel total: ${fmtCurrency(valorNum)}` : ''}`, 38, 26);
 
       // ── tabela de uso ───────────────────────────────────────────────────
       doc.setFontSize(10);
@@ -476,7 +476,6 @@ export const RelatorioUso: React.FC = () => {
     const resumo = [
       { Info: 'Período', Valor: `${fmt(dataIni)} a ${fmt(dataFim)}` },
       { Info: 'Total de registros', Valor: todosAgendamentos.length },
-      { Info: 'Total de dias-uso', Valor: totalDias },
       { Info: 'Valor total do aluguel', Valor: valorNum },
       { Info: 'Total rateado', Valor: parseFloat(totalRateio.toFixed(2)) },
     ];
@@ -511,7 +510,6 @@ SUMÁRIO DO PERÍODO
 ─────────────────────────────────────────
   • Período de referência: ${periodoStr}
   • Total de registros: ${agendamentos.length}
-  • Total de dias-uso: ${totalDias}
 ${valorNum > 0 ? `  • Valor total do aluguel: ${fmtCurrency(valorNum)}` : ''}
 
 ─────────────────────────────────────────
