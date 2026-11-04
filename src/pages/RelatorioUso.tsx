@@ -60,7 +60,8 @@ export const RelatorioUso: React.FC = () => {
   const [solicitanteDropdownOpen, setSolicitanteDropdownOpen] = useState(false);
   const [filtroArea, setFiltroArea] = useState('');
   const [filtroLocalUg, setFiltroLocalUg] = useState('');
-  const filtrouAlgumCampo = filtroArea !== '' || filtroLocalUg !== '' || filtroSolicitanteId !== '';
+  const [filtroStatus, setFiltroStatus] = useState<string>('');
+  const filtrouAlgumCampo = filtroArea !== '' || filtroLocalUg !== '' || filtroSolicitanteId !== '' || filtroStatus !== '';
 
   // dados
   const [agendamentos, setAgendamentos] = useState<VAgenda[]>([]);
@@ -209,6 +210,7 @@ export const RelatorioUso: React.FC = () => {
     setFiltroLocalUg('');
     setFiltroSolicitanteId('');
     setFiltroSolicitanteBusca('');
+    setFiltroStatus('');
   };
 
   const gerarRelatorio = async () => {
@@ -231,6 +233,9 @@ export const RelatorioUso: React.FC = () => {
     }
     if (filtroPor === 'local' && filtroLocalUg) {
       query = query.eq('local_id', filtroLocalUg);
+    }
+    if (filtroStatus) {
+      query = query.eq('status', filtroStatus);
     }
 
     const { data, error } = await query;
@@ -630,7 +635,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
             </button>
           )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* período */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Data Início</label>
@@ -649,6 +654,23 @@ Sistema de Gestão de PTAs — PPM Facilities`;
               onChange={e => setDataFim(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
             />
+          </div>
+          {/* status */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
+            <select
+              value={filtroStatus}
+              onChange={e => setFiltroStatus(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
+            >
+              <option value="">Todos os status</option>
+              <option value="agendado">Agendado</option>
+              <option value="liberado">Liberado</option>
+              <option value="retirado">Retirado</option>
+              <option value="em_uso">Em uso</option>
+              <option value="concluido">Concluído</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
           </div>
           {/* filtrar por */}
           <div>
