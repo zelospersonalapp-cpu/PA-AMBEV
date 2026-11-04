@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Truck,
-  CheckCircle2,
   Clock,
   AlertTriangle,
   Calendar,
   ArrowRight,
   PlusCircle,
-  Repeat,
-  ShieldCheck,
-  TrendingUp,
   AlertOctagon,
-  BatteryCharging,
+  Battery,
+  CheckCircle2,
+  Wrench,
+  ChevronRight,
+  Activity,
+  MapPin,
+  User,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { PTA, VAgenda, Agendamento } from '../types';
@@ -23,16 +25,12 @@ import { AgendamentoModal } from '../components/AgendamentoModal';
 export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
-  // KPIs
   const [ptas, setPtas] = useState<PTA[]>([]);
   const [agendamentosHoje, setAgendamentosHoje] = useState<number>(0);
   const [agendamentosSemana, setAgendamentosSemana] = useState<number>(0);
   const [avariasAbertas, setAvariasAbertas] = useState<number>(0);
-
-  // Lists
   const [proximasAtividades, setProximasAtividades] = useState<VAgenda[]>([]);
 
-  // Drawers / Modals
   const [selectedAgendamentoId, setSelectedAgendamentoId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [novoModalOpen, setNovoModalOpen] = useState(false);
@@ -40,10 +38,7 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
-
-    const handleUpdate = () => {
-      loadDashboardData();
-    };
+    const handleUpdate = () => loadDashboardData();
     window.addEventListener('agendamento-updated', handleUpdate);
     return () => window.removeEventListener('agendamento-updated', handleUpdate);
   }, []);
@@ -56,323 +51,274 @@ export const Dashboard: React.FC = () => {
       nextWeek.setDate(nextWeek.getDate() + 7);
       const nextWeekStr = nextWeek.toISOString().substring(0, 10);
 
-      // 1. Fetch PTAs for status counts
-      const { data: ptasData } = await supabase.from('ptas').select('*');
-      if (ptasData) {
-        setPtas(ptasData);
-      }
+      const [ptasRes, agHojeRes, agSemanaRes, avariasRes, proxRes] = await Promise.all([
+        supabase.from('ptas').select('*'),
+        supabase.from('agendamentos').select('id').neq('status', 'cancelado').lte('data_inicio', todayStr).gte('data_fim', todayStr),
+        supabase.from('agendamentos').select('id').neq('status', 'cancelado').gte('data_fim', todayStr).lte('data_inicio', nextWeekStr),
+        supabase.from('avarias').select('id').neq('status', 'resolvida'),
+        supabase.from('v_agenda').select('*').neq('status', 'cancelado').gte('data_fim', todayStr).lte('data_inicio', nextWeekStr).order('data_inicio', { ascending: true }).limit(12),
+      ]);
 
-      // 2. Fetch Agendamentos de Hoje e da Semana
-      const { data: agHoje } = await supabase
-        .from('agendamentos')
-        .select('id')
-        .neq('status', 'cancelado')
-        .lte('data_inicio', todayStr)
-        .gte('data_fim', todayStr);
-
-      setAgendamentosHoje(agHoje?.length || 0);
-
-      const { data: agSemana } = await supabase
-        .from('agendamentos')
-        .select('id')
-        .neq('status', 'cancelado')
-        .gte('data_fim', todayStr)
-        .lte('data_inicio', nextWeekStr);
-
-      setAgendamentosSemana(agSemana?.length || 0);
-
-      // 3. Fetch Avarias Abertas
-      const { data: avariasData } = await supabase
-        .from('avarias')
-        .select('id')
-        .neq('status', 'resolvida');
-
-      setAvariasAbertas(avariasData?.length || 0);
-
-      // 4. Fetch Confiabilidade View
-
-      // 5. Fetch Próximas Atividades (7 dias de v_agenda)
-      const { data: proxData } = await supabase
-        .from('v_agenda')
-        .select('*')
-        .neq('status', 'cancelado')
-        .gte('data_fim', todayStr)
-        .lte('data_inicio', nextWeekStr)
-        .order('data_inicio', { ascending: true })
-        .limit(10);
-
-      if (proxData) {
-        setProximasAtividades(proxData);
-      }
+      if (ptasRes.data) setPtas(ptasRes.data);
+      setAgendamentosHoje(agHojeRes.data?.length || 0);
+      setAgendamentosSemana(agSemanaRes.data?.length || 0);
+      setAvariasAbertas(avariasRes.data?.length || 0);
+      if (proxRes.data) setProximasAtividades(proxRes.data);
     } catch (err) {
-      console.error('Erro ao carregar dados do dashboard:', err);
+      console.error('Erro ao carregar dashboard:', err);
     } finally {
       setLoading(false);
     }
   }
 
-  // PTA status counts
   const ptaDisponiveis = ptas.filter((p) => p.status === 'disponivel').length;
   const ptaEmUso = ptas.filter((p) => p.status === 'em_uso').length;
   const ptaManutencao = ptas.filter((p) => p.status === 'em_manutencao').length;
   const ptaAvariadas = ptas.filter((p) => p.status === 'avariada').length;
 
-  return (
-    <div className="space-y-6">
-      {/* Top Banner / Welcome */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-[#1A1A1A] flex items-center gap-2 leading-tight">
-            Painel Geral de PTAs
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-            Visão geral do parque de plataformas e desempenho operacional.
-          </p>
-        </div>
+  const today = new Date();
+  const todayLabel = today.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
 
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <button
-            onClick={() => setNovoModalOpen(true)}
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
-          >
-            <PlusCircle className="w-4 h-4 text-white" />
-            <span>Novo Agendamento</span>
-          </button>
+  return (
+    <div className="space-y-4">
+
+      {/* ── Topbar ── */}
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-[#F5D800]" />
+            Painel Operacional
+          </h2>
+          <p className="text-[11px] text-gray-400 capitalize mt-0.5">{todayLabel}</p>
+        </div>
+        <div className="flex items-center gap-2">
           <NavLink
             to="/agenda"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-gray-50 text-gray-800 font-semibold text-xs sm:text-sm rounded-lg border border-gray-300 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-lg border border-gray-300 transition-colors"
           >
-            <Calendar className="w-4 h-4 text-gray-500" />
-            <span>Ver Calendário</span>
+            <Calendar className="w-3.5 h-3.5" />
+            Calendário
           </NavLink>
+          <button
+            onClick={() => setNovoModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded-lg shadow-xs transition-colors"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            Novo Agendamento
+          </button>
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Card 1: PTAs por Status */}
-        <NavLink to="/ptas" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
-          <div>
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 leading-tight min-h-[2rem] flex items-center">
-                Parque de PTAs ({ptas.length})
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
-                <Truck className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-2 text-xl sm:text-3xl font-bold text-[#1A1A1A]">
-              {ptaDisponiveis}{' '}
-              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                Disponíveis
-              </span>
+      {/* ── KPI Strip ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+        {/* PTAs */}
+        <NavLink to="/cadastros" className="bg-white rounded-xl border border-gray-200 p-3.5 shadow-xs hover:border-[#F5D800] transition-colors no-underline group">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Parque de PTAs</span>
+            <div className="w-7 h-7 rounded-lg bg-[#1B2A4A]/5 flex items-center justify-center">
+              <Truck className="w-3.5 h-3.5 text-[#1B2A4A]" />
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-blue-500" /> {ptaEmUso} em uso
+          <div className="flex items-baseline gap-1.5 mb-2.5">
+            <span className="text-2xl font-black text-gray-900">{ptas.length}</span>
+            <span className="text-xs text-gray-400">plataformas</span>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{ptaDisponiveis} disp.
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-amber-500" /> {ptaManutencao} manut.
+            <span className="flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />{ptaEmUso} uso
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-rose-500" /> {ptaAvariadas} avar.
-            </span>
+            {ptaManutencao > 0 && (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />{ptaManutencao} manut.
+              </span>
+            )}
+            {ptaAvariadas > 0 && (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />{ptaAvariadas} avar.
+              </span>
+            )}
           </div>
         </NavLink>
 
-        {/* Card 2: Agendamentos Hoje / Semana */}
-        <NavLink to="/agenda" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
-          <div>
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 leading-tight min-h-[2rem] flex items-center">
-                Reservas em Operação
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
-                <Clock className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-2 text-xl sm:text-3xl font-bold text-[#1A1A1A]">
-              {agendamentosHoje}{' '}
-              <span className="text-xs font-medium text-gray-500">hoje na fábrica</span>
+        {/* Hoje */}
+        <NavLink to="/agenda" className="bg-white rounded-xl border border-gray-200 p-3.5 shadow-xs hover:border-[#F5D800] transition-colors no-underline">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Em Operação Hoje</span>
+            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Clock className="w-3.5 h-3.5 text-blue-600" />
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
-            <span>Semana:</span>
-            <span className="font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
-              {agendamentosSemana}
-            </span>
+          <div className="flex items-baseline gap-1.5 mb-2.5">
+            <span className="text-2xl font-black text-gray-900">{agendamentosHoje}</span>
+            <span className="text-xs text-gray-400">ativas agora</span>
+          </div>
+          <div className="flex items-center justify-between text-[10px] text-gray-500 border-t border-gray-100 pt-2">
+            <span>Semana</span>
+            <span className="font-black text-gray-800 text-sm">{agendamentosSemana}</span>
           </div>
         </NavLink>
 
-        {/* Card 3: Avarias Abertas */}
-        <NavLink to="/avarias" className="tap-card bg-white rounded-xl border border-gray-200 border-l-4 border-l-[#F5D800] p-3 sm:p-4 shadow-xs flex flex-col justify-between no-underline">
-          <div>
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 leading-tight min-h-[2rem] flex items-center">
-                Manutenção & Avarias
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-[#1B2A4A]">
-                <AlertOctagon className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-2 text-xl sm:text-3xl font-bold text-[#1A1A1A] flex items-center gap-2">
-              {avariasAbertas}
-              {avariasAbertas > 0 ? (
-                <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                  Pendentes
-                </span>
-              ) : (
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  Zero Avarias
-                </span>
-              )}
+        {/* Avarias */}
+        <NavLink to="/avarias" className={`bg-white rounded-xl border p-3.5 shadow-xs hover:border-rose-300 transition-colors no-underline ${avariasAbertas > 0 ? 'border-rose-200 bg-rose-50/30' : 'border-gray-200'}`}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Avarias Abertas</span>
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${avariasAbertas > 0 ? 'bg-rose-100' : 'bg-emerald-50'}`}>
+              <AlertOctagon className={`w-3.5 h-3.5 ${avariasAbertas > 0 ? 'text-rose-600' : 'text-emerald-600'}`} />
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
-            <span className="text-amber-800 font-semibold flex items-center gap-1">
-              <span>Gerenciar</span>
-              <ArrowRight className="w-3 h-3" />
-            </span>
+          <div className="flex items-baseline gap-1.5 mb-2.5">
+            <span className={`text-2xl font-black ${avariasAbertas > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>{avariasAbertas}</span>
+            <span className="text-xs text-gray-400">pendentes</span>
+          </div>
+          <div className="flex items-center gap-1 text-[10px] border-t border-gray-100 pt-2">
+            {avariasAbertas === 0 ? (
+              <span className="text-emerald-600 font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />Tudo OK</span>
+            ) : (
+              <span className="text-rose-600 font-bold flex items-center gap-1"><AlertTriangle className="w-3 h-3" />Requer atenção</span>
+            )}
           </div>
         </NavLink>
+
+        {/* Mini mapa de PTAs */}
+        <div className="bg-white rounded-xl border border-gray-200 p-3.5 shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Status das PTAs</span>
+            <Wrench className="w-3.5 h-3.5 text-gray-400" />
+          </div>
+          <div className="space-y-1.5">
+            {loading ? (
+              <div className="text-[10px] text-gray-300 py-2">Carregando...</div>
+            ) : ptas.length === 0 ? (
+              <div className="text-[10px] text-gray-400 py-2">Nenhuma PTA cadastrada</div>
+            ) : ptas.slice(0, 4).map((pta) => {
+              const cfg = getPtaStatusConfig(pta.status);
+              return (
+                <div key={pta.id} className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-gray-700 truncate">{pta.patrimonio}</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-1 ${cfg.bg} shrink-0`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                    {cfg.label}
+                  </span>
+                </div>
+              );
+            })}
+            {ptas.length > 4 && (
+              <NavLink to="/cadastros" className="text-[10px] text-[#1B2A4A] font-bold flex items-center gap-0.5 hover:underline">
+                +{ptas.length - 4} mais <ChevronRight className="w-3 h-3" />
+              </NavLink>
+            )}
+          </div>
+        </div>
 
       </div>
 
-      {/* Main Section: Próximas Atividades */}
-      <div className="grid grid-cols-1 gap-6">
-        {/* Left 2 Cols: Próximas Atividades (7 dias de v_agenda) */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-            <div>
-              <h3 className="text-base font-bold text-[#1A1A1A] flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-amber-500" />
-                Próximas Atividades (Próximos 7 Dias)
-              </h3>
-              <p className="text-xs text-gray-500">
-                Ordenado cronologicamente a partir da view unificada de agendamentos (v_agenda).
-              </p>
-            </div>
-            <NavLink
-              to="/agenda"
-              className="text-xs font-bold text-amber-800 hover:text-amber-900 flex items-center gap-1 hover:underline"
-            >
-              <span>Ver agenda completa</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </NavLink>
+      {/* ── Próximas Atividades ── */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-amber-500" />
+            <span className="text-sm font-bold text-gray-900">Próximas Atividades</span>
+            <span className="text-[10px] text-gray-400 font-normal">— próximos 7 dias</span>
           </div>
+          <NavLink to="/agenda" className="text-[11px] font-bold text-[#1B2A4A] hover:underline flex items-center gap-1">
+            Ver agenda <ArrowRight className="w-3 h-3" />
+          </NavLink>
+        </div>
 
-          {loading ? (
-            <div className="py-12 text-center text-gray-400 text-xs flex flex-col items-center gap-2">
-              <div className="w-6 h-6 border-2 border-[#F5D800] border-t-transparent rounded-full animate-spin" />
-              <span>Carregando agenda...</span>
-            </div>
-          ) : proximasAtividades.length === 0 ? (
-            <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              <Truck className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <div className="text-sm font-semibold text-gray-700">Nenhum agendamento para os próximos 7 dias</div>
-              <p className="text-xs text-gray-500 mt-1">
-                Todas as plataformas elevatórias estão disponíveis para reserva imediata.
-              </p>
-              <button
-                onClick={() => setNovoModalOpen(true)}
-                className="mt-3 px-3.5 py-1.5 bg-[#1B2A4A] hover:bg-[#152238] text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
-              >
-                Criar primeiro agendamento
-              </button>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
+        {loading ? (
+          <div className="py-10 flex items-center justify-center gap-2 text-xs text-gray-400">
+            <div className="w-4 h-4 border-2 border-[#F5D800] border-t-transparent rounded-full animate-spin" />
+            Carregando...
+          </div>
+        ) : proximasAtividades.length === 0 ? (
+          <div className="py-10 text-center">
+            <Truck className="w-7 h-7 text-gray-300 mx-auto mb-2" />
+            <p className="text-xs font-semibold text-gray-500">Nenhum agendamento nos próximos 7 dias</p>
+            <button
+              onClick={() => setNovoModalOpen(true)}
+              className="mt-3 px-3 py-1.5 bg-[#1B2A4A] hover:bg-[#152238] text-white text-xs font-bold rounded-lg"
+            >
+              Criar agendamento
+            </button>
+          </div>
+        ) : (
+          <table className="w-full text-left text-xs">
+            <thead className="bg-gray-50 text-gray-500 text-[10px] font-bold uppercase border-b border-gray-100">
+              <tr>
+                <th className="py-2.5 px-4">Data</th>
+                <th className="py-2.5 px-4">PTA</th>
+                <th className="py-2.5 px-4">Atividade</th>
+                <th className="py-2.5 px-4 hidden sm:table-cell">Local</th>
+                <th className="py-2.5 px-4 hidden md:table-cell">Solicitante</th>
+                <th className="py-2.5 px-4">Status</th>
+                <th className="py-2.5 px-2 w-8"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
               {proximasAtividades.map((item) => {
                 const statusConfig = getAgendamentoStatusConfig(item.status);
                 const isPrioritario = item.prioridade === 'prioritario';
+                const dataInicio = formatDateBR(item.data_inicio);
+                const dataFim = formatDateBR(item.data_fim);
+                const sameDayRange = item.data_inicio === item.data_fim;
 
                 return (
-                  <div
+                  <tr
                     key={item.id}
-                    onClick={() => {
-                      setSelectedAgendamentoId(item.id);
-                      setDrawerOpen(true);
-                    }}
-                    className="tap-card py-3 px-2.5 rounded-lg hover:bg-gray-50 flex items-center justify-between gap-3 sm:gap-4"
+                    onClick={() => { setSelectedAgendamentoId(item.id); setDrawerOpen(true); }}
+                    className="hover:bg-gray-50 cursor-pointer transition-colors"
                   >
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-[9px] font-bold text-gray-500 uppercase">
-                          {formatDateBR(item.data_inicio).substring(0, 5)}
+                    <td className="py-2.5 px-4 whitespace-nowrap">
+                      <span className="font-bold text-gray-800">{dataInicio.substring(0, 5)}</span>
+                      {!sameDayRange && (
+                        <span className="text-gray-400"> → {dataFim.substring(0, 5)}</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-black text-[#1B2A4A]">
+                          {item.pta_patrimonio || item.patrimonio || '—'}
                         </span>
-                        <span className="text-xs font-bold text-gray-900">
-                          {formatDateBR(item.data_inicio).substring(0, 2)}
-                        </span>
+                        {isPrioritario && (
+                          <span className="text-[9px] font-bold bg-[#F5D800] text-[#1B2A4A] px-1 py-0.5 rounded">★</span>
+                        )}
                       </div>
-
-                      <div className="min-w-0">
-                        {/* Linha 1: PTA + atividade + prioritário */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-sm text-gray-900">
-                            PTA {item.pta_patrimonio || item.patrimonio || '—'}
-                          </span>
-                          <span className="text-gray-400">—</span>
-                          <span className="text-sm text-gray-700">{item.tipo_atividade}</span>
-                          {isPrioritario && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#F5D800] text-[#1B2A4A] border border-amber-300">
-                              ★ PRIORITÁRIO
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Linha 2: Local de Instalação */}
-                        <div className="text-xs text-gray-600 mt-0.5 flex items-center gap-1.5">
-                          <span className="font-semibold">
-                            {(item as any).ponto_ref || item.local_descricao || item.ug || '—'}
-                            {item.setor_linha ? ` · ${item.setor_linha}` : ''}
-                          </span>
-                        </div>
-
-                        {/* Linha 3: Solicitante e Liberador */}
-                        <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
-                          <span>Solicitante: <strong className="text-gray-700">{item.solicitante || item.solicitante_nome || item.nome_solicitante || '-'}</strong></span>
-                          {(item.liberado_por || item.liberador_nome) && (
-                            <>
-                              <span>•</span>
-                              <span>Agendamento feito por: <strong className="text-gray-700">{item.liberado_por || item.liberador_nome}</strong></span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${statusConfig.bg}`}
-                      >
+                    </td>
+                    <td className="py-2.5 px-4 text-gray-700 max-w-[160px] truncate">{item.tipo_atividade}</td>
+                    <td className="py-2.5 px-4 hidden sm:table-cell text-gray-500 max-w-[140px] truncate">
+                      {(item as any).ponto_ref || item.local_descricao || item.ug || <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="py-2.5 px-4 hidden md:table-cell text-gray-500">
+                      {item.solicitante || item.solicitante_nome || item.nome_solicitante || <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 w-fit ${statusConfig.bg}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} />
                         {statusConfig.label}
                       </span>
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
-                    </div>
-                  </div>
+                    </td>
+                    <td className="py-2.5 px-2">
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
+                    </td>
+                  </tr>
                 );
               })}
-            </div>
-          )}
-        </div>
-
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Drawer & Modal */}
       <DetalhesAgendamentoDrawer
         isOpen={drawerOpen}
-        onClose={() => {
-          setDrawerOpen(false);
-          setSelectedAgendamentoId(null);
-        }}
+        onClose={() => { setDrawerOpen(false); setSelectedAgendamentoId(null); }}
         agendamentoId={selectedAgendamentoId}
         onUpdated={loadDashboardData}
-        onOpenEdit={(agendamento) => {
-          setEditingAgendamento(agendamento);
-          setNovoModalOpen(true);
-        }}
+        onOpenEdit={(agendamento) => { setEditingAgendamento(agendamento); setNovoModalOpen(true); }}
       />
 
       <AgendamentoModal
