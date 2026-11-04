@@ -20,6 +20,7 @@ import type { VAgenda, PTA, AreaEmpresa, Local, Agendamento } from '../types';
 import { formatDateBR, getAgendamentoStatusConfig, getDayOfWeekName } from '../lib/formatters';
 import { DetalhesAgendamentoDrawer } from '../components/DetalhesAgendamentoDrawer';
 import { AgendamentoModal } from '../components/AgendamentoModal';
+import { PendenciasModal } from '../components/PendenciasModal';
 
 export const Agenda: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,13 +51,44 @@ export const Agenda: React.FC = () => {
   const [novoModalOpen, setNovoModalOpen] = useState(false);
   const [editingAgendamento, setEditingAgendamento] = useState<Agendamento | null>(null);
   const [selectedDateForNew, setSelectedDateForNew] = useState<string | undefined>(undefined);
+  // Pendências
+  const [pendenciasModalOpen, setPendenciasModalOpen] = useState(false);
+  const [pendenciasRefresh, setPendenciasRefresh] = useState(0);
+  const [pendenciaDrawerOpen, setPendenciaDrawerOpen] = useState(false);
+  const [pendenciaAgendamentoId, setPendenciaAgendamentoId] = useState<string | null>(null);
+  const [pendenciasDateForNew, setPendenciasDateForNew] = useState<string | undefined>(undefined);
+
+  const handleNovoAgendamentoClick = async (date?: string) => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayISO = `${yyyy}-${mm}-${dd}`;
+
+    const { data } = await supabase
+      .from('v_agenda')
+      .select('id')
+      .lt('data_fim', todayISO)
+      .not('status', 'in', '("concluido","cancelado")')
+      .limit(1);
+
+    if (data && data.length > 0) {
+      setPendenciasDateForNew(date);
+      setPendenciasModalOpen(true);
+    } else {
+      setEditingAgendamento(null);
+      setSelectedDateForNew(date);
+      setNovoModalOpen(true);
+    }
+  };
 
   // Check if query param ?novo=true is present
   useEffect(() => {
     if (searchParams.get('novo') === 'true') {
-      setNovoModalOpen(true);
-      // Clean query param
+      // Clean query param first
       setSearchParams({}, { replace: true });
+      // Check pendências before opening
+      handleNovoAgendamentoClick();
     }
   }, [searchParams, setSearchParams]);
 
@@ -228,11 +260,7 @@ export const Agenda: React.FC = () => {
 
         <div className="flex items-center gap-2.5 w-full md:w-auto">
           <button
-            onClick={() => {
-              setEditingAgendamento(null);
-              setSelectedDateForNew(undefined);
-              setNovoModalOpen(true);
-            }}
+            onClick={() => handleNovoAgendamentoClick()}
             className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
           >
             <PlusCircle className="w-4 h-4 text-white" />
@@ -444,11 +472,7 @@ export const Agenda: React.FC = () => {
                 >
                   <button
                     type="button"
-                    onClick={() => {
-                      setSelectedDateForNew(dateStr);
-                      setEditingAgendamento(null);
-                      setNovoModalOpen(true);
-                    }}
+                    onClick={() => handleNovoAgendamentoClick(dateStr)}
                     className="w-full py-1 text-[11px] font-semibold text-gray-400 hover:text-black hover:bg-gray-100 rounded border border-dashed border-gray-200 transition-colors"
                   >
                     + Agendar
@@ -686,6 +710,35 @@ export const Agenda: React.FC = () => {
         onOpenEdit={(agendamento) => {
           setEditingAgendamento(agendamento);
           setNovoModalOpen(true);
+        }}
+      />
+
+      {/* Modal de Pendências */}
+      <PendenciasModal
+        isOpen={pendenciasModalOpen}
+        refreshTrigger={pendenciasRefresh}
+        onClose={() => setPendenciasModalOpen(false)}
+        onAllResolved={() => {
+          setPendenciasModalOpen(false);
+          setEditingAgendamento(null);
+          setSelectedDateForNew(pendenciasDateForNew);
+          setNovoModalOpen(true);
+        }}
+        onOpenAgendamento={(id) => {
+          setPendenciaAgendamentoId(id);
+          setPendenciaDrawerOpen(true);
+        }}
+      />
+
+      {/* Drawer de operações das pendências */}
+      <DetalhesAgendamentoDrawer
+        isOpen={pendenciaDrawerOpen}
+        onClose={() => setPendenciaDrawerOpen(false)}
+        agendamentoId={pendenciaAgendamentoId}
+        onUpdated={() => {
+          loadAgenda();
+          setPendenciaDrawerOpen(false);
+          setPendenciasRefresh((n) => n + 1);
         }}
       />
 
