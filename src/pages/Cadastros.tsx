@@ -773,7 +773,7 @@ export const Cadastros: React.FC = () => {
 
             {/* FORM LOCAL */}
             {activeTab === 'locais' && (
-              <form onSubmit={handleSaveLocal} className="p-6 space-y-3 text-xs">
+              <form onSubmit={handleSaveLocal} className="p-6 space-y-4 text-xs">
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">Local de Instalação (UG) *</label>
                   <input
@@ -784,7 +784,6 @@ export const Cadastros: React.FC = () => {
                     placeholder="Ex: CERVEJARIA, ENVASE, UTILIDADES..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
-                  <p className="text-[10px] text-gray-400 mt-0.5">Unidade Gerencial — aparece no Relatório de Uso</p>
                 </div>
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">Setor / Linha *</label>
@@ -794,19 +793,11 @@ export const Cadastros: React.FC = () => {
                     value={localSetorLinha}
                     onChange={(e) => setLocalSetorLinha(e.target.value)}
                     placeholder="Ex: BRASSAGEM, FILTRAÇÃO, PRESSÃO..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium uppercase"
-                  />
-                  <p className="text-[10px] text-gray-400 mt-0.5">Exibição: UG · Setor (ex: CERVEJARIA · BRASSAGEM)</p>
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Ponto de Referência <span className="text-gray-400 font-normal">(opcional)</span></label>
-                  <input
-                    type="text"
-                    value={localPontoRef}
-                    onChange={(e) => setLocalPontoRef(e.target.value)}
-                    placeholder="Ex: próximo à caldeira 3..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white uppercase"
                   />
+                  <p className="text-[10px] text-gray-400 mt-0.5">
+                    Exibição completa: <span className="font-medium text-gray-500">{localUg ? `${localUg} · ${localSetorLinha || '...'}` : 'UG · Setor'}</span>
+                  </p>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer pt-2">
                   <input
