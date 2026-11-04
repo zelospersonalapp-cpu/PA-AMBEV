@@ -905,9 +905,9 @@ Sistema de Gestão de PTAs — PPM Facilities`;
               <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={moverParaRateio}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow transition-colors"
                 >
-                  <ArrowDownCircle className="w-4 h-4" />
+                  <ArrowDownCircle className="w-3.5 h-3.5" />
                   Mover {selecionados.size} para Rateio ↓
                 </button>
               </div>
