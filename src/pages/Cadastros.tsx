@@ -46,6 +46,7 @@ export const Cadastros: React.FC = () => {
   const [areaNome, setAreaNome] = useState('');
   const [areaTipo, setAreaTipo] = useState<AreaTipo>('area_interna');
   const [areaContato, setAreaContato] = useState('');
+  const [areaCentroLucro, setAreaCentroLucro] = useState('');
   const [areaAtivo, setAreaAtivo] = useState(true);
 
   // Local Form
@@ -105,6 +106,7 @@ export const Cadastros: React.FC = () => {
       setAreaNome('');
       setAreaTipo('area_interna');
       setAreaContato('');
+      setAreaCentroLucro('');
       setAreaAtivo(true);
     } else if (activeTab === 'locais') {
       setEditingLocal(null);
@@ -136,6 +138,7 @@ export const Cadastros: React.FC = () => {
     setAreaNome(item.nome);
     setAreaTipo(item.tipo);
     setAreaContato(item.contato || '');
+    setAreaCentroLucro(item.centro_lucro || '');
     setAreaAtivo(item.ativo);
     setModalOpen(true);
   };
@@ -217,6 +220,7 @@ export const Cadastros: React.FC = () => {
         nome: areaNome.trim(),
         tipo: areaTipo,
         contato: areaContato.trim() || null,
+        centro_lucro: areaCentroLucro.trim() || null,
         ativo: areaAtivo,
       };
       if (editingArea) {
@@ -411,6 +415,7 @@ export const Cadastros: React.FC = () => {
               <tr>
                 <th className="py-3 px-4">Empresa</th>
                 <th className="py-3 px-4">Tipo</th>
+                <th className="py-3 px-4">Centro de Lucro</th>
                 <th className="py-3 px-4">Contato / Informações</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Ações</th>
@@ -433,6 +438,7 @@ export const Cadastros: React.FC = () => {
                         {area.tipo === 'area_interna' ? 'Área Interna (AmBev)' : 'Empresa Terceira'}
                       </span>
                     </td>
+                    <td className="py-3 px-4 text-gray-600 font-mono text-xs">{area.centro_lucro || '-'}</td>
                     <td className="py-3 px-4 text-gray-700">{area.contato || '-'}</td>
                     <td className="py-3 px-4">
                       {area.ativo ? (
@@ -732,6 +738,16 @@ export const Cadastros: React.FC = () => {
                     <option value="area_interna">Área Interna (AmBev)</option>
                     <option value="empresa_terceira">Empresa Terceirizada</option>
                   </select>
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Centro de Lucro (OBZ)</label>
+                  <input
+                    type="text"
+                    value={areaCentroLucro}
+                    onChange={(e) => setAreaCentroLucro(e.target.value)}
+                    placeholder="Ex: 1234-5, BRZ-RJ-01..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                  />
                 </div>
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">Contato / Gestor / E-mail</label>

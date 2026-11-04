@@ -35,6 +35,7 @@ export interface AreaEmpresa {
   nome: string;
   tipo: AreaTipo;
   contato?: string | null;
+  centro_lucro?: string | null;
   ativo: boolean;
   created_at?: string;
 }
