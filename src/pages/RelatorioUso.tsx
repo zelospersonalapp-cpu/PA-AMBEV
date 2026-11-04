@@ -678,7 +678,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
               onChange={e => setFiltroPor(e.target.value as any)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
             >
-              <option value="area">Área / Empresa</option>
+              <option value="area">Empresa</option>
               <option value="solicitante">Solicitante</option>
               <option value="local">Local de Instalação</option>
             </select>
@@ -686,7 +686,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
           {/* valor do filtro */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">
-              {filtroPor === 'area' ? 'Área' : filtroPor === 'solicitante' ? 'Solicitante' : 'Local de Instalação'}
+              {filtroPor === 'area' ? 'Empresa' : filtroPor === 'solicitante' ? 'Solicitante' : 'Local de Instalação'}
               <span className="font-normal text-gray-400 ml-1">(deixe vazio para todos)</span>
             </label>
             {filtroPor === 'area' ? (
@@ -695,7 +695,7 @@ Sistema de Gestão de PTAs — PPM Facilities`;
                 onChange={e => setFiltroArea(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#F5D800] focus:border-amber-400"
               >
-                <option value="">Todas as áreas</option>
+                <option value="">Todas as empresas</option>
                 {areas.map(a => (
                   <option key={a.id} value={a.id}>{a.nome}</option>
                 ))}
