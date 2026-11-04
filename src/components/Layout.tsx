@@ -15,18 +15,57 @@ import {
   CheckCircle2,
   FileBarChart2,
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { AgendamentoModal } from './AgendamentoModal';
+import { PendenciasModal } from './PendenciasModal';
+import { DetalhesAgendamentoDrawer } from './DetalhesAgendamentoDrawer';
 
 interface LayoutProps {
   children?: React.ReactNode;
   onOpenNovoAgendamento?: () => void;
 }
 
+function getTodayISO(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [novoModalOpen, setNovoModalOpen] = useState(false);
+  // Pendências
+  const [pendenciasModalOpen, setPendenciasModalOpen] = useState(false);
+  const [pendenciasRefresh, setPendenciasRefresh] = useState(0);
+  const [pendenciaDrawerOpen, setPendenciaDrawerOpen] = useState(false);
+  const [pendenciaAgendamentoId, setPendenciaAgendamentoId] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleNovoAgendamentoClick = async () => {
+    // Verifica pendências antes de abrir o modal de novo agendamento
+    const today = getTodayISO();
+    const { data } = await supabase
+      .from('v_agenda')
+      .select('id')
+      .lt('data_fim', today)
+      .not('status', 'in', '("concluido","cancelado")')
+      .limit(1);
+
+    if (data && data.length > 0) {
+      // Há pendências — mostrar modal de bloqueio
+      setPendenciasModalOpen(true);
+    } else {
+      // Sem pendências — prosseguir normalmente
+      if (onOpenNovoAgendamento) {
+        onOpenNovoAgendamento();
+      } else {
+        setNovoModalOpen(true);
+      }
+    }
+  };
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -74,13 +113,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  if (onOpenNovoAgendamento) {
-                    onOpenNovoAgendamento();
-                  } else {
-                    setNovoModalOpen(true);
-                  }
-                }}
+                onClick={handleNovoAgendamentoClick}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4 text-white" />
@@ -222,6 +255,38 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
           }}
         />
       )}
+
+      {/* Modal de Pendências — trava global */}
+      <PendenciasModal
+        isOpen={pendenciasModalOpen}
+        refreshTrigger={pendenciasRefresh}
+        onAllResolved={() => {
+          setPendenciasModalOpen(false);
+          // Abre o modal de novo agendamento após resolver tudo
+          if (onOpenNovoAgendamento) {
+            onOpenNovoAgendamento();
+          } else {
+            setNovoModalOpen(true);
+          }
+        }}
+        onOpenAgendamento={(id) => {
+          setPendenciaAgendamentoId(id);
+          setPendenciaDrawerOpen(true);
+        }}
+      />
+
+      {/* Drawer de detalhes/operações de agendamento (usado pelas pendências) */}
+      <DetalhesAgendamentoDrawer
+        isOpen={pendenciaDrawerOpen}
+        onClose={() => setPendenciaDrawerOpen(false)}
+        agendamentoId={pendenciaAgendamentoId}
+        onUpdated={() => {
+          window.dispatchEvent(new CustomEvent('agendamento-updated'));
+          setPendenciaDrawerOpen(false);
+          // Força o PendenciasModal a re-buscar pendências
+          setPendenciasRefresh((n) => n + 1);
+        }}
+      />
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-4 mt-auto">
