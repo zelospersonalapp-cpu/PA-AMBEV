@@ -439,6 +439,12 @@ export const RelatorioUso: React.FC = () => {
 
     const linhasRateio = rateio.map(r => {
       const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
+      // Pegar OBZ dos agendamentos desta área (igual ao PDF)
+      const obzSet = new Set(
+        todosAgendamentos
+          .filter(a => r.agendamento_ids.includes(a.id) && a.centro_cst_obz)
+          .map(a => a.centro_cst_obz!)
+      );
       return {
         'Empresa': r.area_nome,
         'Dias de Uso': r.dias,
@@ -446,6 +452,7 @@ export const RelatorioUso: React.FC = () => {
         'Ajuste %': r.pct_ajuste,
         '% Final': parseFloat(pctFinal.toFixed(2)),
         'Valor a Pagar (R$)': parseFloat(r.valor.toFixed(2)),
+        'Centro de Custo (OBZ)': [...obzSet].join(', ') || '',
       };
     });
 
@@ -454,7 +461,7 @@ export const RelatorioUso: React.FC = () => {
     const ws2 = XLSX.utils.json_to_sheet(linhasRateio);
 
     ws1['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 6 }, { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
-    ws2['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 16 }];
+    ws2['!cols'] = [{ wch: 24 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 16 }, { wch: 20 }];
 
     XLSX.utils.book_append_sheet(wb, ws1, 'Uso de PTAs');
     XLSX.utils.book_append_sheet(wb, ws2, 'Rateio de Custos');
@@ -476,6 +483,11 @@ export const RelatorioUso: React.FC = () => {
   const compartilharEmail = () => {
     const valorNum = parseFloat(valorAluguel.replace(/\./g, '').replace(',', '.')) || 0;
     const periodoStr = `${fmt(dataIni)} a ${fmt(dataFim)}`;
+    // Usar o mesmo conjunto filtrado do PDF/Excel
+    const idsNoRateioEmail = new Set(rateio.flatMap(r => r.agendamento_ids));
+    const todosAgendamentosEmail = idsNoRateioEmail.size > 0
+      ? agendamentos.filter(a => idsNoRateioEmail.has(a.id))
+      : agendamentos;
 
     const linhasRateioTexto = rateio
       .map(r => {
@@ -495,13 +507,13 @@ Encaminhamos o Relatório de Uso das Plataformas Elevatórias (PTAs) referente a
 SUMÁRIO DO PERÍODO
 ─────────────────────────────────────────
   • Período de referência: ${periodoStr}
-  • Total de registros: ${agendamentos.length}
+  • Total de registros: ${todosAgendamentosEmail.length}
 ${valorNum > 0 ? `  • Valor total do aluguel: ${fmtCurrency(valorNum)}` : ''}
 
 ─────────────────────────────────────────
-ALOCAÇÃO DE CUSTOS POR CENTRO DE CUSTO
+ALOCAÇÃO DE CUSTOS POR EMPRESA
 ─────────────────────────────────────────
-Conforme apuração do período, os valores a serem alocados nos respectivos centros de custo são:
+Conforme apuração do período, os valores a serem alocados por empresa são:
 
 ${linhasRateioTexto}
 
