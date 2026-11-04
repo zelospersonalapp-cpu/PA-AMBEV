@@ -162,7 +162,7 @@ export const Cadastros: React.FC = () => {
     setPtaCapacidade(pta.capacidade_kg);
     setPtaNumSerie(pta.num_serie || '');
     setPtaNivelBateria(pta.nivel_bateria ?? 100);
-    const validStatuses: PtaStatus[] = ['disponivel', 'em_uso', 'em_manutencao', 'avariada', 'inativa'];
+    const validStatuses: PtaStatus[] = ['disponivel', 'em_uso', 'em_manutencao', 'avariada', 'inativa', 'indisponivel'];
     setPtaStatus(validStatuses.includes(pta.status) ? pta.status : 'disponivel');
     setPtaObservacoes(pta.observacoes || '');
     setPtaModalOpen(true);
@@ -1464,6 +1464,7 @@ export const Cadastros: React.FC = () => {
                     <option value="em_manutencao">Em Manutenção</option>
                     <option value="avariada">Avariada</option>
                     <option value="inativa">Inativa</option>
+                    <option value="indisponivel">Indisponível</option>
                   </select>
                 </div>
               </div>

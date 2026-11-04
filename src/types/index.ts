@@ -1,5 +1,5 @@
 export type PtaTipo = 'articulada' | 'tesourinha';
-export type PtaStatus = 'disponivel' | 'em_uso' | 'em_manutencao' | 'avariada' | 'inativa';
+export type PtaStatus = 'disponivel' | 'em_uso' | 'em_manutencao' | 'avariada' | 'inativa' | 'indisponivel';
 
 export interface PTA {
   id: string;
