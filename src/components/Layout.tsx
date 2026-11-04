@@ -109,7 +109,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
                       PPM Facilities
                     </span>
                   </h1>
-                  <p className="text-xs text-[#CBD5E1] font-medium">Centro de Inteligência Facilities</p>
+                  <p className="text-xs text-[#CBD5E1] font-medium">Central de Inteligência Facilities</p>
                 </div>
               </div>
             </div>

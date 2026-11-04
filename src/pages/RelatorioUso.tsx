@@ -491,7 +491,7 @@ export const RelatorioUso: React.FC = () => {
     const body =
 `Prezados,
 
-Encaminhamos o Relatório de Uso das Plataformas Elevatórias (PTAs) referente ao período de ${periodoStr}, gerado pelo Sistema de Gestão de PTAs — Centro de Inteligência Facilities CRJ.
+Encaminhamos o Relatório de Uso das Plataformas Elevatórias (PTAs) referente ao período de ${periodoStr}, gerado pelo Sistema de Gestão de PTAs — Central de Inteligência Facilities CRJ.
 
 ─────────────────────────────────────────
 SUMÁRIO DO PERÍODO
@@ -523,7 +523,7 @@ Em caso de dúvidas ou necessidade de ajustes no rateio, favor entrar em contato
 
 Atenciosamente,
 
-Centro de Inteligência Facilities — CRJ
+Central de Inteligência Facilities — CRJ
 AmBev | Plataformas Elevatórias (PTAs)
 Sistema de Gestão de PTAs — PPM Facilities`;
 
