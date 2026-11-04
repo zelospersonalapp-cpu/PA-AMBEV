@@ -467,7 +467,22 @@ export const RelatorioUso: React.FC = () => {
     const linhasRateioTexto = rateio
       .map(r => {
         const pctFinal = Math.max(0, r.pct_uso + r.pct_ajuste);
-        return `    • ${r.area_nome}: ${r.dias} dias (${pctFinal.toFixed(1)}%) → ${fmtCurrency(r.valor)}`;
+        // OBZ desta empresa
+        const obzSet = new Set(
+          todosAgendamentosEmail
+            .filter(a => r.agendamento_ids.includes(a.id) && a.centro_cst_obz)
+            .map(a => a.centro_cst_obz!)
+        );
+        const obzStr = [...obzSet].join(', ');
+        return `    • ${r.area_nome}: ${r.dias} dias (${pctFinal.toFixed(1)}%) → ${fmtCurrency(r.valor)}${obzStr ? ` | Centro de Custo: ${obzStr}` : ''}`;
+      })
+      .join('\n');
+
+    const linhasUsoTexto = todosAgendamentosEmail
+      .map(a => {
+        const local = [a.ug, a.setor_linha].filter(Boolean).join(' · ') || a.ponto_ref || a.local_descricao || '—';
+        const empresa = (a as any).area_empresa || a.area_nome || a.nome_area || '—';
+        return `    • ${fmt(a.data_inicio)} | ${a.patrimonio || a.pta_patrimonio || '—'} | ${empresa} | ${local} | ${a.tipo_atividade || '—'} | ${a.status || '—'}`;
       })
       .join('\n');
 
@@ -484,6 +499,12 @@ SUMÁRIO DO PERÍODO
   • Período de referência: ${periodoStr}
   • Total de registros: ${todosAgendamentosEmail.length}
 ${valorNum > 0 ? `  • Valor total do aluguel: ${fmtCurrency(valorNum)}` : ''}
+
+─────────────────────────────────────────
+DETALHES DE USO
+─────────────────────────────────────────
+  Data       | PTA            | Empresa     | Local de Instalação       | Atividade           | Status
+${linhasUsoTexto}
 
 ─────────────────────────────────────────
 ALOCAÇÃO DE CUSTOS POR EMPRESA
