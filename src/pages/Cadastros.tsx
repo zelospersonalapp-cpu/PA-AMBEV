@@ -13,12 +13,19 @@ import {
   X,
   Search,
   User,
+  Truck,
+  AlertTriangle,
+  History,
+  CalendarPlus,
+  Battery,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
-import type { AreaEmpresa, Local, Colaborador, AreaTipo, ColaboradorPapel } from '../types';
+import type { AreaEmpresa, Local, Colaborador, AreaTipo, ColaboradorPapel, PTA, PtaTipo, PtaStatus, VAvariasPTA } from '../types';
+import { getPtaStatusConfig } from '../lib/formatters';
+import { AgendamentoModal } from '../components/AgendamentoModal';
 
-type Tab = 'areas' | 'locais' | 'colaboradores' | 'solicitantes';
+type Tab = 'ptas' | 'areas' | 'locais' | 'colaboradores' | 'solicitantes';
 
 export const Cadastros: React.FC = () => {
   const toast = useToast();
@@ -26,7 +33,8 @@ export const Cadastros: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     const aba = searchParams.get('aba');
     if (aba === 'solicitantes') return 'solicitantes';
-    return 'areas';
+    if (aba === 'ptas') return 'ptas';
+    return 'ptas';
   });
   const [loading, setLoading] = useState(true);
 
@@ -73,6 +81,31 @@ export const Cadastros: React.FC = () => {
   const [solAreaId, setSolAreaId] = useState('');
   const [solContato, setSolContato] = useState('');
 
+  // PTA states
+  const [ptas, setPtas] = useState<PTA[]>([]);
+  const [avariasPtaList, setAvariasPtaList] = useState<VAvariasPTA[]>([]);
+  const [ptaSearchTerm, setPtaSearchTerm] = useState('');
+  const [ptaFilterTipo, setPtaFilterTipo] = useState('');
+  const [ptaFilterStatus, setPtaFilterStatus] = useState('');
+  const [ptaModalOpen, setPtaModalOpen] = useState(false);
+  const [editingPta, setEditingPta] = useState<PTA | null>(null);
+  const [ptaSaving, setPtaSaving] = useState(false);
+  const [ptaPatrimonio, setPtaPatrimonio] = useState('');
+  const [ptaTipo, setPtaTipo] = useState<PtaTipo>('articulada');
+  const [ptaModelo, setPtaModelo] = useState('');
+  const [ptaFabricante, setPtaFabricante] = useState('');
+  const [ptaAlturaMax, setPtaAlturaMax] = useState<number>(12);
+  const [ptaCapacidade, setPtaCapacidade] = useState<number>(230);
+  const [ptaNumSerie, setPtaNumSerie] = useState('');
+  const [ptaNivelBateria, setPtaNivelBateria] = useState<number>(100);
+  const [ptaStatus, setPtaStatus] = useState<PtaStatus>('disponivel');
+  const [ptaObservacoes, setPtaObservacoes] = useState('');
+  const [agendarModalOpen, setAgendarModalOpen] = useState(false);
+  const [ptaParaAgendar, setPtaParaAgendar] = useState<PTA | null>(null);
+  const [historyPta, setHistoryPta] = useState<PTA | null>(null);
+  const [historyList, setHistoryList] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   useEffect(() => {
     loadAll();
   }, []);
@@ -80,17 +113,21 @@ export const Cadastros: React.FC = () => {
   async function loadAll() {
     setLoading(true);
     try {
-      const [areasRes, locaisRes, colabsRes, solicitantesRes] = await Promise.all([
+      const [areasRes, locaisRes, colabsRes, solicitantesRes, ptasRes, avariasRes] = await Promise.all([
         supabase.from('areas_empresas').select('*').order('nome', { ascending: true }),
         supabase.from('locais').select('*').order('ug', { ascending: true }),
         supabase.from('colaboradores').select('*').order('nome', { ascending: true }),
         supabase.from('colaboradores').select('*').eq('papel', 'solicitante').order('nome', { ascending: true }),
+        supabase.from('ptas').select('*').order('patrimonio', { ascending: true }),
+        supabase.from('v_avarias_pta').select('*'),
       ]);
 
       if (areasRes.data) setAreas(areasRes.data);
       if (locaisRes.data) setLocais(locaisRes.data);
       if (colabsRes.data) setColaboradores(colabsRes.data);
       if (solicitantesRes.data) setSolicitantes(solicitantesRes.data);
+      if (ptasRes.data) setPtas(ptasRes.data);
+      if (avariasRes.data) setAvariasPtaList(avariasRes.data);
     } catch (err: any) {
       console.error('Erro ao carregar cadastros auxiliares:', err);
       toast.error('Erro ao carregar dados', err.message);
@@ -98,6 +135,119 @@ export const Cadastros: React.FC = () => {
       setLoading(false);
     }
   }
+
+  // PTA helpers
+  const openPtaCreate = () => {
+    setEditingPta(null);
+    setPtaPatrimonio('');
+    setPtaTipo('articulada');
+    setPtaModelo('');
+    setPtaFabricante('');
+    setPtaAlturaMax(12);
+    setPtaCapacidade(230);
+    setPtaNumSerie('');
+    setPtaNivelBateria(100);
+    setPtaStatus('disponivel');
+    setPtaObservacoes('');
+    setPtaModalOpen(true);
+  };
+
+  const openPtaEdit = (pta: PTA) => {
+    setEditingPta(pta);
+    setPtaPatrimonio(pta.patrimonio);
+    setPtaTipo(pta.tipo);
+    setPtaModelo(pta.modelo);
+    setPtaFabricante(pta.fabricante);
+    setPtaAlturaMax(pta.altura_max_m);
+    setPtaCapacidade(pta.capacidade_kg);
+    setPtaNumSerie(pta.num_serie || '');
+    setPtaNivelBateria(pta.nivel_bateria);
+    setPtaStatus(pta.status);
+    setPtaObservacoes(pta.observacoes || '');
+    setPtaModalOpen(true);
+  };
+
+  const handleSavePta = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ptaPatrimonio.trim() || !ptaModelo.trim() || !ptaFabricante.trim()) {
+      toast.warning('Dados Incompletos', 'Preencha patrimônio, fabricante e modelo.');
+      return;
+    }
+    setPtaSaving(true);
+    try {
+      const payload = {
+        patrimonio: ptaPatrimonio.trim(),
+        tipo: ptaTipo,
+        modelo: ptaModelo.trim(),
+        fabricante: ptaFabricante.trim(),
+        altura_max_m: Number(ptaAlturaMax),
+        capacidade_kg: Number(ptaCapacidade),
+        num_serie: ptaNumSerie.trim() || null,
+        nivel_bateria: ptaNivelBateria,
+        status: ptaStatus,
+        observacoes: ptaObservacoes.trim() || null,
+      };
+      if (editingPta) {
+        const { error } = await supabase.from('ptas').update(payload).eq('id', editingPta.id);
+        if (error) throw error;
+        toast.success('PTA Atualizada', 'Alterações salvas.');
+      } else {
+        const { error } = await supabase.from('ptas').insert([payload]);
+        if (error) throw error;
+        toast.success('PTA Cadastrada', 'Nova plataforma inserida.');
+      }
+      setPtaModalOpen(false);
+      loadAll();
+    } catch (err: any) {
+      toast.error('Erro ao salvar PTA', err.message);
+    } finally {
+      setPtaSaving(false);
+    }
+  };
+
+  const handleExcluirPta = async (pta: PTA) => {
+    if (!window.confirm(`Excluir PTA ${pta.patrimonio}? Esta ação não pode ser desfeita.`)) return;
+    try {
+      const { error } = await supabase.from('ptas').delete().eq('id', pta.id);
+      if (error) throw error;
+      toast.success('PTA Excluída', `PTA ${pta.patrimonio} removida.`);
+      loadAll();
+    } catch (err: any) {
+      toast.error('Erro ao excluir', err.message);
+    }
+  };
+
+  const openPtaHistory = async (pta: PTA) => {
+    setHistoryPta(pta);
+    setHistoryLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('avarias')
+        .select('*')
+        .eq('pta_id', pta.id)
+        .order('data_avaria', { ascending: false });
+      if (error) throw error;
+      setHistoryList(data || []);
+    } catch (err: any) {
+      toast.error('Erro ao buscar histórico', err.message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const filteredPtas = ptas.filter((p) => {
+    if (ptaSearchTerm) {
+      const q = ptaSearchTerm.toLowerCase();
+      if (
+        !p.patrimonio.toLowerCase().includes(q) &&
+        !p.modelo.toLowerCase().includes(q) &&
+        !p.fabricante.toLowerCase().includes(q)
+      ) return false;
+    }
+    if (ptaFilterTipo && p.tipo !== ptaFilterTipo) return false;
+    if (ptaFilterStatus && p.status !== ptaFilterStatus) return false;
+    return true;
+  });
 
   // Opening modals
   const handleOpenCreate = () => {
@@ -321,12 +471,17 @@ export const Cadastros: React.FC = () => {
         </div>
 
         <button
-          onClick={handleOpenCreate}
+          onClick={() => {
+            if (activeTab === 'ptas') openPtaCreate();
+            else handleOpenCreate();
+          }}
           className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B2A4A] hover:bg-[#152238] text-white font-bold text-xs sm:text-sm rounded-lg shadow-xs transition-colors"
         >
           <PlusCircle className="w-4 h-4 text-[#F5D800]" />
           <span>
-            {activeTab === 'areas'
+            {activeTab === 'ptas'
+              ? 'Cadastrar PTA'
+              : activeTab === 'areas'
               ? 'Nova Empresa'
               : activeTab === 'locais'
               ? 'Novo Local de Instalação'
@@ -337,6 +492,17 @@ export const Cadastros: React.FC = () => {
 
       {/* Tabs Navigation */}
       <div className="flex border-b border-gray-200 bg-white px-4 rounded-xl shadow-xs overflow-x-auto">
+        <button
+          onClick={() => { setActiveTab('ptas'); setPtaSearchTerm(''); }}
+          className={`py-3 px-4 font-bold text-xs flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'ptas'
+              ? 'border-[#F5D800] text-[#1B2A4A]'
+              : 'border-transparent text-gray-500 hover:text-[#1B2A4A]'
+          }`}
+        >
+          <Truck className="w-4 h-4" />
+          <span>PTAs ({ptas.length})</span>
+        </button>
         <button
           onClick={() => {
             setActiveTab('areas');
@@ -397,17 +563,158 @@ export const Cadastros: React.FC = () => {
         </button>
       </div>
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-        <input
-          type="text"
-          placeholder="Filtrar registros da tabela..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-lg bg-white"
-        />
-      </div>
+      {/* Search Input — só aparece nas tabs que não são PTAs */}
+      {activeTab !== 'ptas' && (
+        <div className="relative">
+          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+          <input
+            type="text"
+            placeholder="Filtrar registros da tabela..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-lg bg-white"
+          />
+        </div>
+      )}
+
+      {/* Content for TAB PTAs */}
+      {activeTab === 'ptas' && (
+        <div className="space-y-3">
+          {/* Filtros PTAs */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Buscar por patrimônio, modelo ou fabricante..."
+                value={ptaSearchTerm}
+                onChange={(e) => setPtaSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-lg bg-white"
+              />
+            </div>
+            <select
+              value={ptaFilterTipo}
+              onChange={(e) => setPtaFilterTipo(e.target.value)}
+              className="px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white"
+            >
+              <option value="">Todos os Tipos</option>
+              <option value="articulada">Articulada</option>
+              <option value="tesourinha">Tesourinha</option>
+            </select>
+            <select
+              value={ptaFilterStatus}
+              onChange={(e) => setPtaFilterStatus(e.target.value)}
+              className="px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white"
+            >
+              <option value="">Todos os Status</option>
+              <option value="disponivel">Disponível</option>
+              <option value="em_uso">Em Uso</option>
+              <option value="em_manutencao">Em Manutenção</option>
+              <option value="avariada">Avariada</option>
+              <option value="inativa">Inativa</option>
+            </select>
+          </div>
+
+          {/* Tabela PTAs */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-600 uppercase text-[10px] font-bold border-b border-gray-200">
+                <tr>
+                  <th className="py-3 px-4">Patrimônio</th>
+                  <th className="py-3 px-4">Tipo</th>
+                  <th className="py-3 px-4">Fabricante / Modelo</th>
+                  <th className="py-3 px-4">Altura · Cap.</th>
+                  <th className="py-3 px-4">Nº Série</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Avarias</th>
+                  <th className="py-3 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="py-10 text-center text-gray-400 text-xs">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-[#1B2A4A] border-t-transparent rounded-full animate-spin" />
+                        Carregando...
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredPtas.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-10 text-center text-gray-400 text-xs">
+                      {ptas.length === 0 ? 'Nenhuma PTA cadastrada ainda.' : 'Nenhuma PTA encontrada com esses filtros.'}
+                    </td>
+                  </tr>
+                ) : filteredPtas.map((pta) => {
+                  const statusConf = getPtaStatusConfig(pta.status);
+                  const avStat = avariasPtaList.find((a) => a.pta_id === pta.id);
+                  const podeAgendar = pta.status !== 'avariada' && pta.status !== 'em_manutencao' && pta.status !== 'inativa';
+                  return (
+                    <tr key={pta.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="py-2.5 px-4 font-bold text-gray-900">{pta.patrimonio}</td>
+                      <td className="py-2.5 px-4 text-gray-600 capitalize">{pta.tipo === 'articulada' ? 'Articulada' : 'Tesourinha'}</td>
+                      <td className="py-2.5 px-4 text-gray-700">{pta.fabricante} <span className="text-gray-400">·</span> {pta.modelo}</td>
+                      <td className="py-2.5 px-4 text-gray-600">{pta.altura_max_m}m · {pta.capacidade_kg}kg</td>
+                      <td className="py-2.5 px-4 font-mono text-gray-500">{pta.num_serie || <span className="text-gray-300">—</span>}</td>
+                      <td className="py-2.5 px-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 w-fit ${statusConf.bg}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusConf.dot}`} />
+                          {statusConf.label}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-4">
+                        {avStat && avStat.avarias_abertas > 0 ? (
+                          <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded flex items-center gap-1 w-fit">
+                            <AlertTriangle className="w-3 h-3" />
+                            {avStat.avarias_abertas} aberta(s)
+                          </span>
+                        ) : (
+                          <span className="text-gray-300 text-[10px]">—</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => openPtaHistory(pta)}
+                            title="Histórico"
+                            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                          >
+                            <History className="w-3.5 h-3.5" />
+                          </button>
+                          {podeAgendar && (
+                            <button
+                              onClick={() => { setPtaParaAgendar(pta); setAgendarModalOpen(true); }}
+                              title="Agendar esta PTA"
+                              className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                            >
+                              <CalendarPlus className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => openPtaEdit(pta)}
+                            title="Editar"
+                            className="p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition-colors"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleExcluirPta(pta)}
+                            title="Excluir"
+                            className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Content for TAB 1: ÁREAS */}
       {activeTab === 'areas' && (
@@ -1033,6 +1340,211 @@ export const Cadastros: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal Criar/Editar PTA */}
+      {ptaModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#1B2A4A] rounded-lg">
+                  <Truck className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-gray-900">
+                    {editingPta ? 'Editar PTA' : 'Cadastrar Nova PTA'}
+                  </h2>
+                  <p className="text-xs text-gray-500">Plataforma Elevatória</p>
+                </div>
+              </div>
+              <button onClick={() => setPtaModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSavePta} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Patrimônio *</label>
+                  <input
+                    type="text"
+                    value={ptaPatrimonio}
+                    onChange={(e) => setPtaPatrimonio(e.target.value.toUpperCase())}
+                    placeholder="Ex: PTA-001"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Tipo *</label>
+                  <select value={ptaTipo} onChange={(e) => setPtaTipo(e.target.value as PtaTipo)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                    <option value="articulada">Articulada</option>
+                    <option value="tesourinha">Tesourinha</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Fabricante *</label>
+                  <input
+                    type="text"
+                    value={ptaFabricante}
+                    onChange={(e) => setPtaFabricante(e.target.value)}
+                    placeholder="Ex: JLG"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Modelo *</label>
+                  <input
+                    type="text"
+                    value={ptaModelo}
+                    onChange={(e) => setPtaModelo(e.target.value)}
+                    placeholder="Ex: 450AJ"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Altura Máx. (m)</label>
+                  <input
+                    type="number"
+                    value={ptaAlturaMax}
+                    onChange={(e) => setPtaAlturaMax(Number(e.target.value))}
+                    min={1}
+                    max={50}
+                    step={0.5}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Capacidade (kg)</label>
+                  <input
+                    type="number"
+                    value={ptaCapacidade}
+                    onChange={(e) => setPtaCapacidade(Number(e.target.value))}
+                    min={100}
+                    max={2000}
+                    step={10}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                    <Battery className="w-3 h-3" /> Bateria (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={ptaNivelBateria}
+                    onChange={(e) => setPtaNivelBateria(Number(e.target.value))}
+                    min={0}
+                    max={100}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Nº de Série</label>
+                  <input
+                    type="text"
+                    value={ptaNumSerie}
+                    onChange={(e) => setPtaNumSerie(e.target.value)}
+                    placeholder="Opcional"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
+                  <select value={ptaStatus} onChange={(e) => setPtaStatus(e.target.value as PtaStatus)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                    <option value="disponivel">Disponível</option>
+                    <option value="em_uso">Em Uso</option>
+                    <option value="em_manutencao">Em Manutenção</option>
+                    <option value="avariada">Avariada</option>
+                    <option value="inativa">Inativa</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Observações</label>
+                <textarea
+                  value={ptaObservacoes}
+                  onChange={(e) => setPtaObservacoes(e.target.value)}
+                  rows={2}
+                  placeholder="Notas, histórico de manutenções, etc."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
+                />
+              </div>
+              <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
+                <button type="button" onClick={() => setPtaModalOpen(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={ptaSaving} className="px-5 py-2 bg-[#1B2A4A] hover:bg-[#152238] text-white rounded-lg text-sm font-bold shadow-xs transition-colors">
+                  {ptaSaving ? 'Salvando...' : editingPta ? 'Salvar Alterações' : 'Cadastrar PTA'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Histórico de Avarias */}
+      {historyPta && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div>
+                <h2 className="text-base font-bold text-gray-900">Histórico — {historyPta.patrimonio}</h2>
+                <p className="text-xs text-gray-500">{historyPta.fabricante} {historyPta.modelo}</p>
+              </div>
+              <button onClick={() => setHistoryPta(null)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {historyLoading ? (
+                <div className="flex items-center justify-center py-8 text-gray-400 text-xs gap-2">
+                  <div className="w-4 h-4 border-2 border-[#1B2A4A] border-t-transparent rounded-full animate-spin" />
+                  Carregando...
+                </div>
+              ) : historyList.length === 0 ? (
+                <p className="text-center text-gray-400 text-xs py-8">Nenhuma avaria registrada para esta PTA.</p>
+              ) : (
+                <div className="space-y-3">
+                  {historyList.map((av) => (
+                    <div key={av.id} className="border border-gray-200 rounded-lg p-3 text-xs">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-gray-800">{av.tipo_avaria || 'Avaria'}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${av.status === 'resolvida' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {av.status === 'resolvida' ? 'Resolvida' : av.status === 'em_reparo' ? 'Em Reparo' : 'Aberta'}
+                        </span>
+                      </div>
+                      <p className="text-gray-500">{av.descricao || 'Sem descrição.'}</p>
+                      <p className="text-gray-400 mt-1">{av.data_avaria ? new Date(av.data_avaria).toLocaleDateString('pt-BR') : '—'}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Agendar PTA */}
+      {agendarModalOpen && ptaParaAgendar && (
+        <AgendamentoModal
+          isOpen={agendarModalOpen}
+          onClose={() => { setAgendarModalOpen(false); setPtaParaAgendar(null); }}
+          onSuccess={() => {
+            setAgendarModalOpen(false);
+            setPtaParaAgendar(null);
+            loadAll();
+          }}
+          initialPtaId={ptaParaAgendar.id}
+        />
       )}
     </div>
   );

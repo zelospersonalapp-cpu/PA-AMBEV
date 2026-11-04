@@ -3,16 +3,13 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Calendar,
-  Truck,
   AlertOctagon,
-  Award,
   Database,
   TrendingDown,
   Menu,
   X,
   PlusCircle,
   Building2,
-  CheckCircle2,
   FileBarChart2,
   Settings,
 } from 'lucide-react';
@@ -75,7 +72,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Agenda (Calendário)', href: '/agenda', icon: Calendar },
-    { name: 'PTAs (Plataformas)', href: '/ptas', icon: Truck },
     { name: 'Avarias & Manutenção', href: '/avarias', icon: AlertOctagon },
     { name: 'Análise de Conduta', href: '/desconformidades', icon: TrendingDown },
     { name: 'Cadastros Auxiliares', href: '/cadastros', icon: Database },
