@@ -10,6 +10,8 @@ interface PendenciasModalProps {
   refreshTrigger?: number;
   /** Chamado quando todas as pendências foram resolvidas */
   onAllResolved: () => void;
+  /** Chamado quando o usuário fecha o modal sem resolver */
+  onClose: () => void;
   /** Chamado quando o usuário clica em um botão de ação de uma pendência */
   onOpenAgendamento: (agendamentoId: string) => void;
 }
@@ -35,6 +37,7 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
   isOpen,
   refreshTrigger = 0,
   onAllResolved,
+  onClose,
   onOpenAgendamento,
 }) => {
   const [pendencias, setPendencias] = useState<VAgenda[]>([]);
@@ -87,18 +90,27 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
       <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Header vermelho */}
         <div className="bg-red-700 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 rounded-full p-2">
-              <AlertTriangle className="w-6 h-6 text-white" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 rounded-full p-2">
+                <AlertTriangle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-white font-bold text-lg leading-tight">
+                  Sistema Travado — Pendências em Aberto
+                </h2>
+                <p className="text-red-200 text-sm mt-0.5">
+                  Existem agendamentos com prazo vencido que precisam ser resolvidos antes de criar um novo.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-white font-bold text-lg leading-tight">
-                Sistema Travado — Pendências em Aberto
-              </h2>
-              <p className="text-red-200 text-sm mt-0.5">
-                Existem agendamentos com prazo vencido que precisam ser resolvidos antes de criar um novo.
-              </p>
-            </div>
+            <button
+              onClick={onClose}
+              className="mt-0.5 text-white/60 hover:text-white transition-colors p-1 rounded"
+              title="Fechar"
+            >
+              <XCircle className="w-5 h-5" />
+            </button>
           </div>
         </div>
 

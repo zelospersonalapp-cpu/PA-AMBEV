@@ -260,6 +260,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onOpenNovoAgendamento 
       <PendenciasModal
         isOpen={pendenciasModalOpen}
         refreshTrigger={pendenciasRefresh}
+        onClose={() => setPendenciasModalOpen(false)}
         onAllResolved={() => {
           setPendenciasModalOpen(false);
           // Abre o modal de novo agendamento após resolver tudo
