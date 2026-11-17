@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ArrowRight, XCircle, Loader2 } from 'lucide-react';
+import { AlertTriangle, ArrowRight, XCircle, Loader2, Trash2, CheckSquare, Square } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatDateBR, getAgendamentoStatusConfig } from '../lib/formatters';
+import { formatDateBR } from '../lib/formatters';
 import type { VAgenda, StatusAgendamento } from '../types';
 
 interface PendenciasModalProps {
@@ -42,6 +42,9 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
 }) => {
   const [pendencias, setPendencias] = useState<VAgenda[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const fetchPendencias = async () => {
     setLoading(true);
@@ -65,6 +68,8 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchPendencias();
+      setSelectedIds(new Set());
+      setConfirmDelete(false);
     }
   }, [isOpen, refreshTrigger]);
 
@@ -80,6 +85,48 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
     agendado: 'Aguardando Liberação',
     liberado: 'Aguardando Retirada',
     retirado: 'Aguardando Devolução',
+  };
+
+  const allSelected = pendencias.length > 0 && selectedIds.size === pendencias.length;
+  const someSelected = selectedIds.size > 0 && !allSelected;
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pendencias.map((p) => p.id)));
+    }
+  };
+
+  const toggleSelect = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleDeleteSelecionadas = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleting(true);
+    setConfirmDelete(false);
+    try {
+      const ids = Array.from(selectedIds);
+      // Deletar checklists vinculados primeiro
+      await supabase.from('checklists').delete().in('agendamento_id', ids);
+      // Deletar agendamentos
+      const { error } = await supabase.from('agendamentos').delete().in('id', ids);
+      if (error) {
+        alert('Erro ao deletar: ' + error.message);
+      } else {
+        setSelectedIds(new Set());
+        await fetchPendencias();
+      }
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -123,12 +170,78 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
             </div>
           ) : (
             <>
-              <p className="text-sm text-gray-600 mb-4">
-                <span className="font-bold text-red-700">{pendencias.length} pendência{pendencias.length !== 1 ? 's' : ''}</span> encontrada{pendencias.length !== 1 ? 's' : ''}.
-                Resolva cada uma seguindo o fluxo correto ou cancele o agendamento.
-              </p>
+              {/* Barra de ações em massa */}
+              <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-bold text-red-700">{pendencias.length} pendência{pendencias.length !== 1 ? 's' : ''}</span>
+                    {selectedIds.size > 0 && (
+                      <span className="ml-2 text-gray-500">· {selectedIds.size} selecionada{selectedIds.size !== 1 ? 's' : ''}</span>
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Botão Selecionar Todas */}
+                  <button
+                    onClick={toggleSelectAll}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold transition-colors"
+                  >
+                    {allSelected ? (
+                      <CheckSquare className="w-3.5 h-3.5 text-red-600" />
+                    ) : someSelected ? (
+                      <CheckSquare className="w-3.5 h-3.5 text-gray-400" />
+                    ) : (
+                      <Square className="w-3.5 h-3.5 text-gray-400" />
+                    )}
+                    {allSelected ? 'Desmarcar todas' : 'Selecionar todas'}
+                  </button>
 
-              <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+                  {/* Botão Deletar Selecionadas */}
+                  {selectedIds.size > 0 && (
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      disabled={deleting}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors disabled:opacity-60"
+                    >
+                      {deleting ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                      Deletar selecionadas ({selectedIds.size})
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Dialog de confirmação de exclusão */}
+              {confirmDelete && (
+                <div className="mb-4 bg-red-50 border-2 border-red-300 rounded-xl p-4">
+                  <p className="text-sm font-bold text-red-800 mb-1">
+                    ⚠️ Confirmar exclusão permanente
+                  </p>
+                  <p className="text-xs text-red-700 mb-3">
+                    Você está prestes a deletar permanentemente <strong>{selectedIds.size} agendamento{selectedIds.size !== 1 ? 's' : ''}</strong> e seus checklists vinculados. Esta ação não pode ser desfeita.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDeleteSelecionadas}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Sim, deletar
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(false)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
                 {pendencias.map((p) => {
                   const status = p.status as StatusAgendamento;
                   const statusClass = statusColors[status] || 'bg-gray-100 text-gray-800 border-gray-300';
@@ -138,17 +251,34 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
                   const localLabel = [p.ug, p.setor_linha].filter(Boolean).join(' · ') || '—';
                   const dataFimFmt = formatDateBR(p.data_fim);
                   const dataInicFmt = formatDateBR(p.data_inicio);
+                  const isSelected = selectedIds.has(p.id);
 
                   return (
                     <div
                       key={p.id}
-                      className="border-2 border-red-200 rounded-xl bg-red-50 overflow-hidden cursor-pointer hover:border-red-400 hover:shadow-md transition-all"
+                      className={`border-2 rounded-xl overflow-hidden transition-all ${
+                        isSelected
+                          ? 'border-red-500 bg-red-50 shadow-md ring-2 ring-red-200'
+                          : 'border-red-200 bg-red-50 hover:border-red-400 hover:shadow-md cursor-pointer'
+                      }`}
                       onClick={() => onOpenAgendamento(p.id)}
                       title="Clique para abrir o agendamento"
                     >
-                      {/* Status badge + patrimônio */}
+                      {/* Status badge + patrimônio + checkbox */}
                       <div className="bg-red-100 px-4 py-2.5 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
+                          {/* Checkbox */}
+                          <button
+                            onClick={(e) => toggleSelect(p.id, e)}
+                            className="flex-shrink-0 p-0.5 hover:scale-110 transition-transform"
+                            title={isSelected ? 'Desmarcar' : 'Selecionar'}
+                          >
+                            {isSelected ? (
+                              <CheckSquare className="w-5 h-5 text-red-700" />
+                            ) : (
+                              <Square className="w-5 h-5 text-red-400" />
+                            )}
+                          </button>
                           <span className="font-bold text-red-800 text-sm">PTA {ptaLabel}</span>
                           <span className={`text-[10px] font-bold uppercase tracking-wider border rounded px-1.5 py-0.5 ${statusClass}`}>
                             {statusLabel}
