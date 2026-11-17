@@ -249,7 +249,8 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
                   const ptaLabel = p.patrimonio || p.pta_patrimonio || '—';
                   const areaLabel = p.area_nome || p.nome_area || '—';
                   const localLabel = p.ug || '—';
-                  const agendadorLabel = p.solicitante || p.nome_solicitante || '—';
+                  const solicitanteLabel = p.solicitante || p.solicitante_nome || p.nome_solicitante || '—';
+                  const agendadorLabel = p.liberador_nome || p.agendado_nome || '—';
                   const dataFimFmt = formatDateBR(p.data_fim);
                   const dataInicFmt = formatDateBR(p.data_inicio);
                   const isSelected = selectedIds.has(p.id);
@@ -296,6 +297,8 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
                         <span><span className="text-gray-400">UG:</span> <span className="font-semibold">{localLabel}</span></span>
                         <span className="text-gray-300">·</span>
                         <span><span className="text-gray-400">Período:</span> <span className="font-semibold">{dataInicFmt}→{dataFimFmt}</span></span>
+                        <span className="text-gray-300">·</span>
+                        <span><span className="text-gray-400">Solicitante:</span> <span className="font-semibold">{solicitanteLabel}</span></span>
                         <span className="text-gray-300">·</span>
                         <span><span className="text-gray-400">Agendado por:</span> <span className="font-semibold">{agendadorLabel}</span></span>
                       </div>
