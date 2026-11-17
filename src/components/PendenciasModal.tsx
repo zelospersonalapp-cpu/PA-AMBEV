@@ -248,7 +248,8 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
                   const statusLabel = statusLabels[status] || status;
                   const ptaLabel = p.patrimonio || p.pta_patrimonio || '—';
                   const areaLabel = p.area_nome || p.nome_area || '—';
-                  const localLabel = [p.ug, p.setor_linha].filter(Boolean).join(' · ') || '—';
+                  const localLabel = p.ug || '—';
+                  const agendadorLabel = p.solicitante || p.nome_solicitante || '—';
                   const dataFimFmt = formatDateBR(p.data_fim);
                   const dataInicFmt = formatDateBR(p.data_inicio);
                   const isSelected = selectedIds.has(p.id);
@@ -256,69 +257,64 @@ export const PendenciasModal: React.FC<PendenciasModalProps> = ({
                   return (
                     <div
                       key={p.id}
-                      className={`border-2 rounded-xl overflow-hidden transition-all ${
+                      className={`border rounded-lg overflow-hidden transition-all ${
                         isSelected
-                          ? 'border-red-500 bg-red-50 shadow-md ring-2 ring-red-200'
-                          : 'border-red-200 bg-red-50 hover:border-red-400 hover:shadow-md cursor-pointer'
+                          ? 'border-red-500 bg-red-50 shadow ring-1 ring-red-300'
+                          : 'border-red-200 bg-red-50 hover:border-red-400 hover:shadow cursor-pointer'
                       }`}
                       onClick={() => onOpenAgendamento(p.id)}
                       title="Clique para abrir o agendamento"
                     >
-                      {/* Status badge + patrimônio + checkbox */}
-                      <div className="bg-red-100 px-4 py-2.5 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          {/* Checkbox */}
+                      {/* Linha única: checkbox + PTA + badge + vencimento */}
+                      <div className="bg-red-100 px-3 py-2 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <button
                             onClick={(e) => toggleSelect(p.id, e)}
-                            className="flex-shrink-0 p-0.5 hover:scale-110 transition-transform"
+                            className="flex-shrink-0 hover:scale-110 transition-transform"
                             title={isSelected ? 'Desmarcar' : 'Selecionar'}
                           >
                             {isSelected ? (
-                              <CheckSquare className="w-5 h-5 text-red-700" />
+                              <CheckSquare className="w-4 h-4 text-red-700" />
                             ) : (
-                              <Square className="w-5 h-5 text-red-400" />
+                              <Square className="w-4 h-4 text-red-400" />
                             )}
                           </button>
-                          <span className="font-bold text-red-800 text-sm">PTA {ptaLabel}</span>
-                          <span className={`text-[10px] font-bold uppercase tracking-wider border rounded px-1.5 py-0.5 ${statusClass}`}>
+                          <span className="font-bold text-red-800 text-xs">PTA {ptaLabel}</span>
+                          <span className={`text-[9px] font-bold uppercase tracking-wider border rounded px-1 py-0.5 flex-shrink-0 ${statusClass}`}>
                             {statusLabel}
                           </span>
                         </div>
-                        <span className="text-[11px] text-red-600 font-mono font-bold">
-                          Venceu em {dataFimFmt}
+                        <span className="text-[10px] text-red-600 font-mono font-bold flex-shrink-0">
+                          Venceu {dataFimFmt}
                         </span>
                       </div>
 
-                      <div className="px-4 py-3 grid grid-cols-3 gap-x-4 gap-y-1.5 text-xs text-gray-700">
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Empresa / Área</p>
-                          <p className="font-semibold">{areaLabel}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Local (UG)</p>
-                          <p className="font-semibold">{localLabel}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Período</p>
-                          <p className="font-semibold">{dataInicFmt} → {dataFimFmt}</p>
-                        </div>
+                      {/* Dados em linha única compacta */}
+                      <div className="px-3 py-1.5 flex items-center gap-3 text-[11px] text-gray-700 flex-wrap">
+                        <span><span className="text-gray-400">Empresa:</span> <span className="font-semibold">{areaLabel}</span></span>
+                        <span className="text-gray-300">·</span>
+                        <span><span className="text-gray-400">UG:</span> <span className="font-semibold">{localLabel}</span></span>
+                        <span className="text-gray-300">·</span>
+                        <span><span className="text-gray-400">Período:</span> <span className="font-semibold">{dataInicFmt}→{dataFimFmt}</span></span>
+                        <span className="text-gray-300">·</span>
+                        <span><span className="text-gray-400">Agendado por:</span> <span className="font-semibold">{agendadorLabel}</span></span>
                       </div>
 
                       {/* Botões de ação */}
-                      <div className="px-4 pb-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="px-3 pb-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => onOpenAgendamento(p.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-red-700 hover:bg-red-800 text-white text-[11px] font-bold transition-colors"
                         >
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRight className="w-3 h-3" />
                           {getLabelBotao(status)}
                         </button>
                         <button
                           onClick={() => onOpenAgendamento(p.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-xs font-semibold transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white hover:bg-gray-50 border border-gray-300 text-gray-600 text-[11px] font-semibold transition-colors"
                         >
-                          <XCircle className="w-3.5 h-3.5 text-gray-500" />
-                          Cancelar Agendamento
+                          <XCircle className="w-3 h-3 text-gray-400" />
+                          Cancelar
                         </button>
                       </div>
                     </div>
