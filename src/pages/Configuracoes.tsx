@@ -4,7 +4,7 @@ import { usePendenciaLock } from '../lib/usePendenciaLock';
 
 // ----- helpers de senha -----
 const SENHA_KEY = 'ppm_config_senha_hash';
-const DEFAULT_HASH = 'ppm2024'; // senha padrão antes de qualquer configuração
+const DEFAULT_HASH = 'ambev'; // senha padrão administrativa
 
 function hashSimples(s: string): string {
   // hash determinístico simples (não criptográfico — apenas ofusca no localStorage)
@@ -296,7 +296,7 @@ export const Configuracoes: React.FC = () => {
           <div className="max-w-md">
             <p className="text-sm font-semibold text-gray-800 mb-1">Alterar Senha Administrativa</p>
             <p className="text-xs text-gray-500 mb-4 leading-relaxed">
-              A senha protege alterações nas configurações do sistema. A senha padrão inicial é <code className="bg-gray-100 px-1 rounded text-gray-700">ppm2024</code>.
+              A senha protege alterações nas configurações do sistema. A senha padrão inicial é <code className="bg-gray-100 px-1 rounded text-gray-700">ambev</code>.
             </p>
 
             <form onSubmit={handleAlterarSenha} className="space-y-3">
