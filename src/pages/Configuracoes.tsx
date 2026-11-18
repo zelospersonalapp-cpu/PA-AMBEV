@@ -1,12 +1,179 @@
-import React from 'react';
-import { Settings, ShieldAlert, ShieldCheck, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings, ShieldAlert, ShieldCheck, Info, Lock, Eye, EyeOff, KeyRound, CheckCircle } from 'lucide-react';
 import { usePendenciaLock } from '../lib/usePendenciaLock';
 
+// ----- helpers de senha -----
+const SENHA_KEY = 'ppm_config_senha_hash';
+const DEFAULT_HASH = 'ppm2024'; // senha padrão antes de qualquer configuração
+
+function hashSimples(s: string): string {
+  // hash determinístico simples (não criptográfico — apenas ofusca no localStorage)
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  }
+  return 'h' + Math.abs(h).toString(36);
+}
+
+function getSenhaHash(): string {
+  try { return localStorage.getItem(SENHA_KEY) || hashSimples(DEFAULT_HASH); }
+  catch { return hashSimples(DEFAULT_HASH); }
+}
+
+function setSenhaHash(nova: string) {
+  try { localStorage.setItem(SENHA_KEY, hashSimples(nova)); } catch {}
+}
+
+function verificarSenha(tentativa: string): boolean {
+  return hashSimples(tentativa) === getSenhaHash();
+}
+
+// ----- modal de senha -----
+interface ModalSenhaProps {
+  titulo: string;
+  descricao: string;
+  onConfirm: (senha: string) => void;
+  onCancel: () => void;
+}
+
+const ModalSenha: React.FC<ModalSenhaProps> = ({ titulo, descricao, onConfirm, onCancel }) => {
+  const [senha, setSenha] = useState('');
+  const [mostrar, setMostrar] = useState(false);
+  const [erro, setErro] = useState('');
+
+  function handleConfirm() {
+    if (!verificarSenha(senha)) {
+      setErro('Senha incorreta. Tente novamente.');
+      setSenha('');
+      return;
+    }
+    onConfirm(senha);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="bg-[#1B2A4A] rounded-xl p-2.5">
+            <Lock className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-900 text-sm">{titulo}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{descricao}</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="relative">
+            <input
+              autoFocus
+              type={mostrar ? 'text' : 'password'}
+              value={senha}
+              onChange={e => { setSenha(e.target.value); setErro(''); }}
+              onKeyDown={e => e.key === 'Enter' && handleConfirm()}
+              placeholder="Digite a senha"
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm pr-10 focus:outline-none focus:ring-2 ${
+                erro ? 'border-red-400 focus:ring-red-300' : 'border-gray-300 focus:ring-blue-300'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setMostrar(v => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {mostrar ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {erro && (
+            <p className="text-xs text-red-600 font-medium">{erro}</p>
+          )}
+        </div>
+
+        <div className="flex gap-2 mt-5">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={!senha}
+            className="flex-1 px-4 py-2 rounded-lg bg-[#1B2A4A] text-white text-sm font-bold hover:bg-[#152238] transition-colors disabled:opacity-40"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ----- página principal -----
 export const Configuracoes: React.FC = () => {
   const { enabled, setEnabled } = usePendenciaLock();
 
+  // modal de confirmação de toggle
+  const [modalToggleAberto, setModalToggleAberto] = useState(false);
+
+  // seção alterar senha
+  const [senhaAtual, setSenhaAtual] = useState('');
+  const [senhaNova, setSenhaNova] = useState('');
+  const [senhaConfirm, setSenhaConfirm] = useState('');
+  const [mostrarSenhas, setMostrarSenhas] = useState(false);
+  const [erroSenha, setErroSenha] = useState('');
+  const [sucessoSenha, setSucessoSenha] = useState(false);
+
+  function handleToggleClick() {
+    setModalToggleAberto(true);
+  }
+
+  function handleToggleConfirmado() {
+    setModalToggleAberto(false);
+    setEnabled(!enabled);
+  }
+
+  function handleAlterarSenha(e: React.FormEvent) {
+    e.preventDefault();
+    setErroSenha('');
+    setSucessoSenha(false);
+
+    if (!verificarSenha(senhaAtual)) {
+      setErroSenha('Senha atual incorreta.');
+      return;
+    }
+    if (senhaNova.length < 4) {
+      setErroSenha('A nova senha deve ter pelo menos 4 caracteres.');
+      return;
+    }
+    if (senhaNova !== senhaConfirm) {
+      setErroSenha('As senhas não coincidem.');
+      return;
+    }
+
+    setSenhaHash(senhaNova);
+    setSucessoSenha(true);
+    setSenhaAtual('');
+    setSenhaNova('');
+    setSenhaConfirm('');
+    setTimeout(() => setSucessoSenha(false), 4000);
+  }
+
   return (
     <div className="space-y-6">
+      {/* Modal de senha para toggle */}
+      {modalToggleAberto && (
+        <ModalSenha
+          titulo={enabled ? 'Desativar Bloqueio' : 'Ativar Bloqueio'}
+          descricao="Esta ação requer a senha administrativa."
+          onConfirm={handleToggleConfirmado}
+          onCancel={() => setModalToggleAberto(false)}
+        />
+      )}
+
       {/* Header da página */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-5 flex items-center gap-4">
         <div className="bg-[#1B2A4A] rounded-xl p-3">
@@ -48,9 +215,14 @@ export const Configuracoes: React.FC = () => {
                   }
                 </div>
                 <div>
-                  <p className="font-bold text-gray-900 text-sm">
-                    Bloqueio por Pendências Vencidas
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-gray-900 text-sm">
+                      Bloqueio por Pendências Vencidas
+                    </p>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#1B2A4A]/10 text-[10px] font-bold text-[#1B2A4A]">
+                      <Lock className="w-2.5 h-2.5" /> PROTEGIDO
+                    </span>
+                  </div>
                   <p className="text-xs text-gray-500 mt-1 leading-relaxed max-w-lg">
                     Quando <strong>ativo</strong>, impede a criação de novos agendamentos enquanto
                     existirem PTAs com data de devolução vencida e status em aberto
@@ -60,10 +232,10 @@ export const Configuracoes: React.FC = () => {
                 </div>
               </div>
 
-              {/* Toggle switch */}
+              {/* Toggle switch — agora pede senha */}
               <button
                 type="button"
-                onClick={() => setEnabled(!enabled)}
+                onClick={handleToggleClick}
                 className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-200 ease-in-out focus:outline-none ${
                   enabled
                     ? 'bg-red-600 border-red-600'
@@ -71,7 +243,7 @@ export const Configuracoes: React.FC = () => {
                 }`}
                 role="switch"
                 aria-checked={enabled}
-                title={enabled ? 'Clique para desativar' : 'Clique para ativar'}
+                title={enabled ? 'Clique para desativar (requer senha)' : 'Clique para ativar (requer senha)'}
               >
                 <span
                   className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out ${
@@ -107,6 +279,85 @@ export const Configuracoes: React.FC = () => {
               operacional sobre a nova funcionalidade. A configuração é salva localmente neste
               dispositivo.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Seção: Segurança — Alterar senha */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-[#1B2A4A]" />
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-700">
+            Segurança
+          </span>
+        </div>
+
+        <div className="p-5">
+          <div className="max-w-md">
+            <p className="text-sm font-semibold text-gray-800 mb-1">Alterar Senha Administrativa</p>
+            <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+              A senha protege alterações nas configurações do sistema. A senha padrão inicial é <code className="bg-gray-100 px-1 rounded text-gray-700">ppm2024</code>.
+            </p>
+
+            <form onSubmit={handleAlterarSenha} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Senha atual</label>
+                <div className="relative">
+                  <input
+                    type={mostrarSenhas ? 'text' : 'password'}
+                    value={senhaAtual}
+                    onChange={e => { setSenhaAtual(e.target.value); setErroSenha(''); }}
+                    placeholder="••••••"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                  <button type="button" onClick={() => setMostrarSenhas(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {mostrarSenhas ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nova senha</label>
+                <input
+                  type={mostrarSenhas ? 'text' : 'password'}
+                  value={senhaNova}
+                  onChange={e => { setSenhaNova(e.target.value); setErroSenha(''); }}
+                  placeholder="Mínimo 4 caracteres"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Confirmar nova senha</label>
+                <input
+                  type={mostrarSenhas ? 'text' : 'password'}
+                  value={senhaConfirm}
+                  onChange={e => { setSenhaConfirm(e.target.value); setErroSenha(''); }}
+                  placeholder="Repita a nova senha"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+              </div>
+
+              {erroSenha && (
+                <p className="text-xs text-red-600 font-medium">{erroSenha}</p>
+              )}
+
+              {sucessoSenha && (
+                <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  <CheckCircle className="w-4 h-4 shrink-0" />
+                  <span className="text-xs font-semibold">Senha alterada com sucesso!</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={!senhaAtual || !senhaNova || !senhaConfirm}
+                className="px-5 py-2 bg-[#1B2A4A] text-white text-sm font-bold rounded-lg hover:bg-[#152238] transition-colors disabled:opacity-40"
+              >
+                Salvar nova senha
+              </button>
+            </form>
           </div>
         </div>
       </div>
